@@ -1,0 +1,170 @@
+\chapter{Hadoop}\label{cap:hadoop}
+\hyphenation{MapReduce}
+\noindent Este cap\'itulo busca exponer con simplicidad los fundamentos que definen la arquitectura de Hadoop. Inicialmente se introducir\'an conceptos globales para ir ahondando progresivamente en sus capas constitutivas: el subsistema de procesado y el de almacenamiento.
+
+
+\section{Origen}\label{sec:origen}
+\noindent Hadoop tiene sus or\'igenes en \emph{Apache Nutch}, una implementaci\'on de Doug Cutting y Mike Cafarella de un \'indice web y buscador de c\'odigo abierto. Nutch comenz\'o sus andaduras en 2002. A pesar de que el tama\~no de Internet era notoriamente inferior por aquel entonces, la tecnolog\'ia bajo Nutch ser\'ia incapaz de hacerlo escalar hasta indizar el bill\'on de p\'aginas de las que constaba la web. Pero en 2003 se publica un art\'iculo sobre \emph{GFS} (\emph{Google File System}) \cite{gfs} que supone un gran empuje hacia la simplificaci\'on de las tareas administrativas de sistemas de ficheros distribuidos y Nutch utilizaba estos conceptos. A ra\'iz de esta publicaci\'on, en 2004 deciden dise\~nar un sistema de ficheros propio para Nutch (\emph{NDFS} o \emph{Nutch Distributed File System}).\newline
+
+Es tambi\'en en 2004 cuando aparece otra publicaci\'on \cite{googlemapreduce} que presenta MapReduce y provoca la sucesi\'on de esfuerzos por portar los algoritmos de Nutch al nuevo modelo MapReduce. A mediados de 2005, la mayor parte del c\'odigo de Nutch corr\'ia, siguiendo las directrices de MapReduce, sobre NDFS.\newline
+
+Tanto NDFS como la implementaci\'on de MapReduce para Nutch eran lo suficientemente gen\'ericas como para ser utilizadas, sin demasiado esfuerzo de refactorizaci\'on, m\'as all\'a del mundo de la indexaci\'on de webs. En 2006 se constituye un proyecto independiente a Nutch, que recoge precisamente sus partes reutilizables para extender el \'ambito de aplicaci\'on. Ese proyecto es Hadoop. En 2008 \emph{Yahoo!} anuncia que su \'indice de b\'usquedas web en producci\'on estaba siendo generado por un cl\'uster Hadoop de 10.000 n\'ucleos. Ese mismo a\~no Hadoop se convierte en proyecto de Apache, confirmando su \'exito y aplicabilidad.\newline
+
+Hoy en d\'ia Hadoop es, sin lugar a duda, el framework MapReduce m\'as utilizado en el mundo por una variad\'isima clase de empresas.
+
+
+\section{Arquitectura global de Hadoop}\label{sec:arquitecturahadoop}
+\noindent La composici\'on b\'asica de Hadoop diferencia cuatro m\'odulos:
+\begin{description}
+ \item[Hadoop Common:] un m\'odulo general con scripts y herramientas de configuraci\'on.
+ \item[Hadoop YARN:] un framework para la planificaci\'on de ejecuci\'on y gesti\'on de recursos en entornos distribuidos.
+ \item[Hadoop MapReduce:] un m\'odulo de ejecuci\'on, basado en concreciones sobre Hadoop YARN, que implementa el modelo MapReduce.
+ \item[HDFS:] un acople de persistencia en forma de sistema de ficheros distribuido.
+\end{description}
+
+La arquitectura de Hadoop responde al arquetipo \emph{Maestro-Esclavo} donde se distinguen dos roles en cada cl\'uster: un maestro \'unico y varios esclavos. El reparto de estos roles, y por lo tanto la distribuci\'on de responsabilidades, corre a cargo del administrador del cl\'uster. Esta segregaci\'on de comportamiento fija los roles maestro y esclavos a los nodos de manera permanente. En caso de que fuese necesario alterar el despliegue, por mantenimiento por ejemplo, s\'olo se requerir\'ia reiniciar el cl\'uster al completo si hubiese que mo\-di\-fi\-car el nodo que soporta la ejecuci\'on del rol maestro ---\emph{nodo maestro}.\newline
+
+Nos centraremos casi exclusivamente en MapReduce y en HDFS para desarrollar la funcionalidad cubierta por Hadoop, al ser \'estos sus m\'odulos centrales en la ejecuci\'on. Hadoop YARN es un subsistema que se ha venido cocinando en paralelo con las \'ultimas versiones de Hadoop. Es el resultado de la separaci\'on entre planificaci\'on de tareas y procesado de las mismas ---ambas capacidades cubiertas inicialmente en el antiguo m\'odulo MapReduce--- para conferir a Hadoop un car\'acter m\'as gen\'erico. No obstante, no hablaremos del m\'odulo YARN al ser una tecnolog\'ia presente a partir de Hadoop \texttt{2.x}, y que por el momento (mayo 2013) es una prestaci\'on en estado \emph{alfa}. \newline
+
+Las figuras \ref{fig:hadoopmapredhdfs} y \ref{fig:hadoopmapreddfs} exhiben una visi\'on de alto nivel de la arquitectura de Hadoop. La figura \ref{fig:hadoopmapredhdfs} contempla una instalaci\'on con el sistema de ficheros de Hadoop (HDFS). La figura \ref{fig:hadoopmapreddfs} muestra la distribuci\'on modular de una instalaci\'on Hadoop con otro sistema de ficheros distribuido. \newline
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{imagenes/015.pdf}
+ \caption{Hadoop con la capa MapReduce sobre HDFS}
+\label{fig:hadoopmapredhdfs}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{imagenes/016.pdf}
+ \caption{Hadoop con la capa MapReduce sobre un DFS soportado}
+\label{fig:hadoopmapreddfs}
+\end{center}
+\end{figure}
+
+De las figuras se deduce que Hadoop corre sobre una m\'aquina virtual Java, que MapReduce precisa un \emph{DFS} (\emph{Distributed File System}) subyacente, ya sea HDFS o alguno de los soportados, y que la comunicaci\'on internodal se realiza usando RPC sobre TCP/IP a trav\'es de un t\'unel \emph{SSH} (\emph{Secure SHell}). Todos los m\'odulos de Hadoop contienen un microservidor web (\emph{Jetty}), para facilitar la recolecci\'on de informaci\'on de estado de cada uno.
+
+
+
+
+\section{Hadoop Distributed File System}\label{sec:hdfs}
+\noindent El sistema de ficheros distribuido de Hadoop (HDFS) est\'a dise\~nado para archivar gigantescas masas de datos (TeraBytes, PetaBytes, etc.), cuyo patr\'on primario de acceso sea \emph{escribir-una-vez}, \emph{leer-muchas}. No es requisito que la informaci\'on albergada sea accedida exclusivamente siguiendo este patr\'on, pero la implementaci\'on de HDFS potencia los accesos de este tipo. El hardware subyancente no tiene ning\'un requisito especial y HDFS lo transforma en un repositorio de datos robusto, tolerante a fallos, f\'acilmente escalable, con balanceo de carga autom\'atico, reducci\'on del ancho de banda de red consumido, etc. Sin embargo, dado que la capa f\'isica soporte no tiene ning\'un car\'acter fuera de lo com\'un ---normalmente clusters formados por nodos en red con almacenamiento local---, en HDFS confluyen algunas limitaciones operativas:
+
+\begin{itemize}
+ \item Alta latencia de acceso al dato. La m\'axima de HDFS es priorizar las lecturas grandes, y as\'i se obtienen tiempos de acceso elevados en favor de un mayor ancho de banda.
+ \item Alta latencia de escritura de ficheros de peque\~no tama\~no. Derivado de la primera limitaci\'on al tener que invalidar multitud de bloques de disco, en el peor caso uno por fichero, y redistribuir las versiones actualizadas en el cl\'uster.
+ \item No se soportan ni m\'ultiples procesos escritores en un solo fichero ni escrituras a disco que no sean \emph{append} ---escrituras por el final. HDFS no es un sistema de ficheros \emph{POSIX} (\emph{Portable Operating System Interface}), s\'olo implementa la parte necesaria para optimizar el procesado de datos distribuidos, siguiendo el comentado patr\'on de acceso.
+\end{itemize}
+
+Para organizar el almacenamiento, HDFS utiliza el concepto de bloque como en los sistemas de ficheros tradicionales. Los bloques HDFS abstraen la organizaci\'on concreta de los datos en disco con una doble finalidad: 
+\begin{description}
+ \item[Reducir la complejidad:] la escritura de un bloque comprende almacenar los datos y gestionar los metadatos asociados, como la informaci\'on de localizaci\'on del dato. Al utilizar el bloque como unidad organizativa, la expresi\'on de la localizaci\'on de los datos se simplifica y puede ser gestionada por otra entidad ---lo que favorece la paralelizaci\'on.
+ \item[Aumentar la flexibilidad:] nada impide que un fichero sea mayor que cual\-quier disco del cl\'uster.
+\end{description}
+
+Para disponer los bloques en los discos locales de cada nodo del cl\'uster, HDFS se vale de una serie de subsistemas: el \emph{DataNode} y el \emph{NameNode}. Adem\'as, como soporte, las \'ultimas versiones de Hadoop permiten desplegar opcionalmente un \emph{Backup Node} y un \emph{Checkpoint Node}.
+
+
+\subsection{Roles de los nodos}\label{subsec:rolesnodos}
+\noindent La figura \ref{fig:desplieguehdfs} muestra un despliegue de HDFS con la nomenclatura habitual en capas. En l\'inea punteada aparecen representados tanto el Backup Node como el Checkpoint Node para expresar su car\'acter opcional.
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{imagenes/017.pdf}
+ \caption{Despliegue t\'ipico de HDFS}
+\label{fig:desplieguehdfs}
+\end{center}
+\end{figure}
+
+
+\subsubsection{DataNode}\label{subsubsec:datanode}
+\noindent Son aquellos nodos del cl\'uster encargados de almacenar en sus discos locales los bloques que contienen los datos de los ficheros del HDFS. Cada vez que escriben un bloque, porque se est\'e a\~nadiendo o actualizando, se comunican con su NameNode asociado para que \'este lleve la cuenta de los cambios seg\'un se van produciendo.
+
+
+\subsubsection{NameNode}\label{subsubsec:namenode}
+\noindent El NameNode es el encargado de manejar el espacio de nombres del cl\'uster, gestionando el \'arbol del sistema de ficheros y los metadatos que hacen posible recopilar la informaci\'on almacenada. Es una parte tan indispensable para el acceso a los datos que, si dejase de funcionar permanentemente el nodo que presta el servicio, toda la informaci\'on se perder\'ia, ya que ser\'ia inviable saber la relaci\'on entre bloques y ficheros. Por ello, el NameNode se refuerza con nodos de puntos de restauraci\'on (Checkpoint Nodes) o con un nodo de copia de seguridad (Backup Node).\newline
+
+La informaci\'on sobre el sistema de ficheros, los metadatos, se guarda en el NameNode de forma persistente, tanto en memoria como en disco, en dos ficheros: uno contiene la imagen del espacio de nombres (\texttt{fsimage}) y el otro el \emph{log} de modificaciones de la imagen (\texttt{edits}). Cuando el NameNode arranca, crea una imagen nueva resultado de la uni\'on de la \'ultima imagen almacenada y el log de cambios registrados en ella. A medida que los DataNodes escriben en el HDFS, van enviando las modificaciones pertinentes al NameNode que mantiene actualizados los cambios en el log, pero no modifica la imagen creada al arrancar. El despliegue t\'ipico del NameNode, para que la escritura del log sea segura, incluye actualizaciones de las copias del \emph{log} en el sistema de ficheros local, en la memoria del NameNode y en un NFS remoto.
+
+
+\subsubsection{Checkpoint Node}\label{subsubsec:checkpointnode}
+\noindent El fin que se persigue agregando un nodo de este tipo es mitigar los problemas relacionados con la ca\'ida de operaci\'on del NameNode. Peri\'odicamente, el Nodo de Checkpoint va generando puntos de restauraci\'on, o \emph{checkpoints}, siguiendo la misma estrategia que en el NameNode, es decir, usando \texttt{fsimage} y \texttt{edits}. Cada cierto tiempo, se descargar\'an ambos ficheros desde el NameNode y se fundir\'an, formando una nueva imagen actualizada que ser\'a transferida al NameNode. Cuando haya finalizado con \'exito la operaci\'on, el NameNode tendr\'a que purgar la imagen antigua e iniciar un nuevo fichero de log que albergue los cambios que se vayan sucediendo.
+
+
+\subsubsection{Backup Node}\label{subsubsec:backupnode}
+\noindent El Nodo de Backup provee la misma funcionalidad de generaci\'on de puntos de restauraci\'on que el Checkpoint Node pero usando una aproximaci\'on diferente. Para mantener sincronizado su espacio de nombres con el del NameNode que plagia, este tipo de nodo se descarga el \texttt{fsimage} al arrancarse y lo actualiza con las modificaciones que vaya captando el NameNode. Adicionalmente y cada cierto tiempo, el Backup Node actualiza su \texttt{fsimage} con los \texttt{edits}, creando un punto de restauraci\'on asociado.\newline
+
+En comparaci\'on con el Checkpoint Node, este nodo consume menos ancho de banda de red ya que no necesita descargarse el \texttt{fsimage} y los \texttt{edits} del NameNode para mantener el sincronismo de estado.\newline
+
+Como apuntes finales, destacar que de momento (versi\'on 1.0.4 de Hadoop), s\'olo se soporta un Nodo de Backup por NameNode o m\'ultiples Nodos de Checkpoint, y que la presencia de un Backup Node habilita la posibilidad de correr el NameNode sin almacenamiento persistente, delegando esa res\-pon\-sa\-bi\-li\-dad al Nodo de Backup.
+
+
+\subsection{Topolog\'ia de red}\label{subsec:topologiared}
+\noindent Una de las partes fundamentales de un sistema de ficheros en un entorno distribuido es proveer al usuario de un mecanismo transparente, que garantice la persistencia de la informaci\'on en \'el contenida manteniendo un cierto nivel de prestaciones. El HDFS utiliza una t\'ecnica, ya citada para los cloud, la replicaci\'on, que proporciona altas prestaciones, escalabilidad y tolerancia a fallo, al tiempo que limita la congesti\'on de red controlando la ubicaci\'on y el n\'umero de copias de los bloques en el centro de datos.
+
+\subsubsection{Distancia entre nodos}\label{subsubsec:distnodos}
+\noindent Para poder soportar las prestaciones comentadas, es fundamental que el NameNode, que es quien gestiona la distribuci\'on de las r\'eplicas de los bloques, tenga cierto conocimiento de la organizaci\'on f\'isica de los nodos que participan en el despliegue. La idea fundamental es tratar de mantener un equilibrio en la separaci\'on de las copias, entendida como la \emph{distancia f\'isica} entre los nodos que almacenan cada una: la distancia media entre r\'eplicas es proporcional tanto a la tolerancia a fallo del sistema, como al ancho de banda consumido para enviar cada r\'eplica. Recordemos que el ancho de banda de red disponible para transferir informaci\'on entre distintos nodos se reduce a medida que los alejamos, o visto de desde otro \'angulo, que la transferencia ser\'a m\'as costosa cuanto mayor sea la distancia entre el nodo que contenga el bloque original y aquel que vaya a albergar la r\'eplica. Es decir, ser\'ia id\'oneo, para equilibrar la separaci\'on entre r\'eplicas, definir una m\'etrica que calculase la distancia entre dos nodos cualesquiera.\newline
+
+Como los nodos de las redes IP siguen una estructura de \'arbol invertido, y la red de un cl\'uster Hadoop es de este tipo, se podr\'ia considerar, como aproximaci\'on de la distancia f\'isica entre nodos, la \texttt{distancia internodal}: \emph{la suma de las distancias de los nodos al ancestro com\'un m\'as pr\'oximo}.\newline
+
+Tal y como se ha comentado, HDFS utiliza RPC sobre TCP/IP a trav\'es de SSH para la comunicaci\'on entre nodos, lo cual (capa IP) no aporta informaci\'on de localizaci\'on \emph{concreta} de cada nodo dentro del despliegue. Para concretar la distancia internodal y as\'i poder hacer un reparto \'optimo de las copias, es necesario configurar HDFS para que cada IP sea mapeada a una posici\'on concreta, de tantas componentes ---\texttt{(centro de datos, rack, nodo)}, por ejemplo--- como niveles haya en la red. La figura \ref{fig:distnodos} muestra un ejemplo con los valores m\'as comunes de la distancia internodal. Veremos c\'omo se calcula para el caso \texttt{d=4}.\newline
+
+Fij\'andonos en la figura \ref{fig:distnodos}, el bloque azul representa la copia original, y el bloque amarillo, destino del arco azul con etiqueta \texttt{d=4}, la r\'eplica. Ambos bloques se encuentran en nodos de distintos racks en el mismo centro de datos. El ancestro com\'un m\'as pr\'oximo entre ellos ser\'a el enrutador que maneje el tr\'afico entre ambos racks. Adem\'as, cada nodo tiene que atravesar otro enrutador de rack, otro ancestro m\'as pr\'oximo a los nodos, que dirige la paqueter\'ia dentro del rack. Con lo que tenemos \emph{dos pasos} (distancia 2) para llegar al router que conecta ambos racks por cada nodo; sumando ambas distancias obtenemos el resultado.
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.75\textwidth]{imagenes/018.pdf}
+ \caption{Ejemplo de valores de distancias internodales}
+\label{fig:distnodos}
+\end{center}
+\end{figure}
+
+
+
+\subsubsection{Replicaci\'on}\label{subsubsec:replicacionbloques}
+\noindent La replicaci\'on es una t\'ecnica transparente al usuario y controlada por el NameNode que, para ser explotado en \'optimas condiciones, deber\'ia tener conocimiento de la distancia internodal. El grado de separaci\'on entre dos r\'eplicas es directamente proporcional al grado de robustez que aporta la copia ---la tolerancia a fallo--- e inversamente proporcional a la eficiencia de transmisi\'on por red, puesto que el ancho de banda disponible para mover un bloque entre dos centros de datos, ser\'a menor que para gestionar la r\'eplica de modo local al nodo, como ya hemos indicado. De tal manera que si se produjese la ca\'ida de un computador, la probabilidad de propagaci\'on de esa ca\'ida disminuye a medida que nos alejamos del nodo problem\'atico ---imaginemos una inundaci\'on del centro de datos, por ejemplo.\newline
+
+La estrategia concreta que sigue HDFS consiste en colocar la primera r\'eplica en el mismo nodo que el cliente del sistema de ficheros, si \'este pertenece al cl\'uster de almacenamiento ---una aplicaci\'on cliente corriendo en un nodo del cl\'uster HDFS, por ejemplo. En caso de que el cliente sea externo al cl\'uster, se elige un nodo al azar, teniendo en cuenta su carga computacional ---prio\-ri\-zan\-do los de menor carga. La segunda r\'eplica se coloca fuera del rack en el que se encuentre la primera copia; el rack concreto se elige al azar. La tercera se emplaza en el mismo rack que la segunda copia pero en un nodo diferente, de nuevo eligiendo al azar y balanceando carga. Las r\'eplicas sucesivas ---el factor de replicaci\'on se controla en el fichero de despliegue de HDFS--- se env\'ian a nodos, siempre diferentes, de este \'ultimo rack.\newline
+
+La mec\'anica descrita aporta el equilibrio deseable entre tolerancia a fallo (ya que habr\'a copias de cada bloque en dos racks distintos), ancho de banda consumido (ya que la escritura de cada bloque s\'olo atraviesa un \emph{switch} o enrutador y las copias sucesivas se hacen dentro del mismo rack), rendimiento de lectura (al poder elegir entre dos racks ante cada petici\'on de lectura de un bloque) y distribuci\'on equilibrada de los bloques en el cl\'uster (que realiza HDFS al ejecutar el m\'etodo descrito). La figura \ref{fig:repbloque} muestra un ejemplo de replicaci\'on con factor 3 en un solo centro de datos. El n\'umero entre corchetes indica el orden de creaci\'on de cada copia; el bloque original, recientemente actualizado o creado, es el azul.
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.75\textwidth]{imagenes/019.pdf}
+ \caption{Ejemplo de replicaci\'on de un bloque, factor 3}
+\label{fig:repbloque}
+\end{center}
+\end{figure}
+
+
+\section{Hadoop MapReduce}\label{sec:hadoopmapred}
+\noindent En un cl\'uster t\'ipico sobre HDFS se dispone la capa de operaci\'on de Hadoop, Hadoop MapReduce, que lleva a cabo la ejecuci\'on de los trabajos de mapeo y reducci\'on enviados al framework. Habiendo ya introducido las bases del paradigma MapReduce, corresponde ahora especificar aquellas desviaciones concretas de la implementaci\'on en Hadoop. Como era esperable, Hadoop MapReduce se basa en los principios expuestos en el art\'iculo de Google \cite{googlemapreduce} en cuanto a reparto de tareas y gesti\'on de fallos. Su arquitectura de alto nivel no dista mucho de la observada en la capa HDFS y as\'i se distinguen los roles \emph{maestro} y \emph{esclavo}.\newline
+
+Por una parte, aparece el \emph{JobTracker}, encargado de planificar el reparto de las tareas a los nodos del cl\'uster; por la otra, el \emph{TaskTracker}, que ejecuta las tareas en los nodos como funciones Map y Reduce.\newline
+
+Igual que su sistema de ficheros distribuido, Hadoop MapReduce est\'a escrito en Java.
+
+
+\subsection{Roles de los nodos}\label{subsec:rolesnodosmapred}
+\noindent La figura \ref{fig:desplieguehadoopmapred} representa un despliegue t\'ipico de Hadoop MapReduce en un cl\'uster, utilizando HDFS como sistema de ficheros distribuido soporte. Para completar la \emph{fotograf\'ia} habr\'ia que incluir los nodos responsables de gestionar el HDFS ---NameNode, Checkpoint Node y Backup Node--- omitidos por claridad.
+
+\begin{figure}[tbp]
+\begin{center}
+\includegraphics[width=0.99\textwidth]{imagenes/020.pdf}
+ \caption{Ejemplo de despliegue de Hadoop MapReduce}
+\label{fig:desplieguehadoopmapred}
+\end{center}
+\end{figure}
+
+\subsubsection{JobTracker}\label{subsubsec:jobtracker}
+\noindent El comportamiento del nodo JobTracker es muy similar al expuesto en el caso del NameNode de HDFS, pero aplicado a la gesti\'on de trabajos y tareas. Ante una petici\'on de ejecuci\'on, el JobTracker dividir\'a el trabajo asociado en tareas que repartir\'a entre los TaskTrackers que tenga bajo supervisi\'on. Normalmente, el tama\~no de los ficheros de entrada de las tareas se hace coincidir con el de los bloques del sistema de ficheros distribuido, sea o no HDFS, por ser lo m\'as eficaz. Para cerciorarse de que las ejecuciones concluyen con \'exito en un entorno expuesto al fallo, el JobTracker mantiene una lista de estado de las tareas asociadas a los nodos TaskTracker. De tal forma, en caso de que se produjese un error que impidiese la finalizaci\'on de alguna tarea, ya sea una tarea Map o una Reduce, el JobTracker replanificar\'ia su ejecuci\'on en otro nodo disponible con la m\'inima carga computacional.\newline
+
+El reparto de trabajo se lleva a cabo siguiendo la m\'axima localidad, esto es, haciendo que los TaskTrackers reduzcan tareas basadas en la transformaci\'on de datos almacenados en el mismo nodo. As\'i se reducen tanto el tiempo de acceso al dato del TaskTracker, como la saturaci\'on de la red del cl\'uster, haciendo la computaci\'on m\'as ligera.\newline
+
+Tal y como suced\'ia en la definici\'on general del MapReduce de Google \cite{googlemapreduce}, el fallo en un JobTracker es muy problem\'atico porque s\'olo est\'a cubierta la posibilidad de correr uno por cl\'uster sin usar herramientas adicionales. Dada una ca\'ida en el JobTracker, el procedimiento de recuperaci\'on ``resuelve'' la situaci\'on descartando los trabajos sin concluir; esperando que el nuevo JobTracker pueda hacerse cargo del procesado de esos trabajos incompletos que habr\'an de ser enviados manualmente por los usuarios. Actualmente s\'i se pueden manejar JobTrackers adicionales en un mismo cl\'uster e instante temporal usando una herramienta adicional: \emph{Zookeeper}.
+
+
+\subsubsection{TaskTracker}\label{subsubsec:tasktracker}
+\noindent La misi\'on fundamental del TaskTracker es procesar las tareas que le sean enviadas desde el JobTracker. Peri\'odicamente, el TaskTracker env\'ia una se\~nal a su JobTracker para informar acerca del estado de progreso de la ejecuci\'on de una tarea, si tuviese una asignada, o para indicar que se encuentra a la espera. Si el JobTracker no recibiese esa se\~nal en un intervalo convenido, \'este marcar\'ia el TaskTracker y \emph{todas} sus tareas relacionadas ---las concluidas y las incompletas--- como inaccesibles. Esta clase de fallo, es decir la ca\'ida de un TaskTracker, se considera menos problem\'atico que en el caso del JobTracker, pero implica replanificaci\'on de tareas e incluso repetici\'on de la ejecuci\'on de alguna. Usando la comentada lista de estado de las tareas, el JobTracker buscar\'a las inaccesibles necesarias ---las Map completadas y las Reduce cuya salida no est\'e en el DFS--- y har\'a la redistribuci\'on siguiendo la mec\'anica descrita.

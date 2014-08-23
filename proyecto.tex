@@ -1,0 +1,94 @@
+\documentclass[12pt,twoside,onecolumn,a4paper]{tesis}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[pdftex]{graphicx}
+%\usepackage[small]{subfigure}
+\usepackage{fancyheadings}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\pagestyle{fancy}
+\bibliographystyle{unsrt}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter. #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection. #1}}
+\renewcommand{\baselinestretch}{1.1}
+\lhead[\fancyplain{}{\thepage}]{\fancyplain{}{\rightmark}}
+\rhead[\fancyplain{}{\leftmark}]{\fancyplain{}{\thepage}}
+\cfoot{}
+
+
+\renewcommand{\theenumi}{\arabic{enumi}.}
+\renewcommand{\theenumii}{\theenumi\arabic{enumii}.}
+\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
+\renewcommand{\labelenumi}{\theenumi}
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\labelenumiii}{\theenumiii}
+
+\oddsidemargin=2.5 cm
+\marginparwidth=4 cm
+\linespread{1.3}
+
+%funcion para compilar solo una parte. Un solo fichero.
+%\includeonly{intro,grid}
+
+%%ampliar margenes cabecera
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist
+
+
+\begin{document}
+\pagestyle{empty}
+\include{portada}
+\cleardoublepage
+\pagestyle{empty}
+\include{citas}
+\cleardoublepage
+\pagestyle{empty}
+\include{projspec}
+\cleardoublepage
+\pagestyle{empty}
+\include{prefacio}
+\cleardoublepage
+\pagenumbering{roman} \pagestyle{fancy}
+\tableofcontents
+%\listoftables
+\listoffigures
+\cleardoublepage
+\pagenumbering{arabic} \pagestyle{fancy}
+
+
+%%%%% Aqui van los capitulos. Cada uno es un fichero tex diferente
+%\include{intro}
+%\cleardoublepage
+%\include{stateoftheart}
+%\cleardoublepage
+%\include{evaliaas}
+%\cleardoublepage
+%\include{openstack}
+%\cleardoublepage
+%\include{hadoop}
+%\cleardoublepage
+%\include{solucion}
+%\cleardoublepage
+%\include{pruebas}
+%\cleardoublepage
+%\include{conclusiones}
+%\cleardoublepage
+%\include{aportaciones}
+%\renewcommand\chaptername{Apendice}
+%\appendix
+%\include{instalacion}
+%\cleardoublepage
+%\include{glosario}
+
+%\cleardoublepage
+%\nocite{*}
+%\bibliography{biblio}
+%\markboth{Bibliografia}{Bibliografia}
+%\addcontentsline{toc}{chapter}{Bibliografia}
+
+\end{document}
+
