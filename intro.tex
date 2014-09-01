@@ -1,22 +1,22 @@
-\chapter{Introducci\'on}\label{cap:intro}
+\chapter{Abstract}\label{cap:intro}
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/001.pdf}
- \caption{Demanda en crecimiento exponencial. Fuente: \emph{Cloudera Inc.}}
+ \caption{Demand in exponential growth. Source: \emph{Cloudera Inc.}}
 \label{fig:datagraph}
 \end{center}
 \end{figure}
 
-\noindent Los \'ultimos a\~nos han visto c\'omo se ha producido una explosi\'on de la cantidad de informaci\'on generada en la red. Adem\'as, esta informaci\'on ha mudado de forma, pasando de \emph{semiestructurada} o \emph{estructurada} ---y por tanto, susceptible de ser expresada siguiendo un esquema tradicional (\emph{relacional}, por ejemplo)--- a heterog\'enea, lo que propicia la necesidad de cambiar el modo en que se almacena y eval\'ua. Como muestra la figura \ref{fig:datagraph}, las que hasta hace poco eran indiscutibles como \emph{backend} de datos, las bases de datos relacionales fundamentalmente, han visto c\'omo se difumina su papel principal ante la incapacidad de guardar eficazmente heterogeneidad no relacionada.\newline
+\noindent Over the last years there has been a continuous increase in the quantity of information generated with the Internet as the main driver. Furthermore, this information has reshaped from structured --- and thus, susceptible to being expressed following a relational schema --- to heterogeneous, which has kick-started the necessity to alter the way it is stored and transformed. As the figure \ref{fig:datagraph} shows, those that were the undisputed back-end queens --- relational database systems mostly --- are seeing how their role is fading away due to their incapability to efficiently save unrelated heterogeneity.
 
-En el a\~no 2000 fueron muchas las empresas del sector \emph{.com} que iniciaron remodelaciones de sus centros de datos para acomodarlos al entonces concebido como inexorable pico de demanda que iba a suceder. Pero se pincha la burbuja, desat\'andose una infrautilizaci\'on generalizada ---en Amazon s\'olo el \texttt{10\%} de los recursos globales estaban siendo utilizados--- que impulsa la b\'usqueda de alg\'un sistema que permita exportar el excedente como producto. La iniciativa de Amazon germina en 2006 con la aparici\'on de los \emph{AWS} (\emph{Amazon Web Services}), un API p\'ublico para el aprovisionamiento flexible y bajo demanda de infraestructura computacional.\newline
+As another related dimension, in the year 2000 many .com companies started upgrading their data centers to accommodate the inexorable demand peak that was going to follow. But it never came; and the bubble burst. What happened then was general underutilization --- only \texttt{10\%} of Amazon's global computational resources were in use --- that pushed the search for alternative means to export the surplus as a product. Amazon's own initiative unfolded in 2006 with the \emph{AWS} (\emph{Amazon Web Services}) appearance. AWS, among others, implements a public API for flexible on-demand infrastructure provisioning.
 
-Desde entonces ha sido fant\'astica la proliferaci\'on de proyectos similares para generalizar el modo de utilizaci\'on de clusters privados, p\'ublicos o h\'ibridos, procurando mantener un notable paralelismo a nivel de API con los AWS, para facilitar la interoperabilidad y evitar la fuga hacia servicios m\'as flexibles de otros proveedores.\newline
+Since then, similar projects have proliferated generalizing how private clusters' unused computational capacity is to be serviced, trying to stay API-compatible with the AWS to facilitate interoperability and thus avoid client's swapping to more flexible providers.
 
-Paralelamente, Google buscaba nuevas formas de explotar, con altas pres\-ta\-cio\-nes y de manera segura, la infraestructura privada adquirida para evolucionar su modelo de negocio. MapReduce, como mecanismo de ejecuci\'on masiva de procesos en paralelo, hac\'ia acto de presencia para impulsar la ge\-ne\-ra\-ci\'on del gigantesco \'indice inverso de Google \cite{googlemapreduce}. Aportaciones pos\-te\-rio\-res del equipo de desarrollo de Nutch ---entonces un prototipo de motor de b\'usqueda para Internet--- al paradigma MapReduce en \emph{Yahoo!}, dar\'ian lugar a la aparici\'on del hoy por hoy est\'andar de facto en el terreno: Hadoop. Hadoop se utiliza en la actualidad en multitud de \'ambitos como la con\-tra\-ta\-ci\'on de viajes online, el almacenamiento y servicio de datos a terminales m\'oviles, el comercio electr\'onico, el procesado de imagen o el descubrimiento de nuevas formas de energ\'ia.\newline
+Meanwhile, Google was also in the search for new mechanisms to exploit, with high performance and securely, their own private infrastructure to evolve the capability of their services. MapReduce, as a way to massively execute thousands transformations on input data, became a reality to thrust the generation of Google's humongous inverted index of the Internet \cite{googlemapreduce}. Forthcoming contributions from Nutch's developers --- by that time an Internet search engine prototype --- to the MapReduce paradigm at \emph{Yahoo!}, would traduce into the appearance of today's \emph{de facto} standard in the field: Hadoop. Nowadays Hadoop is used in a myriad of backgrounds, ranging from travel booking sites to storing and servicing mobile data, ecommerce, image processing applications or searching for new forms of energy.
 
-As\'i, sustentando la implementaci\'on de MapReduce sobre infraestructura \emph{el\'astica}, se conseguir\'ia la explotaci\'on \'optima de los recursos computacionales, expandi\'endolos o contray\'endolos r\'apidamente en funci\'on de la demanda, al tiempo que se reducir\'ia indirectamente el coste energ\'etico (ver figura \ref{fig:energysavings}) del servicio.
+So, by stacking a MapReduce implementation atop elastic infrastructure an optimal exploitation of computational resources would be attainable, rapidly expanding or shrinking them on-demand, while simultaneously reducing the overall energy consumption required to accomplish processings (Figure \ref{fig:energysavings}).
 
 \begin{figure}[tbp]
 \begin{center}
@@ -28,7 +28,7 @@ As\'i, sustentando la implementaci\'on de MapReduce sobre infraestructura \emph{
 
 
 
-\section{Objetivos}\label{sec:objetivos}
+\section{Goals}\label{sec:objetivos}
 
 \noindent El objetivo principal de este proyecto es estudiar la posibilidad de desarrollar una soluci\'on que permita dirigir el funcionamiento de un cloud para ejecutar algoritmia codificada siguiendo el paradigma MapReduce, reduciendo al m\'aximo la necesidad de conocimiento de la estructura del cloud concreto utilizado y de los par\'ametros de configuraci\'on de MapReduce.\newline
 
