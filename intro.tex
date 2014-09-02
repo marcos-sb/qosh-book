@@ -1,5 +1,6 @@
 \chapter{Abstract}\label{cap:intro}
 
+
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/001.pdf}
@@ -7,6 +8,7 @@
 \label{fig:datagraph}
 \end{center}
 \end{figure}
+
 
 \noindent Over the last years there has been a continuous increase in the quantity of information generated with the Internet as the main driver. Furthermore, this information has reshaped from structured --- and thus, susceptible to being expressed following a relational schema --- to heterogeneous, which has kick-started the necessity to alter the way it is stored and transformed. As the figure \ref{fig:datagraph} shows, those that were the undisputed back-end queens --- relational database systems mostly --- are seeing how their role is fading away due to their incapability to efficiently save unrelated heterogeneity.
 
@@ -18,10 +20,11 @@ Meanwhile, Google was also in the search for new mechanisms to exploit, with hig
 
 So, by stacking a MapReduce implementation atop elastic infrastructure an optimal exploitation of computational resources would be attainable, rapidly expanding or shrinking them on-demand, while simultaneously reducing the overall energy consumption required to accomplish processings (Figure \ref{fig:energysavings}).
 
+
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/002.pdf}
- \caption{Motivaci\'on energ\'etica. Fuente: \cite{googleapps}}
+ \caption{Energy savings. Source: \cite{googleapps}}
 \label{fig:energysavings}
 \end{center}
 \end{figure}
@@ -30,16 +33,18 @@ So, by stacking a MapReduce implementation atop elastic infrastructure an optima
 
 \section{Goals}\label{sec:objetivos}
 
-\noindent El objetivo principal de este proyecto es estudiar la posibilidad de desarrollar una soluci\'on que permita dirigir el funcionamiento de un cloud para ejecutar algoritmia codificada siguiendo el paradigma MapReduce, reduciendo al m\'aximo la necesidad de conocimiento de la estructura del cloud concreto utilizado y de los par\'ametros de configuraci\'on de MapReduce.\newline
+\noindent The main goal with this project is to study the feasibility to develop a solution for a Cloud to drive MapReduce applications, with no need to know the particular Cloud structure and/or Hadoop configuration parameters.
 
-Para lograrlo se har\'a un an\'alisis pormenorizado de las variadas soluciones de creaci\'on de clouds. Se evaluar\'an sus capacidades y se configurar\'a un entorno de prueba utilizando virtualizaci\'on, que permita extraer conclusiones dirigidas a la elecci\'on de un \emph{framework} en concreto. Una vez completada la primera selecci\'on, se pasar\'a a la evaluaci\'on de los frameworks que soporten las caracter\'isticas del paradigma de programaci\'on MapReduce.\newline
+In order to achieve such a simple execution model without compromising performance or applicability, a thorough analysis on different \emph{IaaS Frameworks} will be carried out. Their features will be evaluated inside a virtual testing environment to finally narrow the selection to only one. Once an IaaS Framework had been chosen, the attention will be put towards choosing a MapReduce implementation to install over our virtual infrastructure.
 
-Asimismo, se desarrollar\'a un mecanismo para el env\'io de peticiones de ejecuci\'on de trabajos MapReduce, centr\'andonos en la simplicidad y la universalidad de acceso de la interfaz con el cloud y MapReduce. Sin embargo, la sencillez no ha de representar un obst\'aculo para la explotaci\'on y la obtenci\'on de resultados. Del mismo modo, tanto la seguridad como la privacidad en las comunicaciones y el almacenamiento habr\'an de ser convenientemente definidas; no olvidemos que se trata la construcci\'on de un modelo reducido, a escala, de una soluci\'on que pueda ser implantable en una infraestructura infinitamente m\'as capaz.
+Nonetheless, a mechanism to forward MapReduce execution requests will be devised and implemented trying to focus on simplicity and universal access to this human-cloud-mapreduce interface. Yet, this transparency mustn't become an obstacle in exploiting the application or in fetching processed results. Privacy and security in communications and storage will be conveniently defined; we shan't forget it will be developed as a scaled-down model which could be infinitely scaled out.
 
 
-\section{Organizaci\'on de la memoria}\label{sec:organizacion}
-\noindent El contenido del presente documento se distribuye como se expone a continuaci\'on. Este primer cap\'itulo introduce la l\'inea general de desarrollo del proyecto. El cap\'itulo \ref{cap:estadodelarte} acerca al lector conceptos fundamentales de la \emph{computaci\'on cloud} ---como su arquitectura o la virtualizaci\'on--- y del paradigma MapReduce. El cap\'itulo \ref{cap:evaliaas} describe una evaluaci\'on pr\'actica de cuatro sistemas de manejo de clouds \emph{IaaS}. El cap\'itulo \ref{cap:openstack} explora la estructura modular y el funcionamiento particular de OpenStack Folsom. De forma an\'aloga, el cap\'itulo \ref{cap:hadoop} desvela las peculiarias de Hadoop como framework MapReduce. \newline
 
-Los cap\'itulos subsiguientes se centran en detallar el proyecto desde distintos puntos de vista. El cap\'itulo \ref{cap:solucion} contiene las decisiones de dise\~no y los diagramas UML. El cap\'itulo \ref{cap:rendimiento} recoge los an\'alisis de rendimiento de la soluci\'on en un entorno real de pruebas. El cap\'itulo \ref{cap:conclusiones} analiza trabajos de investigaci\'on experimental relacionados con el proyecto, destacando comparativamente sus caracter\'isticas.  Finalmente, se resumen las principales aportaciones del proyecto y se proponen futuras mejoras a su implementaci\'on. \newline
+\section{Arrangement of the Document}\label{sec:organizacion}
 
-Adicionalmente se han incluido dos anexos. El ap\'endice \ref{cap:guiainstalacion} recoge una gu\'ia r\'apida para la puesta en funcionamiento de una instalaci\'on del proyecto en un nodo. El ap\'endice \ref{cap:glosario} recoge las explicaciones de ciertos t\'erminos y tecnolog\'ias repartidas por todo el texto.
+\noindent The contents within this document are distributed as stated next. This first chapter introduces development guidelines in the abstract. Chapter \ref{cap:estadodelarte} puts the reader closer to the fundamental Cloud Computing concepts --- like its general architecture or virtualization ---, along with the ones from the MapReduce paradigm. Chapter \ref{cap:evaliaas} describes an empirical evaluation of four private IaaS Cloud frameworks. Chapter \ref{cap:openstack} explores OpenStack Folsom's modular structure and particular inner workings. Analogically, chapter \ref{cap:hadoop} unveils Hadoop's peculiarities as a MapReduce implementation.
+
+The subsequent chapters center on detailing the project from diverse vantage points. Chapter \ref{cap:solution} contains a series of design decisions and their accompanying UML diagrams. Chapter \ref{cap:rendimiento} gathers an analysis on performance in a real testing cluster. Chapter {cap:conclusiones} analyzes related papers highlighting how they compare to this solution. Finally, the main contributions of this project are discussed in addition to proposing future improvements to the implementation.
+
+Two annexes have also been included. Annex \ref{capguiainstalacion} guides the reader throughout a quick single node installation. Annex \ref{cap:glosario} covers the definition of some of the concepts and technologies referred to in this text.
