@@ -1,25 +1,29 @@
-\chapter{Antecedentes}\label{cap:estadodelarte}
+\chapter{Background}\label{cap:estadodelarte}
 
-\noindent Este segundo cap\'itulo pretende acercar al lector los conceptos clave que definen tanto  la computaci\'on cloud como el arquetipo MapReduce. Sobre ellos se apoyar\'an las elaboraciones posteriores relacionadas con el proyecto.
+\noindent This second chapter tries to acquaint the reader with the key concepts that define Cloud Computing as well as the MapReduce archetype. Later successive elaborations to the project will lay on top of them.
 
 
-\section{Computaci\'on cloud}\label{sec:computacioncloud}
-\noindent En esencia, el \emph{cloud computing}, computaci\'on cloud, o nube computacional, es un modelo de computaci\'on distribuida que pretende facilitar el consumo de esa infraestructura distribuida bajo la forma de recursos computacionales virtuales, plataformas virtuales o servicios. Sin embargo, no es una nueva tecnolog\'ia o arquitectura sino que representa un nuevo modo de explotaci\'on de recursos. Lo que se pretende con los cloud es flexibilizar la forma de dirigir el comportamiento de los centros de datos de cualquier tama\~no, de forma que un usuario pueda conformar computadores virtuales a su antojo (Infraestructura como Servicio o \emph{IaaS}), explotar un entorno de pruebas sobre un sistema operativo o plataforma software concretos (Plataforma como Servicio o \emph{PaaS}) o hacer uso de un servicio espec\'ifico como la copia de seguridad remota (Software como Servicio o \emph{SaaS}). La figura \ref{fig:cloudlayers} muestra el correspondiente diagrama de capas de alto nivel de un cloud gen\'erico.\newline
+\section{Cloud Computing}\label{sec:computacioncloud}
+
+\noindent In essence, Cloud Computing, or Cloud for short, is a distributed computing model that attempts to ease the consumption on-demand of that distributed infrastructure, by exporting it as virtual computational resources, platforms or services. However it may seem, the Cloud is no new technology but it introduces a new manner to exploit idle computing capacity. What it intends is to make orchestration of enormous data centers more flexible, so as to allow a user to start or destroy virtual machines as required --- Infrastructure as a Service (\emph{IaaS}) ---, leverage a testing environment over a particular Operating System or software platform --- Platform as a Service (\emph{PaaS}) --- or use a specific service like remote backup --- Software as a Service (\emph{SaaS}) ---. Figure \ref{fig:cloudlayers} shows the corresponding high level layer diagram of a generic Cloud.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.69\textwidth]{imagenes/003.pdf}
- \caption{Capas de servicio de un cloud}
+ \caption{Layers in a cloud in production}
 \label{fig:cloudlayers}
 \end{center}
 \end{figure}
 
-Los distintos frameworks van a soportar la funcionalidad necesaria para manejar la infraestructura que defina al cloud. Ahora bien, ser\'a necesario un esfuerzo de an\'alisis, dise\~no, configuraci\'on, instalaci\'on y mantenimiento del servicio que se pretenda otorgar, teniendo en cuenta que el grado de elaboraci\'on de \'este aumenta desde los tipo IaaS hasta los tipo SaaS; efectivamente, las capas PaaS y SaaS se apoyan en sus respectivas capas soporte (IaaS para PaaS y PaaS para SaaS) que habr\'an de ser configuradas como se requiera. Todos los frameworks IaaS ---o, simplificadamente, herramientas de creaci\'on y mantenimiento de clouds para el manejo de m\'aquinas virtuales--- centran su atenci\'on en la configuraci\'on de un entorno estable definido por cuatro variables: CPUs virtuales, memoria de ejecuci\'on (RAM virtual), memoria de persistencia (HDD virtual) y redes virtuales. Este entorno de ejecuci\'on hace posible lanzar clusters virtuales completos sobre los que instalar plataformas o sistemas para ser posteriormente consumidos por usuarios; creando como efecto las capas software del cloud correspondientes ---PaaS y SaaS, respectivamente.\newline
+Different IaaS frameworks will cover the functionality that is required to drive the cloud-defining \emph{physical} infrastructure. Nonetheless, an effort to analyze, design, configure, install and maintain the intended service will be needed, bearing in mind that the degree of elaboration grows from IaaS services to SaaS ones. In effect, PaaS and SaaS layers are lied supported by those immediately under --- software is implemented over a particular platform which, in turn, is also build upon a physical layer ---. Every Cloud Framework focuses on giving the option to configure a stable environment in which to run virtual machines defined by four variables: Virtual CPU count, virtual RAM, virtual persistent memory and virtual networking devices. Such an environment makes it possible to deploy virtual clusters upon which to install platforms or services to be subsequently consumed by users, bringing up the software layers that give form PaaS and SaaS paradigms respectively.
 
-Otras cuestiones no menos importantes, como el control de acceso, los permisos de ejecuci\'on, las cuotas o el almacenamiento persistente y seguro, tambi\'en tendr\'an representaci\'on en todos los frameworks.
+No less important cuestions like access control, execution permissions, quota or persistent or safe storage will also be present in all of the frameworks.
 
 
-\subsection{Arquitectura}\label{subsec:arquitecturacloud}
+\subsection{Architecture}\label{subsec:arquitecturacloud}
+
+\noindent Figure \ref{fig:cloudlayers} showed possible layers that could be found in a Cloud deployment.
+
 \noindent La figura \ref{fig:cloudlayers} mostraba las posibles capas que pueden formar parte del conjunto de servicios de un cloud en funcionamiento. En funci\'on de las capas implementadas, del framework concreto y del \emph{rol} que est\'e jugando el nodo del cl\'uster que ejecute un cloud, aparecer\'an asociados distintos \emph{m\'odulos} que hacen posible el consumo de los servicios configurados. Estos m\'odulos pueden concebirse como subsistemas de los cloud que conectan cada una de las partes necesarias para la ejecuci\'on de m\'aquinas virtuales, definidas fundamentalmente por las cuatro variables comentadas con anterioridad ---VCPUs, RAM, HDD y red. No existe una metodolog\'ia que dicte c\'omo han de ser estos subsistemas, en cuanto a tama\~no y responsabilidades, y as\'i, cada framework hace su propia partici\'on modular de la gesti\'on de infraestructura.\newline
 
 Dejando de lado la modularidad, un concepto destacable de los cloud es la separaci\'on de responsabilidad en dos roles principales: \emph{Cloud Controller} y \emph{Cloud Node}. La figura \ref{fig:archcloud} muestra un despliegue gen\'erico de un cloud en un cl\'uster donde se han identificado ambos roles. La idea es seguir el modelo de las arquitecturas \emph{Maestro-Esclavo}.\newline
