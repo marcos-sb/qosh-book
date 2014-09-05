@@ -5,7 +5,7 @@
 
 \section{Cloud Computing}\label{sec:computacioncloud}
 
-\noindent In essence, Cloud Computing, or Cloud for short, is a distributed computing model that attempts to ease the consumption on-demand of that distributed infrastructure, by exporting it as virtual computational resources, platforms or services. However it may seem, the Cloud is no new technology but it introduces a new manner to exploit idle computing capacity. What it intends is to make orchestration of enormous data centers more flexible, so as to allow a user to start or destroy virtual machines as required --- Infrastructure as a Service (\emph{IaaS}) ---, leverage a testing environment over a particular Operating System or software platform --- Platform as a Service (\emph{PaaS}) --- or use a specific service like remote backup --- Software as a Service (\emph{SaaS}) ---. Figure \ref{fig:cloudlayers} shows the corresponding high level layer diagram of a generic Cloud.
+\noindent In essence, Cloud Computing, or Cloud for short, is a distributed computing model that attempts to ease the consumption on-demand of that distributed infrastructure, by exporting it as virtual computational resources, platforms or services. However it may seem, the Cloud is no new technology but it introduces a new manner to exploit idle computing capacity. What it intends is to make orchestration of enormous data centers more flexible, so as to allow a user to start or destroy virtual machines as required --- Infrastructure as a Service (\emph{IaaS}) ---, leverage a testing environment over a particular Operating System or software platform --- Platform as a Service (\emph{PaaS}) --- or use a specific service like remote backup --- Software as a Service (\emph{SaaS}). Figure \ref{fig:cloudlayers} shows the corresponding high level layer diagram of a generic Cloud.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -15,54 +15,56 @@
 \end{center}
 \end{figure}
 
-Different IaaS frameworks will cover the functionality that is required to drive the cloud-defining \emph{physical} infrastructure. Nonetheless, an effort to analyze, design, configure, install and maintain the intended service will be needed, bearing in mind that the degree of elaboration grows from IaaS services to SaaS ones. In effect, PaaS and SaaS layers are lied supported by those immediately under --- software is implemented over a particular platform which, in turn, is also build upon a physical layer ---. Every Cloud Framework focuses on giving the option to configure a stable environment in which to run virtual machines defined by four variables: Virtual CPU count, virtual RAM, virtual persistent memory and virtual networking devices. Such an environment makes it possible to deploy virtual clusters upon which to install platforms or services to be subsequently consumed by users, bringing up the software layers that give form PaaS and SaaS paradigms respectively.
+Different IaaS frameworks will cover the functionality that is required to drive the cloud-defining \emph{physical} infrastructure. Nonetheless, an effort to analyze, design, configure, install and maintain the intended service will be needed, bearing in mind that the degree of elaboration grows from IaaS services to SaaS ones. In effect, PaaS and SaaS layers are lied supported by those immediately under --- software is implemented over a particular platform which, in turn, is also build upon a physical layer. Every Cloud Framework focuses on giving the option to configure a stable environment in which to run virtual machines defined by four variables: Virtual CPU count, virtual RAM, virtual persistent memory and virtual networking devices. Such an environment makes it possible to deploy virtual clusters upon which to install platforms or services to be subsequently consumed by users, bringing up the software layers that give form PaaS and SaaS paradigms respectively.
 
 No less important cuestions like access control, execution permissions, quota or persistent or safe storage will also be present in all of the frameworks.
 
 
 \subsection{Architecture}\label{subsec:arquitecturacloud}
 
-\noindent Figure \ref{fig:cloudlayers} showed possible layers that could be found in a Cloud deployment.
+\noindent Figure \ref{fig:cloudlayers} showed possible layers that could be found in a cloud deployment. Depending on the layers that are implemented, the particular framework and the role played by the cluster node, different particular modules will appear to make possible the consumption of configured services. These modules may be though of as Cloud subsystems that connect each one of the parts that are required to execute virtual machines. Those virtual machines' capabilities are defined by the four variables previously discussed --- VCPUS, RAM, HDD and networking. As there is no methodology dictating how those subsystems should be in terms of size and responsibility, and thus, each framework makes its own modular partition regarding infrastructure management.
 
-\noindent La figura \ref{fig:cloudlayers} mostraba las posibles capas que pueden formar parte del conjunto de servicios de un cloud en funcionamiento. En funci\'on de las capas implementadas, del framework concreto y del \emph{rol} que est\'e jugando el nodo del cl\'uster que ejecute un cloud, aparecer\'an asociados distintos \emph{m\'odulos} que hacen posible el consumo de los servicios configurados. Estos m\'odulos pueden concebirse como subsistemas de los cloud que conectan cada una de las partes necesarias para la ejecuci\'on de m\'aquinas virtuales, definidas fundamentalmente por las cuatro variables comentadas con anterioridad ---VCPUs, RAM, HDD y red. No existe una metodolog\'ia que dicte c\'omo han de ser estos subsistemas, en cuanto a tama\~no y responsabilidades, y as\'i, cada framework hace su propia partici\'on modular de la gesti\'on de infraestructura.\newline
-
-Dejando de lado la modularidad, un concepto destacable de los cloud es la separaci\'on de responsabilidad en dos roles principales: \emph{Cloud Controller} y \emph{Cloud Node}. La figura \ref{fig:archcloud} muestra un despliegue gen\'erico de un cloud en un cl\'uster donde se han identificado ambos roles. La idea es seguir el modelo de las arquitecturas \emph{Maestro-Esclavo}.\newline
+Setting modularity apart, one common feature among different clouds is the separation of responsibility in two main roles: \emph{Cloud Controller} and \emph{Cloud Node}. Figure \ref{fig:archcloud} shows a generic Cloud deployment in a cluster with both roles defined. The guidelines followed for having this two roles lies close to \emph{Master-Slave} architectures' approach. In those, in the abstract, there's a set of computers labeled as coordinators which are expected to control execution, and another set made up with those machines that are to carry out the actual processing.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{imagenes/004.pdf}
- \caption{Controlador y nodo de un cloud}
+ \caption{Cloud Controller and Cloud Node}
 \label{fig:archcloud}
 \end{center}
 \end{figure}
 
-Dentro de esa distribuci\'on general, los anfitriones o nodos del cl\'uster ---ya sean \emph{controlador} o \emph{nodo} del cloud--- cooperan de forma sincronizada usando \emph{NTP} (\emph{Network Time Protocol}) y el paradigma \emph{paso de mensajes} implementado con colas de prioridad. Se basan adem\'as en la pol\'itica de \emph{nada compartido} para facilitar la escalabilidad. La estructura global de almacenamiento ---inherentemente compartida--- es una base de datos que corre, normalmente, en el controlador o controladores del cloud, o exclusivamente en un nodo del cl\'uster ---la base de datos asociada a un cloud es un ejemplo de un tipo de m\'odulo de persistencia. Un ordenador del cl\'uster puede hacer las veces de controlador y nodo al mismo tiempo, aunque bien es cierto que este \'ultimo apunte no est\'a recomendado fuera de \'ambitos de desarrollo por razones obvias.
+Within this general role distribution in a cluster, host computers or cluster nodes --- labeled as Cloud Controllers or Cloud Nodes --- cooperate in a synchronized fashion through \emph{NTP} (\emph{Network Time Protocol}) and communicate via message passing supported by asynchronous queues. To store services' metadata and status they typically draw upon a \emph{DBMS} (\emph{Data Base Management System}) implementation, which is regularly kept running in a dedicated cluster node set sharded (distributed) between the members of the set.
+
+Although there is no practical restriction to configuring both Cloud Controller and Cloud Node within a single computer in a cluster, this approach should be limited to development environments due to the considerable impact in performance that it would carry.
 
 
 \subsubsection{Cloud Controller}\label{subsubsec:cloudcontroller}
-\noindent La tarea fundamental del nodo del cl\'uster designado como controlador es mantener el funcionamiento del cloud coordinando la cooperaci\'on de sus m\'odulos. Por ejemplo, algunas tareas de las que se encarga el controlador son las siguientes:
+
+\noindent The fundamental task for a Controller is to maintain all of the cloud's constituent modules working together by coordinating their cooperation. As an example, it is a Controller's duty to:
 
 \begin{itemize}
- \item Control de autenticaci\'on y autorizaci\'on.
- \item Recuento de infraestructura f\'isica disponible.
- \item Control de cuotas de operaci\'on.
- \item Balance de consumo.
- \item Inventario de usuarios y proyectos.
- \item Exposici\'on del API para la explotaci\'on de los servicios.
- \item Monitorizaci\'on en tiempo real del cloud.
+ \item Authentication and authorization control.
+ \item Available infrastructure resources recount.
+ \item Quota management.
+ \item Usage balance.
+ \item User and project inventory.
+ \item API exposure for service consumption.
+ \item Real time cloud monitoring.
 \end{itemize}
- 
-Se puede deducir que, al ser una parte vital del cloud, habitualmente se encuentra replicado en varios ordenadores dentro de un mismo cl\'uster. La figura \ref{fig:cloudcontroller} muestra la arquitectura de alto nivel del nodo controlador de un cloud.\newline
+
+Being an essential part of a cloud as it is, the Controller node (not to be mistaken for the Cloud Node) is usually replicated in physically distinct computers. Figure \ref{fig:cloudcontroller} shows a Cloud Controller's architecture from a high level perspective.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.5\textwidth]{imagenes/005.pdf}
- \caption{Detalle del controlador de cloud}
+ \caption{Cloud Controller in detail}
 \label{fig:cloudcontroller}
 \end{center}
 \end{figure}
 
-Normalmente, los clientes interact\'uan con el cloud a trav\'es de un API REST (\emph{REpresentational State Transfer}). Estos clientes suelen tener forma de herramienta de interfaz de comandos (\emph{CLI} o \emph{Command Line Interface}) o interfaz web, consumidoras de un servicio REST, de ah\'i que el API de acceso tenga que exponer un servicio de ese tipo. Estos APIs de acceso var\'ian li\-ge\-ra\-men\-te en sintaxis y sem\'antica con cada compa\~n\'ia, lo que provoca cierto acoplamiento de los clientes con los servicios. Es por ello que se han puesto en marcha numerosos esfuerzos para la unificaci\'on y estandarizaci\'on de estos APIs, para garantizar la compatibilidad entre distintas implementaciones, siendo el m\'as importante por primerizo y acogida, el propuesto desde el \emph{Open Grid Forum}: \emph{OCCI} (\emph{Open Cloud Computing Interface} \cite{occisdraft}).\newline
+As a general rule, clients will interact with clouds through a Web Service API --- mostly \emph{RESTful} APIs (\emph{REpresentational State Transfer}). Those APIs vary slightly from company to vendor as usual, which forces clients to be partially coupled to clouds. That is why there has been an increasing trend for unifying and standardizing those APIs in order to guarantee compatibility inter-framework. Of special mention is the cloud standard proposed by the \emph{Open Grid Forum}: \emph{OCCI} (\emph{Open Cloud Computing Interface} \cite{occisdraft}).
+
 
 Los m\'odulos constitutivos del cloud soportan el grueso funcional del controlador. Cada uno de ellos tendr\'a un fin bien definido, y as\'i aparecen m\'odulos de red, m\'odulos de control de acceso y seguridad, m\'odulos de almacenamiento, etc. Muchos de ellos ya exist\'ian previa aparici\'on de los cloud, s\'olo que funcionaban de manera aislada. Los m\'odulos se comunican entre s\'i usando una cola de mensajes as\'incrona que garantiza la comunicaci\'on tambi\'en con el exterior del controlador, es decir, con el resto de los nodos del cl\'uster que participa en el cloud. Y por \'ultimo, la base de datos, soporte de almacenamiento de informaci\'on compartida por los m\'odulos de la nube, jugar\'a un papel central, ya que la informaci\'on global de estado determina el comportamiento general del cloud. Si estos datos se corrompiesen, el funcionamiento general podr\'ia verse gravemente afectado.\newline
 
