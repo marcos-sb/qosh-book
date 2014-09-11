@@ -165,10 +165,7 @@ $\mathbf{fold} \: \left( \mathbf{+} \right) \: 0 \: \left[ 1,2,3 \right] \: \Rig
 \end{center}
 \end{figure}
 
-On the contrary of what happened with map, reduce expects the intermediate groups as input to produce a smaller set of values for each group as output, because reduce will iteratively \emph{fold} the groupings into values. Those reduced intermediate values will be passed in again to the reduce function if more values with the same key appeared from subsequent maps. Reduce signature is shown on figure \ref{fig:reduce}.
-
-
-A la funci\'on Reduce, en cambio, se le pasan las agrupaciones intermedias formadas por una clave y su conjunto de valores asociado, la salida de Map, para producir en su salida un conjunto menor de valores, ya que cada invocaci\'on de Reduce ocasionar\'a cero o un \'unico valor por cada clave, \emph{reduciendo} o plegando (fold) esos valores intermedios. La firma de Reduce se presenta en la figura \ref{fig:reduce}. Del mismo modo a como sucede en Map, es el framework quien se encarga de gestionar la transferencia de los resultados intermedios, salida de Map, a Reduce. A este respecto decir que algunas implementaciones del modelo permiten al desarrollador controlar el modo en que gestionan los resultados intermedios, pudiendo definir el comportamiento de las agrupaciones en una funci\'on \texttt{Combiner} que act\'ua antes de Reduce.
+On the contrary to map, reduce expects the intermediate groups as input to produce a smaller set of values for each group as output, because reduce will iteratively \emph{fold} the groupings into values. Those reduced intermediate values will be passed in again to the reduce function if more values with the same key appeared from subsequent maps. Reduce signature is shown on figure \ref{fig:reduce}. Just as happens with map, MapReduce handles the transmission of intermediate results out from map into reduce. The model also describes the possibility to define a \emph{Combiner} function that would act after map partially reducing the values within the same grouping to lower network traffic --- the combiner usually runs in the same machine as the map.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -180,34 +177,34 @@ $\mathbf{v:} \: valor$ \\
 $\mathbf{\left(kn,vn \right):} \: par \: \left(clave,valor\right) \: en \: un \: dominio \: n$ \\
 \hline
 \end{tabular}
-\caption{Firma de la funci\'on Reduce}
+\caption{Reduce function signature}
 \label{fig:reduce}
 \end{center}
 \end{figure}
 
+\subsubsection{A word counter in MapReduce}\label{subsubsec:wordcount}
 
-\subsubsection{Wordcount en MapReduce}\label{subsubsec:wordcount}
-\noindent Como ejemplo, la figura \ref{fig:wordcount} contiene el pseudoc\'odigo de una aplicaci\'on MapReduce para contar el n\'umero de apariciones de distintas palabras en una serie de documentos.\newline
+\noindent As an example, figure \ref{fig:wordcount} shows the pseudocode of a MapReduce application to count the number of words in a document set.
 
 \begin{figure}[tbp]
  \begin{center}
   \begin{tabular}{|l|}
    \hline
    \texttt{{\bf Map} (String key, String value):} \\
-   \texttt{// key: nombre del documento} \\
-   \texttt{// value: contenido del documento} \\
+   \texttt{// key: documento name} \\
+   \texttt{// value: document contents} \\
    \texttt{{\bf for each} word w {\bf in} value:} \\
    \texttt{{\bf EmitIntermediate} (w, ``1'')};\\ \\
 
    \texttt{{\bf Reduce} (String key, Iterator values):} \\
-   \texttt{// key: una palabra} \\
-   \texttt{// values: un iterable sobre un n\'umero de palabras} \\
+   \texttt{// key: a word} \\
+   \texttt{// values: an Iterable over intermediate counts of the word key} \\
    \texttt{{\bf int} result = 0;} \\
    \texttt{{\bf for each} v {\bf in} values:} \\
    \texttt{{\bf Emit} ({\bf AsString} (result));} \\
    \hline
   \end{tabular}
-  \caption{Pseudoc\'odigo de wordcount para MapReduce. Fuente: \cite{googlemapreduce}}
+  \caption{MapReduce wordcount pseudocode. Source: \cite{googlemapreduce}}
   \label{fig:wordcount}
  \end{center}
 \end{figure}
