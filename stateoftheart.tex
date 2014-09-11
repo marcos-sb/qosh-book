@@ -1,4 +1,5 @@
 \chapter{Background}\label{cap:estadodelarte}
+\hypenation{MapReduce}
 
 \noindent This second chapter tries to acquaint the reader with the key concepts that define Cloud Computing as well as the MapReduce archetype. Later successive elaborations to the project will lay on top of them.
 
@@ -90,35 +91,31 @@ The most important subsystem in a Cloud Controller is the \emph{hypervisor} or \
 
 \subsubsection{Hardware Virtualization}\label{subsubsec:virthardware}
 
-\noindent Hardware Virtualization, on the contrary, permits host's processes to run directly atop the physical hardware layer, with no interpretation.
+\noindent Hardware Virtualization, on the contrary, allows host's processes to run directly atop the physical hardware layer, with no interpretation. Logically, this provides a considerable speedup from emulation, though imposes a special treatment to be given to its virtual processes. Regarding CPUs, both AMD's and Intel's support virtual process execution --- which is the capacity to run processes belonging to the virtual domain with little performance overhead --- as far as the convenient hardware extensions are present (\emph{SVM} and \emph{VT-x} respectively \cite{intelvtx}). Just as what happened with emulation, an unaltered host's kernel may be used. This fact is of relative importance as if wasn't so it would limit the myriad of OSs that could be installed as guests. Lastly, it should be pointed out that the hardware architecture is exposed to the VM as it is, i. e. with no software middleware.
 
-\noindent La virtualizaci\'on hardware, por contra, permite que los procesos del hu\'esped corran encima del hardware real directamente, sin necesidad de in\-ter\-me\-dia\-rios. L\'ogicamente, esto propicia una aceleraci\'on considerable con respecto a la emulaci\'on, pero impone que el hardware d\'e un trato especial a esos procesos virtuales. En el caso de la CPU, tanto las de AMD como las de Intel soportan la ejecuci\'on virtual de procesos ---o dicho de otra forma, la ejecuci\'on de procesos pertenecientes al dominio virtual con reducida penalizaci\'on al rendimiento--- siempre que est\'en presentes las extensiones convenientes (\emph{SVM} para AMD y \emph{VT-X} para Intel \cite{intelvtx}). Igual que en la emulaci\'on, no es necesario modificar el kernel del hu\'esped, lo cual es importante ya que reducir\'ia la diversidad de sistemas operativos instalables, y el kernel anfitri\'on s\'olo ha de cargar un m\'odulo, ge\-ne\-ral\-men\-te. Apuntar, por \'ultimo, que la arquitectura hardware se presenta a las m\'aquinas virtuales tal y como es, es decir, sin ninguna alteraci\'on software intermedia.\newline
+\subsubsection{Paravirtualization}\label{subsubsec:paravirt}
 
-\subsubsection{Paravirtualizaci\'on}\label{subsubsec:paravirt}
+\noindent Paravirtualization uses a different approach. To begin with, it is indispensable that the guest's kernel be modified to make it capable of interacting with a paravirtualized environment. When the guest runs, the hypervisor will separate those regions of instructions that have to be executed in kernel mode in the CPU, from those in user mode which will be executed as regular host processes. Subsequently, the hypervisor will manage an on-contract execution between host and guest allowing the latter to run kernel mode sections as if pertaining to the real execution domain --- as if they were processes running in the host, not in the guest --- with almost no performance slowdown. Paravirtualization, in turn, does not require an special hardware extension be present.
 
-\noindent La paravirtualizaci\'on utiliza una aproximaci\'on diferente. Para empezar, es indispensable que el kernel hu\'esped sea modificado, de forma que sea consciente de estar corriendo en un entorno paravirtualizado. A la hora de ejecutar, el hipervisor marcar\'a aquellas regiones del c\'odigo que sean comprometidas, esto es, que deban correrse en modo kernel en la CPU, dejando al margen las partes en modo usuario que podr\'an ser ejecutadas como procesos del anfitri\'on. A continuaci\'on, el hipervisor gestionar\'a un contrato de ejecuci\'on entre el hu\'esped y el anfitri\'on, de forma que este \'ultimo procesar\'a esas partes en modo kernel como si se tratasen de secciones del dominio real de procesado, y no como pertenecientes al dominio virtual con su correspondiente penalizaci\'on de rendimiento. La paravirtualizaci\'on, en cambio, no requiere ninguna extensi\'on especial en el hardware.\newline
+\subsection{Cloud IaaS frameworks}\label{subsec:frameworksiaas}
 
+\noindent Cloud IaaS frameworks are those software systems managing the abstraction of complexity associated with on demand provisioning and administering failure-prone generic infrastructure. In spite of being almost all of them open sourced --- which fosters reusability and collaboration ---, they have evolved in different frames. This fact has raised a condition of lacking outwards interoperability, maturing non-standard APIs; though today those divergences are fading away. These frameworks and APIs are product of the efforts to improve and ease controlling the underlying particular clusters on which they germinated. Thus, it is no surprising their advances had originated parallelly with the infrastructure they drove, leaving compatibility in the background.
 
-\subsection{Frameworks para cloud IaaS}\label{subsec:frameworksiaas}
+Slowly but steadily these managing systems became larger in reach and responsibility boosted by an increasingly interest in the sector. In the end, it happened that software and systems engineering made them more abstract, so they finally overlapped functionally. AWS appearance finished forging the latent standardization need, and thus, as of today, most frameworks offer APIs closer and closer to Amazon's --- nowadays the de-facto standard --- and OCCI's \cite{occisdraft}.
 
-\noindent Los frameworks para cloud IaaS son aquellos sistemas software encargados de abstraer la complejidad asociada al aprovisionamiento din\'amico y la administraci\'on de infraestructura gen\'erica susceptible de fallar. Casi en su totalidad en c\'odigo abierto bajo licencia Apache ---lo que facilita las aportaciones y la reutilizaci\'on de m\'odulos de unos a otros---, sin embargo han tenido marcos de evoluci\'on diferentes. Este hecho ha condicionado su falta de in\-te\-ro\-pe\-ra\-bi\-li\-dad hacia el exterior ---con clientes consumidores del cloud--- cuajando APIs de gesti\'on no estandarizadas; aunque hoy por hoy empieza a no ser cierto. Estos frameworks no dejan de ser producto del esfuerzo por mejorar y facilitar la administraci\'on de los clusters concretos sobre los que se fueron gestando. Por tanto, no es de extra\~nar que sus avances se hayan producido en paralelo con la infraestructura que gestionaban, sin importar demasiado la compatibilidad.\newline
+\section{MapReduce Paradigm}\label{sec:mapred}
 
-Poco a poco, estos sistemas de manejo fueron creciendo en alcance y res\-pon\-sa\-bi\-li\-dad impulsados por el creciente inter\'es del sector. Al final, sucedi\'o que la propia ingenier\'ia del software y de sistemas los fue haciendo cada vez m\'as gen\'ericos, de manera que terminaron por solaparse funcionalmente. La aparici\'on de los AWS termin\'o de fraguar la necesidad latente de estandarizaci\'on, y as\'i, la mayor\'ia de estos frameworks ofrecen APIs propios cada vez m\'as pr\'oximos al de Amazon, hoy por hoy est\'andar de facto, y que adem\'as est\'an siendo remodelados para dirigirse hacia el est\'andar OCCI \cite{occisdraft}.
+\noindent The origin of the paradigm centers around a paper publication of two Google employees \cite{googlemapreduce}. In this paper they explained a method implementation devised to abstract the common parts present in distributed computing that rendered simple but large problems much more complex to solve when paralleling their execution on massive clusters. A concise definition states that MapReduce is ``\textit{a data processing model and execution environment that runs on large clusters of commodity computers}'' \cite{hadoopdefguide}.
 
+\subsection{Programming Model}\label{subsec:programacionmapred}
 
-\section{Paradigma MapReduce}\label{sec:mapred}
-\noindent El origen del paradigma se centra en el art\'iculo \cite{googlemapreduce}. En \'el se investigaba la posibilidad de abstraer las partes comunes de la utilizaci\'on de recursos computacionales distribuidos, que tanto aumentaban la complejidad de algunos problemas simples que se planteaban cotidianamente en Google. As\'i fue tomando forma la primera implementaci\'on de un modelo que se ocupaba de todos los apartados necesarios para aprovechar las capacidades de c\'alculo y almacenamiento de los clusters de que dispon\'ian. Una concisa definici\'on dicta que MapReduce es un ``\textit{modelo de procesado de datos y entorno de ejecuci\'on que corre en grandes clusters de computadores personales convencionales}'' \cite{hadoopdefguide}.
+\noindent The MapReduce programming model requires the developer express his problem as a partition of two well-defined pieces. A first part deals with the reading of input data and with producing a set of intermediate results that will be scattered over the cluster nodes. These intermediate transformations will be grouped according to an intermediate key value. A second phase begins with that grouping of intermediate results and concludes when every \emph{reduce} operation on the groupings succeeds. Seen from another vantage point, the first phase corresponds, broadly speaking, to the behavior of the functional \emph{map} and the second to the functional \emph{fold}.
 
-
-\subsection{Modelo de programaci\'on}\label{subsec:programacionmapred}
-\noindent El modelo del programaci\'on del paradigma requiere que el desarrollador ex\-pre\-se su problema como un contrato de procesado en dos partes fundamentales. La primera parte se encarga de leer los datos de entrada y de producir unos resultados intermedios que ser\'an distribuidos por la red. Estos resultados intermedios se agrupar\'an seg\'un el valor de una clave intermedia. Una segunda fase comienza con los resultados intermedios agrupados y finaliza cuando se han \emph{reducido} todas las operaciones pendientes sobre las agrupaciones de entrada. Visto desde otra perspectiva, la primera fase se co\-rres\-pon\-de, a grandes rasgos, con el comportamiento de la funci\'on \emph{map} y la segunda con la funci\'on \emph{fold}; ambas pertenecientes al modelo de programaci\'on funcional. \newline
-
-En el vocabulario del framework MapReduce, estos conceptos de la programaci\'on funcional dan origen a las funciones \texttt{Map} y \texttt{Reduce} que definen los trabajos de procesado. Tanto Map como Reduce han de ser escritas por parte del programador, lo que puede obligar a cambiar el modo de expresi\'on del problema original. A cambio, el framework se encarga de paralelizar la computaci\'on, distribuyendo los datos de entrada, manejando los errores que pudiesen producirse y recogiendo los resultados a la salida; todo de forma transparente.
-
+In terms of the MapReduce model, these functional paradigm concepts give rise to \emph{Map} and \emph{Reduce} functions. Both Map and Reduce have to be supplied by the developer, which may force a deviation in breaking the original problem down. As counterpart, the MapReduce model will deal with parallelizing the computation, distributing input data across the cluster, handling exceptions that could raise and recovering output results; everything transparent to the programmer.
 
 \subsubsection{Funci\'on Map}\label{map}
-\hyphenation{MapReduce}
-\noindent El t\'ipico map funcional toma una funci\'on \emph{F} cualquiera y una lista de elementos \emph{L} o, en general, cualquier estructura recursiva, para devolver la lista resultado de aplicar \emph{F} a cada elemento de \emph{L}. La figura \ref{fig:functionalmap} muestra su firma y un ejemplo de aplicaci\'on.\newline
+
+\noindent The typical functional map takes any function \texttt{F} and a list of elements \texttt{L} or, in general, any recursive data structure, to return a list resulting from applying \texttt{F} to each element of \texttt{L}. Figure \ref{fig:functionalmap} shows its signature and an example.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -128,12 +125,12 @@ $\mathbf{map:} \: \left ( \alpha \rightarrow \beta \right ) \: \rightarrow \: \a
 $\mathbf{map} \: \left( \mathbf{pow}\:2 \right) \: \left[ 1,2,3 \right] \: \Rightarrow \: \left[ 1,4,9 \right ]$ \\
 \hline
 \end{tabular}
-\caption{Ejemplo de aplicaci\'on de la funci\'on map (versi\'on funcional)}
+\caption{Map function example (functional version)}
 \label{fig:functionalmap}
 \end{center}
 \end{figure}
 
-En su realizaci\'on MapReduce, la funci\'on Map recibe un par de valores a la entrada y produce otro par \texttt{(clave, valor)} como salida intermedia. La librer\'ia MapReduce se encarga entonces de agrupar esos pares intermedios, por valor de clave, antes de pas\'arselos a Reduce como entradas. Los tipos de entrada y salida de Map se corresponden con la firma de la figura \ref{fig:mapreducemap}. Es el framework MapReduce quien se encarga de alimentar la funci\'on Map, transformando los datos de los ficheros de entrada en pares \texttt{(clave, valor)} correctos.
+In its MapReduce realization, map function receives a tuple as input and produces another tuple \texttt{(key, value)} as intermediate output. It is the MapReduce library who is responsible for feeding the map function by mutating the data contained in input files into \texttt{(key, value)} pairs. Then, it deals with grouping those intermediate tuples by key before passing them in as input to the reduce function. Input and output data types correspond to those shown in the function signature figure \ref{fig:mapreducemap}.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -145,14 +142,15 @@ $\mathbf{v:} \: valor \linebreak$ \\
 $\mathbf{\left(kn,vn \right):} \: par \: \left( clave,valor \right) \: en \: un \: dominio \: n$ \\
 \hline
 \end{tabular}
-\caption{Firma de la funci\'on Map (versi\'on MapReduce)}
+\caption{Map function signature (MapReduce version)}
 \label{fig:mapreducemap}
 \end{center}
 \end{figure}
 
 
-\subsubsection{Funci\'on Reduce}\label{reduce}
-\noindent El t\'ipico fold de la programaci\'on funcional recoge una funci\'on \emph{G} cualquiera, una lista \emph{L}, gen\'ericamente cualquier estructura recursiva, y un elemento inicial \emph{I}, del mismo tipo que los elementos de \emph{L} y sobre el que se acumulan los resultados intermedios, para devolver el valor final de \emph{I}, resultado de aplicar \emph{G} a cada elemento de \emph{L}. La figura \ref{fig:fold} presenta su firma y un ejemplo de aplicaci\'on.\newline
+\subsubsection{Reduce function}\label{reduce}
+
+\noindent The typical functional fold expects any function \texttt{G}, a list \texttt{L}, or generally any type of recursive data structure, and any initial element \texttt{I}, subtype of \texttt{L}'s elements. Fold returns the value in \texttt{I} resulting from building up the intermediate values generated after applying \texttt{G} to each element in \texttt{L}. Figure \ref{fig:fold} presents fold signature as well as an example.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -162,10 +160,13 @@ $\mathbf{fold:} \: \left( \alpha \rightarrow \beta \rightarrow \alpha \right) \:
 $\mathbf{fold} \: \left( \mathbf{+} \right) \: 0 \: \left[ 1,2,3 \right] \: \Rightarrow \: 6$ \\
 \hline
 \end{tabular}
-\caption{Ejemplo de aplicaci\'on de la funci\'on fold}
+\caption{Fold function example}
 \label{fig:fold}
 \end{center}
 \end{figure}
+
+On the contrary of what happened with map, reduce expects the intermediate groups as input to produce a smaller set of values for each group as output, because reduce will iteratively \emph{fold} the groupings into values. Those reduced intermediate values will be passed in again to the reduce function if more values with the same key appeared from subsequent maps. Reduce signature is shown on figure \ref{fig:reduce}.
+
 
 A la funci\'on Reduce, en cambio, se le pasan las agrupaciones intermedias formadas por una clave y su conjunto de valores asociado, la salida de Map, para producir en su salida un conjunto menor de valores, ya que cada invocaci\'on de Reduce ocasionar\'a cero o un \'unico valor por cada clave, \emph{reduciendo} o plegando (fold) esos valores intermedios. La firma de Reduce se presenta en la figura \ref{fig:reduce}. Del mismo modo a como sucede en Map, es el framework quien se encarga de gestionar la transferencia de los resultados intermedios, salida de Map, a Reduce. A este respecto decir que algunas implementaciones del modelo permiten al desarrollador controlar el modo en que gestionan los resultados intermedios, pudiendo definir el comportamiento de las agrupaciones en una funci\'on \texttt{Combiner} que act\'ua antes de Reduce.
 
