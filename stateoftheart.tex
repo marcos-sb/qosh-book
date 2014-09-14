@@ -1,8 +1,6 @@
 \chapter{Background}\label{cap:estadodelarte}
-\hypenation{MapReduce}
 
 \noindent This second chapter tries to acquaint the reader with the key concepts that define Cloud Computing as well as the MapReduce archetype. Later successive elaborations to the project will lay on top of them.
-
 
 \section{Cloud Computing}\label{sec:computacioncloud}
 
@@ -220,8 +218,8 @@ Once the flow had been completed, MapReduce would return a listing with every wo
 \begin{itemize}
  \item Distributed grep: Map emits every line matching the regular expression. Reduce only forwards its input to its output acting as identity function.
  \item Count of URL access frequency: Like wordcount.
- \item Reverse web-link graph: For each URL contained in a web document, map generates the pair \emph{(<target_URL>, <source_URL>)}. Reduce will emit the pair \emph{(target, list(source))}.
- \item Inverted index: Map parses each document and emits a series of tuples in the form \emph{(<word>, <document_id>)}. All of them are passed as input to reduce that generates the sequence of pairs \emph{(<word>, list(document_id))}.
+ \item Reverse web-link graph: For each URL contained in a web document, map generates the pair \emph{(<target\_URL>, <source\_URL>)}. Reduce will emit the pair \emph{(target, list(source))}.
+ \item Inverted index: Map parses each document and emits a series of tuples in the form \emph{(<word>, <document\_id>)}. All of them are passed as input to reduce that generates the sequence of pairs \emph{(<word>, list(document\_id))}.
 \end{itemize}
 
 \subsection{Processing Model}\label{subsec:processingmodel}
@@ -285,32 +283,27 @@ In fact, MapReduce explores a method to use locality as an additional resource. 
 
 \subsubsection{Backup Tasks}\label{subsubsec:secundarias}
 
-\noindent A situation could arise in which a cluster node be executing map or reduce tasks much slower than it theoretically could. Such a circumstance may arise with a damaged drive 
+\noindent A situation could arise in which a cluster node be executing map or reduce tasks much slower than it theoretically could. Such a circumstance may arise with a damaged drive which would cause read and write operations to slow down. And since jobs complete when all of its composing tasks had been finished, the faulted node (\emph{the straggler}) would be curbing the global throughput. To alleviate this handicap, when few tasks are left incomplete for a particular job, \emph{Backup Task}s are created an submitted to additional workers, making a single task be executed twice concurrently. By the time one copy of the task succeeds it will be labeled completed, duly reducing the impact of stragglers at the cost of wasting computational resources.
 
-\noindent Podr\'ia caber la situaci\'on en la que un nodo del cl\'uster estuviese ejecutando tareas Map o Reduce a una velocidad m\'as lenta de lo habitual; por ejemplo, si tuviese el disco r\'igido da\~nado, las lecturas y escrituras se suceder\'ian m\'as lentamente, y como el trabajo MapReduce no est\'a completado hasta que todas sus tareas componentes hayan finalizado con \'exito, el nodo problem\'atico estar\'ia ocasionando una limitaci\'on en el rendimiento global. Para aliviar el problema, se propone que cuando falte por concluir la ejecuci\'on de pocas ta\-re\-as del trabajo, \'estas sean enviadas a dos nodos trabajadores: una como tarea convencional y otra como tarea secundaria de alg\'un nodo inactivo. En el momento en que concluya la ejecuci\'on de alguna de las dos, esa tarea se marcar\'a como terminada, reduciendo la latencia que a\~naden esos nodos con dificultades operativas.
+\subsubsection{Combiner Function}\label{subsubsec:combiner}
 
+\noindent Many times it happens that there exists a good number of repeated intermediate pairs. Taking wordcount as an example, it can be easily seen that every mapper will generate as many tuples \emph{(``a'', ``1'')} as \emph{a}'s there are in the input documents. A mechanism to lower the tuples that will have to be emitted to reducers is to allow for the definition of a \emph{Combiner Function} to group outputs from the map function --- and in the same mapper node --- before sending them out over the network, effectively cutting down traffic.
 
-\subsubsection{Funci\'on Combiner}\label{subsubsec:combiner}
-\noindent En muchas ocasiones sucede que existe un gran n\'umero de pares intermedios generados que se repiten. Tomando como ejemplo el wordcount expuesto antes, se puede deducir que cada trabajador Map generar\'a ingentes cantidades de registros de la forma \emph{(``a'', ``1'')}, que ser\'an enviados por la red hacia los trabajadores Reduce. Un mecanismo para reducir este colapso es permitir al usuario escribir una funci\'on de combinaci\'on de resultados intermedios, que se lanzar\'a previa ejecuci\'on de la funci\'on Reduce. Esta funci\'on combinadora ir\'a recogiendo los resultados intermedios, dentro del mismo trabajador Map, para hacer una primera reducci\'on (o combinaci\'on) de los datos antes de ser marcados como disponibles para los trabajadores Reduce.\newline
+In fact, it is usual for both combiner and reduce functions to share the same implementation, even though the former writes its output to local disk while the latter writes directly to the distributed file system.
 
-T\'ipicamente, el c\'odigo fuente de ambas funciones ---Reduce y Combiner--- es el mismo; lo que s\'i cambia es el modo en que la librer\'ia MapReduce gestiona su ejecuci\'on: la salida de la combinaci\'on se mantiene en disco local y no en el sistema de ficheros distribuido, para reducir la sobrecarga de red que supondr\'ia.
+\subsection{Other MapReduce Implementations}\label{subsec:frameworksmapred}
 
-
-\subsection{Frameworks MapReduce}\label{subsec:frameworksmapred}
-\noindent Desde 2004 han ido apareciendo multitud de frameworks que codifican, considerando distintas optimizaciones, la funcionalidad del paradigma. Por citar algunos nombres:
+\noindent Since 2004 multiple frameworks that implement the ideas exposed in the paper \cite{googlemapreduce} have been coming out. The next listing clearly shows the impact MapReduce has created.
 
 \begin{description}
- \item[Hadoop] \cite{hadoopdefguide} Uno de los primeros en cubrir el modelo de procesado pro\-pues\-to para MapReduce y principal implementaci\'on de referencia para los dem\'as frameworks. Es el m\'as utilizado, probado y desplegado con diferencia en la actualidad.
- \item[GridGain] \cite{gridgainvshadoop} Comercial y centrado en el procesado en memoria para ace\-le\-rar la ejecuci\'on: menor latencia de acceso al dato a costa de un menor espacio de E/S.
- \item[Twister] \cite{twister} Desarrollado como proyecto de investigaci\'on en la Universidad de Indiana, pretende dar un giro de tuerca m\'as al modelo MapReduce, abstrayendo las partes comunes y necesarias para lanzar ejecuciones, aisl\'andolas y almacen\'andolas en memoria distribuida como objetos est\'aticos, reduciendo as\'i el tiempo necesario para configurar las funciones Map y Reduce previo procesado.
- \item[GATK] \cite{gatk} Utilizado en investifaci\'on gen\'etica para evaluar y secuenciar fragmentos de ADN de m\'ultiples especies.
- \item[Qizmt] \cite{qizmt} Escrito en C\# y puesto en funcionamiento para MySpace.
- \item[misco] \cite{misco} Escrito 100\% en Python y basado en trabajos previos de Nokia, se propone como implementaci\'on MapReduce capaz de correr en dispositivos m\'oviles.
- \item[Peregrine] \cite{peregrine} Optimizando el modo en que se manipulan los resultados intermedios y pasando toda operaci\'on de E/S a una cola as\'incrona, entre otras alteraciones, han llegado a acelerar bastante la ejecuci\'on de tareas. Todav\'ia en beta a junio de 2013.
- \item[Mars] \cite{mars} Implementado en \emph{NVIDIA CUDA}, se centra en extraer el m\'aximo rendimiento de mapeo y reducci\'on moviendo la operativa a la tarjeta gr\'afica. En seis pruebas realizadas con Mars se han observado incrementos de rendimiento superiores a un orden de magnitud frente a ejecuciones en CPU.
-
+ \item[Hadoop] \cite{hadoopdefguide} One of the first implementations to cover the MapReduce processing model and framework of reference to other MapReduce codifications. It is by far the most widely deployed, tested, configured and profiled today.
+ \item[GridGain] \cite{gridgainvshadoop} Commercial and centered around in-memory processing to speedup execution: lower data access latency at the expense of smaller I/O space.
+ \item[Twister] \cite{twister} Developed as a research project of the University of Indiana, tries to cut out and abstract the common parts required to run MapReduce workflows in order to keep them longer in the cluster's distributed memory. With such an approach, the time taken to configure mappers and reducers in multiple executions is lowered by doing the set up only once. Thus, \emph{Twister} really shines in executing \emph{iterative} MapRecude jobs --- those jobs where maps and reduces do not happen in sequence once, but need instead a multitude of complete map-reduce cycles to succeed.
+ \item[GATK] \cite{gatk} Used for genetic research to sequence and evaluate DNA fragments from multiple species.
+ \item[Qizmt] \cite{qizmt} Written in C\# and deployed in MySpace.
+ \item[misco] \cite{misco} Written 100\% Python and based on previous work at Nokia it is posed as a MapReduce implementation capable of running in mobile devices.
+ \item[Peregrine] \cite{peregrine} By optimizing how intermediate results are transformed and by passing every I/O operation throughout an asynchronous queue, its developers claim to have formidably accelerated task execution rate.
+ \item[Mars] \cite{mars} Implemented in \emph{NVIDIA CUDA}, it revolves around extracting higher performance by moving the map and reduce operations into the graphic card. It is supposed to improve processing throughput by over an order of magnitude.
 \end{description}
 
-De todos ellos Hadoop es, incuestionablemente, el framework MapReduce m\'as utilizado en la actualidad. Su naturaleza de c\'odigo abierto y su flexibilidad, tanto de procesado como de almacenamiento, le han reportado un creciente inter\'es desde la industria de la IT, que se ha venido traduciendo en la aparici\'on de numerosas herramientas acoplables a Hadoop que extienden su funcionalidad.
-
-
+Hadoop is undoubtedly the MapReduce implementation more used nowadays. Its open source nature and its flexibility, both for processing and storing, have constantly reported back an increasing interest from the IT industry. This has brought out many pluggable extensions that enhance Hadoop's applicability. 
