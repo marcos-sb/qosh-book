@@ -1,30 +1,26 @@
-\chapter{Evaluaci\'on experimental de frameworks para cloud IaaS}\label{cap:evaliaas}
-\noindent En este cap\'itulo daremos un repaso a los frameworks m\'as utilizados para gestionar clouds IaaS. Haremos una selecci\'on inicial que iremos reduciendo seg\'un ciertos criterios como la madurez, la facilidad de gesti\'on o la calidad documental, hasta quedarnos con uno. Sobre este \'ultimo se realizar\'a un estudio en profundidad.
+\chapter{Experimental Assessment of IaaS Clouds}\label{cap:evaliaas}
 
+\noindent In this chapter we will be reviewing the most used frameworks to drive IaaS Clouds. An initial selection will be made and it will be progressively shrunk following certain criteria like maturity, ease of use or documentation quality, until one remains. A deep study will be carried out on that prevailing one.
 
 \section{Metodolog\'ia de evaluaci\'on}\label{sec:evaluacion}
-\noindent Una evaluaci\'on en profundidad de las capacidades de los distintos frameworks no es posible a menos que se acometa un despliegue real de cada uno. La infraestructura virtual que se genera al instalar un cloud, por peque\~no que sea, es grande y compleja. Adem\'as, intentar emular el hardware real que soportar\'a el cloud es, en ocasiones, insuficiente: por ejemplo, los hipervisores que implementen virtualizaci\'on hardware requerir\'an acceso directo a la CPU. La virtualizaci\'on hardware \emph{anidada}, entendida como la capacidad de exponer las caracter\'isticas nativas de virtualizaci\'on hardware de la CPU a un hu\'esped, o dicho de otro modo, la capacidad de virtualizar hardware \emph{dentro} de una m\'aquina virtual, cuenta con limitado soporte por parte de los fabricantes ---para procesadores Intel se requieren \emph{VT-x} y \emph{EPT} que s\'olo se encuentra en los m\'as modernos--- y de los desarrolladores de las soluciones de vir\-tua\-li\-za\-ci\'on (as\'i lo refleja el \emph{bugtracker} de \emph{VirtualBox}; KVM, por contra, s\'i la soporta). Es decir, no ser\'a posible hacer despliegues de clouds usando m\'aquinas virtuales como nodos del cl\'uster soporte del cloud, a menos que el hipervisor seleccionado soporte paravirtualizaci\'on o emulaci\'on.\newline
 
-Para diagnosticar la superioridad de uno de ellos frente al resto se ha hecho una instalaci\'on a escala, en la medida de lo posible, utilizando m\'aquinas virtuales. Se han valorado adem\'as, tanto la calidad y transparencia documental, como el soporte comunitario \emph{observado} y la capacidad de mantener el servicio de IaaS en ejecuci\'on a pesar de la escasez estructural.\newline
+\noindent A thorough evaluation of the capabilities of the different frameworks is not possible unless an actual deployment is carried through. The virtual infrastructure that is generated when a cloud has finished installing, no matter how small the deployment, is large and complex. Besides, trying to \emph{emulate} the real hardware that will support the cloud is meager at times, e.g. if full hardware virtualization were used, the hypervisor would have to be allowed direct access to the CPU. \emph{Nested Hardware Virtualization} --- the capacity for a CPU to export its native virtualization capabilities to a guest running atop a host node, or the ability to use full hardware virtualization \emph{inside} a virtual machine ---, does not currently enjoy widespread adoption as it requires implementation efforts from both CPU designers and virtualization software developers. This means that it will not be possible for us to appraise the myriad IaaS Cloud solutions by creating a virtual cluster over which to deploy our clouds. Nonetheless, it will be the first test that the frameworks will have to pass in order to be eligible for further assessment, as it is clear reflection of their virtualizing flexibility.
 
-Una vez analizados, se ha elegido el m\'as conveniente para ser configurado de forma nativa ---fuera de una m\'aquina virtual--- en el entorno base que sustentar\'a la ejecución del proyecto. Apuntar, adem\'as, que las versiones probadas son aquellas recogidas en los binarios de los sistemas de gesti\'on de paquetes de cada distribuci\'on en el momento de hacer la instalaci\'on; no se ha pretendido hacer una valoraci\'on de versiones inestables.\newline
+To diagnose the superiority of one of them over the rest, a scaled down setup will be completed to evaluate the proficiency in maintaining the IaaS service running in spite of the reduced infrastructure. Quality and transparency in the documentation, as well as community support and engagement will also be born in mind.
 
-El entorno de pruebas sigue la organizaci\'on expuesta en la figura \ref{fig:espacioprueba}.
+The testing environment follows the organization shown in figure \ref{fig:espacioprueba}.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.55\textwidth]{imagenes/007.pdf}
- \caption{Espacio general de prueba}
+ \caption{General testing space}
 \label{fig:espacioprueba}
 \end{center}
 \end{figure}
 
-\section{Frameworks evaluados}\label{sec:frameworksevaluados}
-\hyphenation{CloudStack}
-\hyphenation{Eucalyptus}
-\hyphenation{OpenNebula}
-\hyphenation{OpenStack}
-\noindent Los frameworks comparados son:
+\section{Evaluated Frameworks}\label{sec:frameworksevaluados}
+
+\noindent The frameworks are:
 \begin{itemize}
  \item CloudStack %3.0.2
  \item Eucalyptus %3.1.1
@@ -32,17 +28,15 @@ El entorno de pruebas sigue la organizaci\'on expuesta en la figura \ref{fig:esp
  \item OpenStack
 \end{itemize}
 
-Desde el punto de vista meramente funcional, los cuatro cubren con cla\-ri\-dad la necesidad requerida por el proyecto. A vista de p\'ajaro se requiere la habilidad de gestionar la ejecuci\'on de un n\'umero indeterminado de m\'aquinas virtuales, hechas a medida para MapReduce, a trav\'es de un API que permita definir una sencilla interfaz de control.\newline
+From an exclusively functional vantage point, the four of them cover clearly the requirements imposed with the project, which, in short, it would be the faculty to run and manage the lifecycle of an indeterminate number of custom VMs, tailored for MapReduce executions, through an API that would allow for the definition of a simple job control interface.
 
-Eucalyptus y OpenStack se aproximan a la soluci\'on de forma m\'as mo\-du\-lar, dejando al descubierto partes de funcionalidad m\'as peque\~na, al tiempo que desacoplan esos m\'odulos. As\'i los componentes, se dan instalaciones m\'as flexibles y tediosas a la par, ya que es necesario configurar m\'as m\'odulos por separado. Sin embargo, en OpenStack es posible contener el aumento de esfuerzo utilizando sus scripts de gesti\'on. En cuanto a requisitos operativos, todos soportan \'ultimas o pen\'ultimas versiones de las principales distribuciones de sistemas operativos Linux, y tanto KVM como Xen como hipervisor. En un despliegue sobre una instalaci\'on de un cl\'uster real, la elecci\'on depender\'a m\'as de la plataforma ya configurada que de las limitaciones que pudiese tener el framework concreto.\newline
+\emph{Eucalyptus} and \emph{OpenStack} take a more modular approach to the solution, unveiling smaller functional parts, while at the same time decoupling those modules. With a module set in this fashion, installations become more flexible and tougher on par. However, to contain the operative effort, OpenStack ships with a series of scripts that help managing its deployments. Regarding their system requirements, they all support installations in modern Linux distributions with KVM or Xen as hypervisors. When dealing with a real deployment, the framework of choice will likely depend more on the existing platform than on particular limitations that any cloud may have.
 
-Como comentario final, decir que la interoperabilidad es la asignatura pendiente a nivel general. Todos se acercan en distinta medida al API de los AWS ---unos lo implementan, otros lo adaptan. OpenNebula, OpenStack y Eucalyptus han demostrado esfuerzos por adherirse al API propuesto desde el Open Grid Forum, que pretende convertirse en el primer API est\'andar (OCCI).\\
-
+As a side note, it is remarkable the lack of interoperability among them. All of them try to adhere to the AWS API in different degree --- some of them partially support it, others use \emph{adaptors} to it. OpenNebula, OpenStack and Eucalyptus have demonstrated to be carrying on coding efforts to fully support the OGF's standard: OCCI.
 
 %\subsection{Eucalyptus}\label{subsec:eucaliptus}
 
-Eucalyptus, a pesar de haber sido el primero en cubrir el API de los AWS, lo cual es anecd\'otico a estas alturas, presenta dos obst\'aculos para su evaluaci\'on. Primero, no todo el c\'odigo es abierto: el m\'odulo \texttt{VMware Broker}, que abre la puerta a la virtualizaci\'on basada en tecnolog\'ia de VMware, s\'olo est\'a disponible en la versi\'on para suscriptores. Y segundo, no es posible instalar los componentes de Eucalyptus en una m\'aquina virtual como bien describe la gu\'ia de instalaci\'on \cite{eucainstall}. Estos dos obst\'aculos motivan la ca\'ida de Eucalyptus de la lista de evaluaci\'on. El resto de los frameworks han sido evaluados tras su instalaci\'on y configuraci\'on.
-
+Eucalyptus, in spite of being the first to fully cover the AWS API, which is merely anecdotic nowadays, shows two obstacles that hinder its evaluation. First, it is not fully open sourced:\texttt{VMware Broker} which brings the opportunity to use virtualized infrastructure based on  VMware technology, is only available to paid subscribers. And second, it is impossible to setup Eucalyptus within a VM to test start-up time or installation complexity, for example, as it explains its installation guide \cite{eucainstall}. Both obstacles make Eucalyptus back out from the evaluation list. The rest have been compared after their setting up and configuration.
 
 \subsection{CloudStack}\label{subsec:cloudstack}
 
@@ -59,7 +53,7 @@ Eucalyptus, a pesar de haber sido el primero en cubrir el API de los AWS, lo cua
 Siguiendo las gu\'ias de instalaci\'on r\'apida y avanzada ---\cite{cloudstackquickinstall} y \cite{cloudstackadvinstall} res\-pec\-ti\-va\-men\-te---, el proceso se puede resumir en los pasos siguientes:
 
 \begin{itemize}
- \item Se crearon dos máquinas virtuales para contener el \emph{Management Server} (\emph{MS}) de CloudStack y el hipervisor XenServer: 1 GB RAM para el MS, 3 GB RAM para Xen y 20 GB HDD, \emph{ACPI} y \emph{APIC} para ambos.
+ \item Se crearon dos mï¿½quinas virtuales para contener el \emph{Management Server} (\emph{MS}) de CloudStack y el hipervisor XenServer: 1 GB RAM para el MS, 3 GB RAM para Xen y 20 GB HDD, \emph{ACPI} y \emph{APIC} para ambos.
  \item Para el MS:
   \begin{itemize}
       \item Se descarg\'o, instal\'o y actualiz\'o \emph{CentOS 6.3}.
@@ -100,7 +94,7 @@ Siguiendo las gu\'ias de instalaci\'on r\'apida y avanzada ---\cite{cloudstackqu
 \begin{itemize}
  \item Se cre\'o una m\'aquina virtual soporte para todo el cloud OpenNebula: 1 GB RAM, 8 GB HDD, ACPI y APIC.
  \item Se descarg\'o, instal\'o y actualiz\'o CentOS 6.3.
- \item Se nombr\'o \emph{opennebula} a la máquina virtual.
+ \item Se nombr\'o \emph{opennebula} a la mï¿½quina virtual.
  \item Igualmente nombrado, se dio de alta un nuevo usuario, \emph{opennebula}, y se agreg\'o a la lista de \emph{sudoers}.
  \item Se detuvo \texttt{SELinux}.
  \item Se sigui\'o la gu\'ia contenida en \cite{centosonquickstart} para concluir el proceso, al que hubo que integrar las siguientes cuestiones para probar el framework:
@@ -114,7 +108,7 @@ Siguiendo las gu\'ias de instalaci\'on r\'apida y avanzada ---\cite{cloudstackqu
 \subsection{OpenStack}\label{subsec:openstack}
 \noindent El caso de OpenStack es llamativo por varias razones. Representa la convergencia entre dos necesidades diferentes: la puramente computacional de la NASA y la orientada al almacenamiento de Rackspace. Complementariamente, tanto Red Hat como Canonical han sumado su aporte bajo la forma de scripts de instalaci\'on y control en el caso de Red Hat, y escribiendo utilidades de despliegue autom\'atico, como \texttt{juju}, en el caso de Canonical.\newline
 
-Como en el caso de OpenNebula, se configur\'o un entorno de ejecuci\'on contenido en una sola m\'aquina virtual. En este caso se eligi\'o a Fedora frente a CentOS y Ubuntu por el soporte comunitario en forma de extensa gu\'ia de instalaci\'on r\'apida \cite{quickstartfedoraos} y por la existencia de herramientas que ace\-le\-ra\-r\'ian sustancialmente el procedimiento. La gu\'ia de instalaci\'on y despligue oficial de OpenStack Folsom \cite{installdeployosfolsom}, est\'a escrita centr\'andose excesivamente en Ubuntu, lo que se tradujo en comandos no aplicables en Fedora. Como \'ultimo comentario previo a la descripci\'on de la puesta en marcha, decir que se probaron dos versiones de OpenStack: \emph{Essex} y \emph{Folsom}. La raz\'on radica en el hecho de que, a pesar de ser Essex la soportada oficialmente por la distribuci\'on (Fedora 17), desde la gu\'ia r\'apida mencionada anteriormente \cite{quickstartfedoraos} se recomendaba usar la \'ultima versión de OpenStack disponible ---Folsom a diciembre de 2012---, habilitando un re\-po\-si\-to\-rio de avance a tal fin.\newline
+Como en el caso de OpenNebula, se configur\'o un entorno de ejecuci\'on contenido en una sola m\'aquina virtual. En este caso se eligi\'o a Fedora frente a CentOS y Ubuntu por el soporte comunitario en forma de extensa gu\'ia de instalaci\'on r\'apida \cite{quickstartfedoraos} y por la existencia de herramientas que ace\-le\-ra\-r\'ian sustancialmente el procedimiento. La gu\'ia de instalaci\'on y despligue oficial de OpenStack Folsom \cite{installdeployosfolsom}, est\'a escrita centr\'andose excesivamente en Ubuntu, lo que se tradujo en comandos no aplicables en Fedora. Como \'ultimo comentario previo a la descripci\'on de la puesta en marcha, decir que se probaron dos versiones de OpenStack: \emph{Essex} y \emph{Folsom}. La raz\'on radica en el hecho de que, a pesar de ser Essex la soportada oficialmente por la distribuci\'on (Fedora 17), desde la gu\'ia r\'apida mencionada anteriormente \cite{quickstartfedoraos} se recomendaba usar la \'ultima versiï¿½n de OpenStack disponible ---Folsom a diciembre de 2012---, habilitando un re\-po\-si\-to\-rio de avance a tal fin.\newline
 
 El grado de madurez observado de Folsom frente a Essex es sustancialmente llamativo en la interfaz web: lo que parec\'ia una primera aproximaci\'on para formular comandos de administraci\'on del cloud, evolucion\'o hacia una interfaz mucho m\'as cohesionada con el comportamiento real. El ejemplo si\-guien\-te pone de manifiesto esta idea: en el momento de lanzar instancias para probar el correcto funcionamiento del cloud, se observ\'o que, en caso de existir alg\'un problema de configuraci\'on en el subsistema de red que impidiese que las instancias obtuviesen direcciones IP, \'estas permanec\'ian en un estado que hac\'ia imposible su eliminaci\'on desde la interfaz web. Fue necesario recurrir a la edici\'on de la base de datos y la estructura de ficheros del controlador del cloud, con algunos resultados nefastos como la p\'erdida de informaci\'on de uso de las instancias, para restablecer la coherencia en Essex. El mismo problema se solventa directamente en Folsom (tanto desde la interfaz web como desde la l\'inea de comandos).\newline
 
@@ -145,7 +139,7 @@ Siguiendo el \'indice siguiente se dispuso un entorno de ejecuci\'on id\'entico 
 \noindent Presentamos, seguidamente, los resultados de la comparaci\'on de los frameworks de IaaS, atendiendo a las cuestiones resaltadas en la metodolog\'ia.
  
 \begin{description}
- \item[Instalaci\'on:] Sin lugar a dudas OpenNebula se lleva la palma. La gu\'ia de instalación es, con mucho, la m\'as corta y ligera de seguir. Acarrea, no obstante, el problema de tener un desconocimiento mayor de lo que est\'a sucediendo bajo la superficie, que dificultar\'a la resoluci\'on de los problemas que pudieran aparecer, así como el manejo general del cloud.
+ \item[Instalaci\'on:] Sin lugar a dudas OpenNebula se lleva la palma. La gu\'ia de instalaciï¿½n es, con mucho, la m\'as corta y ligera de seguir. Acarrea, no obstante, el problema de tener un desconocimiento mayor de lo que est\'a sucediendo bajo la superficie, que dificultar\'a la resoluci\'on de los problemas que pudieran aparecer, asï¿½ como el manejo general del cloud.
  \item[Configuraci\'on y manejo:] El aprovisionamiento de nueva infraestructura, es decir, la uni\'on de nuevos anfitriones al cloud, requiere, en todos los frameworks analizados, la instalaci\'on en cada anfitri\'on del hipervisor que se pretenda utilizar. CloudStack y OpenNebula ofrecen una gesti\'on mucho m\'as transparente que OpenStack, siendo necesario ma\-yor esfuerzo de instalaci\'on y configuraci\'on. En este \'ultimo adem\'as, la interfaz web no deja forma alguna de conocer el tama\~no del cl\'uster real sobre el que corre el cloud ni, l\'ogicamente, el grado de utilizaci\'on de la infraestructura. Entre CloudStack y OpenNebula la diferencia es inexistente en cuanto a la funcionalidad expuesta a trav\'es de sus webs. CloudStack expone los servicios de todo el cloud como una jerarqu\'ia; OpenNebula como una tabla.
  \item[Hipervisor:] En cuanto a hipervisores soportados se refiere, OpenStack aventaja claramente a CloudStack y OpenNebula. Sin embargo, se podr\'ia afirmar que este hecho es pr\'acticamente anecd\'otico porque los tres soportan los m\'as conocidos ---KVM, Xen, variantes de Xen y variantes de VMWare--- que son los utilizados en casi todos los despliegues reales.
  \item[Almacenamiento:] Los tres soportan una m\'as que surtida variedad de controladores de \emph{backend} de datos. Pero, en este caso, es importante subrayar el esfuerzo de OpenStack por implementar la funcionalidad ofrecida por Amazon S3 ---almacenamiento en cloud r\'apido y seguro. Swift es el componente de OpenStack que otorga almacenamiento tolerante a fallos y de alta disponibilidad a los despliegues, sustent\'andose para lograrlo en la replicaci\'on y el balanceo de carga, entre otros. La gu\'ia avanzada de instalaci\'on de CloudStack \cite{cloudstackadvinstall}, muestra una primera aproximaci\'on para la configuraci\'on de Swift como almacenamiento secundario del cloud. De ah\'i se puede deducir en cierto grado la importancia y madurez de Swift como m\'odulo de OpenStack.
