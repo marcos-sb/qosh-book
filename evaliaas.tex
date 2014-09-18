@@ -4,7 +4,7 @@
 
 \section{Metodolog\'ia de evaluaci\'on}\label{sec:evaluacion}
 
-\noindent A thorough evaluation of the capabilities of the different frameworks is not possible unless an actual deployment is carried through. The virtual infrastructure that is generated when a cloud has finished installing, no matter how small the deployment, is large and complex. Besides, trying to \emph{emulate} the real hardware that will support the cloud is meager at times, e.g. if full hardware virtualization were used, the hypervisor would have to be allowed direct access to the CPU. \emph{Nested Hardware Virtualization} --- the capacity for a CPU to export its native virtualization capabilities to a guest running atop a host node, or the ability to use full hardware virtualization \emph{inside} a virtual machine ---, does not currently enjoy widespread adoption as it requires implementation efforts from both CPU designers and virtualization software developers. This means that it will not be possible for us to appraise the myriad IaaS Cloud solutions by creating a virtual cluster over which to deploy our clouds. Nonetheless, it will be the first test that the frameworks will have to pass in order to be eligible for further assessment, as it is clear reflection of their virtualizing flexibility.
+\noindent A thorough evaluation of the capabilities of the different frameworks is not possible unless an actual deployment is carried through. The virtual infrastructure that is generated when a cloud has finished installing, no matter how small the deployment, is large and complex. Besides, trying to \emph{emulate} the real hardware that will support the cloud is meager at times, e.g. if full hardware virtualization were used, the hypervisor would have to be allowed direct access to the CPU. \emph{Nested Hardware Virtualization} --- the capacity for a CPU to export its native virtualization capabilities to a guest running atop a host node, or the ability to use full hardware virtualization \emph{inside} a virtual machine ---, does not currently enjoy widespread adoption as it requires implementation efforts from both CPU designers and virtualization software developers. This means that it will not be possible for us to fully appraise the myriad IaaS Cloud solutions by creating a virtual cluster over which to deploy our clouds, and make performance measures.
 
 To diagnose the superiority of one of them over the rest, a scaled down setup will be completed to evaluate the proficiency in maintaining the IaaS service running in spite of the reduced infrastructure. Quality and transparency in the documentation, as well as community support and engagement will also be born in mind.
 
@@ -36,57 +36,57 @@ As a side note, it is remarkable the lack of interoperability among them. All of
 
 %\subsection{Eucalyptus}\label{subsec:eucaliptus}
 
-Eucalyptus, in spite of being the first to fully cover the AWS API, which is merely anecdotic nowadays, shows two obstacles that hinder its evaluation. First, it is not fully open sourced:\texttt{VMware Broker} which brings the opportunity to use virtualized infrastructure based on  VMware technology, is only available to paid subscribers. And second, it is impossible to setup Eucalyptus within a VM to test start-up time or installation complexity, for example, as it explains its installation guide \cite{eucainstall}. Both obstacles make Eucalyptus back out from the evaluation list. The rest have been compared after their setting up and configuration.
+Eucalyptus, in spite of being the first to fully cover the AWS API, which is merely anecdotical nowadays, has two obstacles that hinder its evaluation. First, it is not fully open sourced:\texttt{VMware Broker} which brings the opportunity to use virtualized infrastructure based on  VMware technology, is only available to paid subscribers. And second, it is impossible to setup Eucalyptus within a VM to test start-up time or installation complexity, for example, as it explains its installation guide \cite{eucainstall}. Both limitations make Eucalyptus back out from the evaluation list. The rest have been compared after their set up and configuration.
 
 \subsection{CloudStack}\label{subsec:cloudstack}
 
-\noindent En \cite{cloudstackquickinstall} se describe la instalaci\'on r\'apida de la \'ultima versi\'on de CloudStack bajo la tutela exclusiva de Citrix. Claramente determina que los nodos de cloud tienen que soportar, como para Eucalyptus, extensiones de vir\-tua\-li\-za\-ci\'on hardware (VT-x o AMD-V) para poder arrancar m\'aquinas virtuales sobre \emph{XenServer} o KVM. Sin embargo, la importancia de que CloudStack pasar\'ia a formar parte de \emph{The Apache Software Foundation} a partir de la versi\'on 4 como proyecto en incubaci\'on \cite{cloudstackstrategy}, y la realidad de un art\'iculo t\'ecnico de Citrix que abr\'ia la puerta a despliegues sobre anfritriones sin extensiones de virtualizaci\'on hardware \cite{cloudstacknohvm} ---a pesar de que incluso el manual de instalaci\'on de CloudStack 4 \cite{apachecloudstack4} siga contemplando esa limitaci\'on---, hizo que se ajustase el entorno de ejecuci\'on de la figura \ref{fig:cloudstack}.\newline
+\noindent CloudStack installation guide (\cite{cloudstackquickinstall}) describes the series of steps that a systems engineer should follow in order to complete a minimum CloudStack deployment. It clearly determines that Cloud Nodes' CPUs have to support virtualization extensions for CloudStack to start Xen or KVM-based VMs. Which happens to be a similar limitation to Eucalyptus'. However, the fact that CloudStack would become part of \emph{The Apache Software Foundation} from version 4 onward (\cite{cloudstackstrategy}), and the reality of a Citrix technical article opening the door to CloudStack deployments over Cloud Nodes lacking virtualization extensions (\cite{apachecloudstack4}), made us arrange the layout shown in figure \ref{fig:cloudstack}.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/008.pdf}
- \caption{CloudStack 3.0.2 con XenServer como hipervisor}
+ \caption{CloudStack 3.0.2 with XenServer hypervisor}
 \label{fig:cloudstack}
 \end{center}
 \end{figure}
 
-Siguiendo las gu\'ias de instalaci\'on r\'apida y avanzada ---\cite{cloudstackquickinstall} y \cite{cloudstackadvinstall} res\-pec\-ti\-va\-men\-te---, el proceso se puede resumir en los pasos siguientes:
+Following the advanced and quick installation guides --- \cite{cloudstackquickinstall} and \cite{cloudstackadvinstall} --- the process may be summarized in the steps bellow:
 
 \begin{itemize}
- \item Se crearon dos m�quinas virtuales para contener el \emph{Management Server} (\emph{MS}) de CloudStack y el hipervisor XenServer: 1 GB RAM para el MS, 3 GB RAM para Xen y 20 GB HDD, \emph{ACPI} y \emph{APIC} para ambos.
- \item Para el MS:
+ \item Two VMs were created to contain CloudStack \emph{Management Server} (\emph{MS}) and XenServer hypervisor: 1 GB of RAM for the MS, 3 GB of RAM for Xen, 20 GB HDD, \emph{ACPI} and \emph{APIC} for both.
+ \item For the MS:
   \begin{itemize}
-      \item Se descarg\'o, instal\'o y actualiz\'o \emph{CentOS 6.3}.
-   \item Se nombr\'o \emph{cloudstack} a la m\'aquina virtual.
-   \item Igualmente nombrado, se dio de alta un nuevo usuario, \emph{cloudstack}, y se agreg\'o a la lista de \emph{sudoers}.
-   \item Se sigui\'o la gu\'ia de instalaci\'on \cite{cloudstackquickinstall} para concluir el proceso.
+   \item \emph{CentOS 6.3} was downloaded, installed and \texttt{yum-updated}.
+   \item The VM was named \emph{cloudstack}.
+   \item Likewise, a user named \emph{cloudstack} was registered and added to the \emph{sudoers} list.
+   \item The quick installation guide was followed to conclude the process.
   \end{itemize}
- \item Para Xen:
+ \item For Xen:
   \begin{itemize}
-   \item Se descarg\'o la versi\'on 6.0.2 de XenServer desde la web de Citrix.
-   \item Se siguieron los apuntes de la gu\'ia de instalaci\'on de CloudStack \cite{cloudstackquickinstall} y el manual de configuraci\'on de XenServer \cite{xenserverinstall} para realizar la instalaci\'on.
+   \item XenServer 6.0.2 was downloaded from Citrix web site.
+   \item The notes contained in the quick installation guide and in the XenServer configuration manual \cite{xenserinstall} were followed to perform the configuration.
   \end{itemize}
- \item Adicionalmente:
-  \begin{itemize}
-   \item Antes de crear la zona de ejecuci\'on y definir el cl\'uster, el almacenamiento primario y secundario, etc., se tuvo que modificar la opci\'on de configuraci\'on global para permitir anfitriones sin extensiones de virtualizaci\'on hardware \cite{cloudstacknohvm}.
-   \item Una vez verificado el correcto reconocimiento de la infraestructura:
-    \begin{itemize}
-     \item Se copi\'o la imagen de CentOS 6.3 al MS.
-     \item Se arranc\'o un \texttt{SimpleHTTPServer} en el puerto \texttt{443} del MS.
-     \item Se permiti\'o el acceso al puerto \texttt{443}, desde \texttt{iptables}, en el MS.
-     \item Se carg\'o la imagen en el cloud desde la interfaz web.
-    \end{itemize}
-  \end{itemize}
+  \item Additionally:
+   \begin{itemize}
+    \item Before specifying the execution environment, defining the cluster, primary and secondary storage, etc. a global flag had to be set to permit nodes with no virtualization extensions \cite{cloudstacknohvm}.
+    \item Once the configured infrastructure was online:
+     \begin{itemize}
+      \item The CentOS 6.3 image was uploaded to the MS.
+      \item A \texttt{SimpleHTTPServer} --- a Python micro HTTP server --- was started on port \emph{443} in the MS.
+      \item A rule was added in \texttt{iptables} to let traffic through on port \emph{443} in the MS.
+      \item The image was loaded to the cloud from the web interface.
+     \end{itemize}
+   \end{itemize}
 \end{itemize}
 
-
 \subsection{OpenNebula}\label{subsec:opennebula}
-\noindent En comparaci\'on con el procedimiento anterior, el esfuerzo de instalaci\'on de OpenNebula 3.8 es muy inferior. De \cite{centosonquickstart} se deriva el proceso que se sigui\'o para configurar el entorno de ejecuci\'on mostrado en la figura \ref{fig:opennebula}, y que se resume en la lista siguiente:
+
+\noindent If balanced against the installation procedure just described, the effort for setting up OpenNebula 3.8 is lighter. The process that has been followed to configure the OpenNebula deployment contained in figure \ref{fig:opennebula} stems directly from \cite{centosonquickstart}, the official installation guide. The subsequent steps serve as summary to the process.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.55\textwidth]{imagenes/009.pdf}
- \caption{OpenNebula 3.8 con KVM}
+ \caption{OpenNebula 3.8 with KVM}
 \label{fig:opennebula}
 \end{center}
 \end{figure}
