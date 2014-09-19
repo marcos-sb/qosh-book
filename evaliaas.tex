@@ -2,7 +2,7 @@
 
 \noindent In this chapter we will be reviewing the most used frameworks to drive IaaS Clouds. An initial selection will be made and it will be progressively shrunk following certain criteria like maturity, ease of use or documentation quality, until one remains. A deep study will be carried out on that prevailing one.
 
-\section{Metodolog\'ia de evaluaci\'on}\label{sec:evaluacion}
+\section{Assessment Methodology}\label{sec:evaluacion}
 
 \noindent A thorough evaluation of the capabilities of the different frameworks is not possible unless an actual deployment is carried through. The virtual infrastructure that is generated when a cloud has finished installing, no matter how small the deployment, is large and complex. Besides, trying to \emph{emulate} the real hardware that will support the cloud is meager at times, e.g. if full hardware virtualization were used, the hypervisor would have to be allowed direct access to the CPU. \emph{Nested Hardware Virtualization} --- the capacity for a CPU to export its native virtualization capabilities to a guest running atop a host node, or the ability to use full hardware virtualization \emph{inside} a virtual machine ---, does not currently enjoy widespread adoption as it requires implementation efforts from both CPU designers and virtualization software developers. This means that it will not be possible for us to fully appraise the myriad IaaS Cloud solutions by creating a virtual cluster over which to deploy our clouds, and make performance measures.
 
@@ -92,60 +92,60 @@ Following the advanced and quick installation guides --- \cite{cloudstackquickin
 \end{figure}
 
 \begin{itemize}
- \item Se cre\'o una m\'aquina virtual soporte para todo el cloud OpenNebula: 1 GB RAM, 8 GB HDD, ACPI y APIC.
- \item Se descarg\'o, instal\'o y actualiz\'o CentOS 6.3.
- \item Se nombr\'o \emph{opennebula} a la m�quina virtual.
- \item Igualmente nombrado, se dio de alta un nuevo usuario, \emph{opennebula}, y se agreg\'o a la lista de \emph{sudoers}.
- \item Se detuvo \texttt{SELinux}.
- \item Se sigui\'o la gu\'ia contenida en \cite{centosonquickstart} para concluir el proceso, al que hubo que integrar las siguientes cuestiones para probar el framework:
+ \item A supporting VM was created to fully contain OpenNebula: 1 GB of RAM, 8 GB for the HDD, ACPI and APIC.
+ \item CentOS 6.3 was downloaded, installed and yum-updated.
+ \item The VM was named \emph{opennebula}.
+ \item A user named \emph{opennebula} was also registered and added to the sudoers list.
+ \item \texttt{SELinux} was stopped.
+ \item The configuration guide (\cite{centosonquickstart}) was followed to complete the process. Afterwards, the next series of actions were carried out to test the framework:
   \begin{itemize}
-   \item Por defecto, el servicio que brinda la interfaz web de OpenNebula (\texttt{sunstone}) se engancha en \emph{lo}. Para que pudiera ser accedido desde fuera del servidor, fuera de la m\'aquina virtual en este caso, fue necesario precisar que sunstone habr\'ia de escuchar en \emph{eth0}, modificando, para este fin, la configuraci\'on correspondiente en \texttt{/etc/one}. Lo mismo aconteci\'o con \texttt{occi}, el servicio REST de control del cloud.
-   \item Adicionalmente, se agreg\'o a iptables la regla para no filtrar el tr\'afico en el puerto \texttt{9869}, el de sunstone inicialmente.
+   \item By default, OpenNebula's web interface module (\texttt{sunstone}) attaches to \emph{lo}. In order to interact with sunstone from outside of the containing VM, it was necessary to change the configuration file (\texttt{/etc/one}) so that sunstone attached to the external networking interface \emph{eth0}. The very same happened with \texttt{occi}, the REST service that exposes the cloud API.
+   \item Furthermore, iptables was modified for letting through traffic on port \emph{9869}; where sunstone listens by default.
   \end{itemize}
 \end{itemize}
 
-
 \subsection{OpenStack}\label{subsec:openstack}
-\noindent El caso de OpenStack es llamativo por varias razones. Representa la convergencia entre dos necesidades diferentes: la puramente computacional de la NASA y la orientada al almacenamiento de Rackspace. Complementariamente, tanto Red Hat como Canonical han sumado su aporte bajo la forma de scripts de instalaci\'on y control en el caso de Red Hat, y escribiendo utilidades de despliegue autom\'atico, como \texttt{juju}, en el caso de Canonical.\newline
 
-Como en el caso de OpenNebula, se configur\'o un entorno de ejecuci\'on contenido en una sola m\'aquina virtual. En este caso se eligi\'o a Fedora frente a CentOS y Ubuntu por el soporte comunitario en forma de extensa gu\'ia de instalaci\'on r\'apida \cite{quickstartfedoraos} y por la existencia de herramientas que ace\-le\-ra\-r\'ian sustancialmente el procedimiento. La gu\'ia de instalaci\'on y despligue oficial de OpenStack Folsom \cite{installdeployosfolsom}, est\'a escrita centr\'andose excesivamente en Ubuntu, lo que se tradujo en comandos no aplicables en Fedora. Como \'ultimo comentario previo a la descripci\'on de la puesta en marcha, decir que se probaron dos versiones de OpenStack: \emph{Essex} y \emph{Folsom}. La raz\'on radica en el hecho de que, a pesar de ser Essex la soportada oficialmente por la distribuci\'on (Fedora 17), desde la gu\'ia r\'apida mencionada anteriormente \cite{quickstartfedoraos} se recomendaba usar la \'ultima versi�n de OpenStack disponible ---Folsom a diciembre de 2012---, habilitando un re\-po\-si\-to\-rio de avance a tal fin.\newline
+\noindent OpenStack case is striking for many reasons. It represents the convergence of two different needs: the computationally-driven in NASA and the storage-bound in Rackspace. Complementarily, both Red Hat and Canonical had shown their interest in the platform by collaborating with their scripts, deploying utilities and cloud-optimized images.
 
-El grado de madurez observado de Folsom frente a Essex es sustancialmente llamativo en la interfaz web: lo que parec\'ia una primera aproximaci\'on para formular comandos de administraci\'on del cloud, evolucion\'o hacia una interfaz mucho m\'as cohesionada con el comportamiento real. El ejemplo si\-guien\-te pone de manifiesto esta idea: en el momento de lanzar instancias para probar el correcto funcionamiento del cloud, se observ\'o que, en caso de existir alg\'un problema de configuraci\'on en el subsistema de red que impidiese que las instancias obtuviesen direcciones IP, \'estas permanec\'ian en un estado que hac\'ia imposible su eliminaci\'on desde la interfaz web. Fue necesario recurrir a la edici\'on de la base de datos y la estructura de ficheros del controlador del cloud, con algunos resultados nefastos como la p\'erdida de informaci\'on de uso de las instancias, para restablecer la coherencia en Essex. El mismo problema se solventa directamente en Folsom (tanto desde la interfaz web como desde la l\'inea de comandos).\newline
+Just as with OpenNebula, the complete execution environment was installed into a single VM. In this case, Fedora was chosen over CentOS or Ubuntu for the existence of a community-written installation guide (\cite{quickstartfedoraos}) and scripting utilities to ease the process, even though the official \emph{OpenStack Folsom} configuration guide \cite{installdeployosfolsom} is written with Ubuntu in mind so many commands are not applicable to Fedora.
 
-Siguiendo el \'indice siguiente se dispuso un entorno de ejecuci\'on id\'entico para sendas versiones (ver figura \ref{fig:openstack}).
+Both Essex and Folsom version were tested. The reason was that in spite of being Essex the officially supported version in Fedora 17, the quick installation guide suggested using the latest version available --- Folsom by December 2012 --- enabling a testing repository to that end. The degree in maturity observed moving from Folsom to Essex was startling: not only the web interface had been revamped giving it a more thorough look that also reflected much better the underlying state of the infrastructure, under the hood, the core module had also been split in smaller functional pieces that could be easily distributed across the cluster. In Essex, when dealing with creating instances in the cloud, if there were a problem while the networking interfaces were being brought up, making it impossible for them to obtain IP addresses, the web interface would hang in a state that would not allow to destroy the instance requiring the invocation of console commands. This hanging problem is solved in Folsom.
+
+An execution environment for both versions was spawned following the next list of actions (see figure \ref{fig:openstack}):
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.55\textwidth]{imagenes/010.pdf}
- \caption{OpenStack en despligue virtual}
+ \caption{Virtual OpenStack deployment}
 \label{fig:openstack}
 \end{center}
 \end{figure}
 
 \begin{itemize}
- \item Se cre\'o una m\'aquina virtual para todo el cloud OpenStack: 1 GB RAM, 10 GB HDD, APIC y ACPI.
- \item Se descarg\'o, instal\'o y actualiz\'o Fedora 17.
- \item Se nombr\'o \emph{openstack} a la m\'aquina virtual.
- \item Igualmente nombrado, se dio de alta un nuevo usuario, \emph{openstack}, y se agreg\'o a la lista de \emph{sudoers}.
- \item Se instal\'o el paquete \texttt{acpid} para poder controlar los aspectos de energ\'ia desde el manejador de cloud.
- \item Se detuvo SELinux.
- \item Se orden\'o una copia en profundidad de la m\'aquina virtual ---tanto configuraci\'on de la m\'aquina como HDD--- para probar Essex y Folsom, y se renombraron convenientemente.
- \item Se siguieron tanto la gu\'ia de instalaci\'on r\'apida extraoficial \cite{quickstartfedoraos}, como la gu\'ia oficial de despliegue \cite{installdeployosfolsom}, dejando de lado la con\-fi\-gu\-ra\-ci\'on de \texttt{Swift}, para concluir el procedimiento.
- \item A mayores, se crearon sendos discos virtuales de 4 GB para albergar los vol\'umenes del almacenamiento de bloque gestionados por \texttt{Compute}, para Essex, y \texttt{Cinder} para Folsom.
+ \item A single VM was created to hold OpenStack: 1 GB of RAM, 10 GB for the HDD, APIC and ACPI.
+ \item Fedora 17 was downloaded, installed and yum-updated as usual.
+ \item The VM was named \emph{openstack}.
+ \item The \emph{openstack} user was registered as well as added to the sudoers list.
+ \item \texttt{acpid} package was installed.
+ \item \emph{SELinux} was stopped.
+ \item A full clone of the VM --- which includes the virtual drive --- was made to test both versions.
+ \item The quick installation guide as well as the official one, omitting Swift, were followed to complete the process.
 \end{itemize}
- 
 
-\section{Conclusiones}\label{sec:conclusiones}
-\noindent Presentamos, seguidamente, los resultados de la comparaci\'on de los frameworks de IaaS, atendiendo a las cuestiones resaltadas en la metodolog\'ia.
+\section{Veredict}\label{sec:conclusiones}
+
+\noindent What follows is the listing explaining the findings in the comparison between the frameworks according to the methodology explained in the beginning of this section.
  
 \begin{description}
- \item[Instalaci\'on:] Sin lugar a dudas OpenNebula se lleva la palma. La gu\'ia de instalaci�n es, con mucho, la m\'as corta y ligera de seguir. Acarrea, no obstante, el problema de tener un desconocimiento mayor de lo que est\'a sucediendo bajo la superficie, que dificultar\'a la resoluci\'on de los problemas que pudieran aparecer, as� como el manejo general del cloud.
- \item[Configuraci\'on y manejo:] El aprovisionamiento de nueva infraestructura, es decir, la uni\'on de nuevos anfitriones al cloud, requiere, en todos los frameworks analizados, la instalaci\'on en cada anfitri\'on del hipervisor que se pretenda utilizar. CloudStack y OpenNebula ofrecen una gesti\'on mucho m\'as transparente que OpenStack, siendo necesario ma\-yor esfuerzo de instalaci\'on y configuraci\'on. En este \'ultimo adem\'as, la interfaz web no deja forma alguna de conocer el tama\~no del cl\'uster real sobre el que corre el cloud ni, l\'ogicamente, el grado de utilizaci\'on de la infraestructura. Entre CloudStack y OpenNebula la diferencia es inexistente en cuanto a la funcionalidad expuesta a trav\'es de sus webs. CloudStack expone los servicios de todo el cloud como una jerarqu\'ia; OpenNebula como una tabla.
- \item[Hipervisor:] En cuanto a hipervisores soportados se refiere, OpenStack aventaja claramente a CloudStack y OpenNebula. Sin embargo, se podr\'ia afirmar que este hecho es pr\'acticamente anecd\'otico porque los tres soportan los m\'as conocidos ---KVM, Xen, variantes de Xen y variantes de VMWare--- que son los utilizados en casi todos los despliegues reales.
- \item[Almacenamiento:] Los tres soportan una m\'as que surtida variedad de controladores de \emph{backend} de datos. Pero, en este caso, es importante subrayar el esfuerzo de OpenStack por implementar la funcionalidad ofrecida por Amazon S3 ---almacenamiento en cloud r\'apido y seguro. Swift es el componente de OpenStack que otorga almacenamiento tolerante a fallos y de alta disponibilidad a los despliegues, sustent\'andose para lograrlo en la replicaci\'on y el balanceo de carga, entre otros. La gu\'ia avanzada de instalaci\'on de CloudStack \cite{cloudstackadvinstall}, muestra una primera aproximaci\'on para la configuraci\'on de Swift como almacenamiento secundario del cloud. De ah\'i se puede deducir en cierto grado la importancia y madurez de Swift como m\'odulo de OpenStack.
- \item[Documentaci\'on:] Ninguno de los tres puede presumir de manuales de instalaci\'on oficiales correctos al 100\%. Adem\'as, como se da la circunstancia de que cada framework ha ido madurando con grados de exposici\'on diferentes a las diversas distribuciones Linux, la cobertura que ofrecen para cada sistema operativo es muy heterog\'enea; hasta el punto de confundir, en alg\'un caso, los nombres de los m\'odulos cuyas funciones hay que invocar. Por ejemplo, ambos manuales de instalaci\'on de CloudStack ---r\'apida \cite{cloudstackadvinstall} y avanzada \cite{cloudstackquickinstall}--- se siguen m\'as correctamente usando CentOS como sistema operativo de base y XenServer como hipervisor. OpenStack dispone oficialmente de manuales de ins\-ta\-la\-ci\'on que soportan tanto derivados de Red Hat ---Fedora, CentOS, el propio Red Hat Enterprise Linux, etc.--- como de Debian ---Ubuntu, Debian, etc.--- sin embargo, al realizar el despliegue sobre Fedora se observ\'o que el nombre de los servicios documentados no se correspond\'ia con el nombre real; en Ubuntu no sucede tal cosa. De todas formas, las incorrecciones son nimias y la extensi\'on de la documentaci\'on es m\'as que suficiente para despliegues en producci\'on.
- \item[Comunidad:] A pesar de que pueda resultar algo secundario, la calidad del soporte comunitario es vital para el desarrollo y soporte de los frameworks. Todos ellos est\'an compuestos por m\'odulos escritos en c\'odigo abierto y libre en su mayor parte, de forma que, cuanto mayor sea el bullicio recogido en foros de desarrollo, mayor ser\'a tambi\'en el aporte recibido; y as\'i, el grado de madurez operativo, funcional y documental ser\'a mayor. A pesar de que no pueda darse un claro vencedor en este apartado, debido al car\'acter difuso de la magnitud \emph{soporte comunitario}, s\'i es interesante destacar el importante apoyo a OpenStack de Canonical y Red Hat: no hay conferencia o charla t\'ecnica general de uno u otro donde no hagan referencia a OpenStack.
-\end{description}
+ \item[Installation:] Without a doubt OpenNebula stands out. The installation guide is the lighter and shortest to follow with difference. Carries, however, the inherent problem of hiding what is going on when it is being configured for the first time, potentially hardening the resolution of issues that might appear in the future.
+ \item[Configuration and Management:] Growing the supporting cluster requires, on every cloud tested, that a compatible hypervisor be installed on any node added. CloudStack and OpenNebula offer a more transparent management interface to better keep in check the physical infrastructure. OpenStack displays the most limited web interface.
+ \item[Hypervisor:] Regarding hypervisor support, OpenStack clearly surpasses both CloudStack and OpenNebula. Yet, they all support the most widely used hypervisors --- KVM, Xen, Xen variants and VMware and variants --- in production deployments.
+ \item[Storage:] The three of them support a broad assortment of data back-end controllers. But, in this case, it is important to highlight the effort OpenStack is involved in to introduce Amazon S3 compatibility in its deployments. Swift is the OpenStack component granting fault tolerance and high availability storage, mimicking Amazon S3, relying on data replication and balancing among other techniques. CloudStack advanced installation guide \cite{cloudstackadvinstall} describes a first approach toward configuring Swift as secondary storage for the cloud. This fact speaks volumes about the maturity and importance of Swift, an OpenStack module.
+ \item[Documentation:] None of the three can boast about exhaustive official installation guides. Every framework has had its own exposure to different linux distributions, so the coverage they offer of them varies to the point of mistaking module names, e.g. both CloudStack manuals are more easily followed using CentOS as base operating system and XenServer as hypervisor. OpenStack provides installation manuals supporting both Red Hat and Debian derivatives, but for Fedora the name of the documented backing services does not correspond to the real ones; not such thing happened for Ubuntu. Nonetheless, inaccuracies are trivial to cope with and the manuals are deep enough to deploy in production.
+ \item[Community:] Even though it may seem unimportant, the community is vital for developing and supporting the frameworks. They are, at the very least, partially open-sourced, so a lively community translates into higher usage rates, more rigorous documentation, more bugs squashed, etc. While it is hard to assess the magnitude of an online community from the outside, it is interesting to highlight the nourishing that OpenStack is continuously receiving from Red Hat and Canonical: there is no technical keynote or conference in which OpenStack is not appointed.
+\end{description} 
 
 \subsection{OpenStack Folsom}\label{subsec:openstackfolsom}
-\noindent Finalmente, el framework para cloud IaaS elegido es OpenStack Folsom. Las gu\'ias de instalaci\'on mencionadas, el soporte comunitario, el empuje por parte de dos pesos pesados del software, los despliegues reales de HP, Dell, Intel, Rackspace, etc., la modularidad de configuraci\'on, la completitud de implementaci\'on (soporte de los APIs OCCI, S3, EC2 y definici\'on de un servicio de almacenamiento en cloud como Swift) y el soporte oficial de despliegue de prueba sobre m\'aquinas virtuales ---usando emulaci\'on--- han desequilibrado la balanza a su favor.
+
+\noindent Finally, the IaaS Cloud that has been chosen is OpenStack Folsom. The lengthy installation guides, the community support, the backing by two large software companies, real HP, Dell, Intel, Rackspace, etc. deployments, the modular configuration, the completeness of the implementation (OCCI APIs, S3, EC2, Swift, etc.) and \emph{official} support to deploying the cloud over a virtual cluster for testing have unbalanced the comparison in its favor.
