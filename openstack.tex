@@ -1,105 +1,103 @@
 \chapter{OpenStack Folsom}\label{cap:openstack}
-\noindent El presente cap\'itulo pretende describir, con cierto detalle, la implementaci\'on del framework para cloud IaaS elegida. Partiremos de una visi\'on global que se ir\'a concretando para describir las responsabilidades y relaciones entre cada parte del cloud.
 
-\section{Arquitectura global}\label{sec:arquitecturaglobal}
-\noindent La figura \ref{fig:arquitecturaos} muestra los tres los componentes operacionales b\'asicos de OpenStack Folsom:
+\noindent The current section intends to detail the IaaS Cloud implementation that has been chosen: OpenStack. Initially, a global vision will be given to the reader, to progressively focus on its constituents modules' responsibilities and how they collaborate to maintain the service running.
+
+\section{Global Architecture}\label{sec:arquitecturaglobal}
+
+\noindent Figure \ref{fig:arquitecturaos} shows the three basic operational components of OpenStack Folsom:
 
 \begin{description}
- \item[N\'ucleo funcional:] OpenStack Compute, OpenStack Quantum (Redes) y OpenStack Storage.
- \item[Interfaz web de control:] OpenStack Horizon Dashboard.
- \item[Servicios compartidos:] OpenStack Glance, OpenStack Keystone y otros servicios indirectos como la persistencia en base de datos o la cola de mensajes.
+ \item[Functional Core:] OpenStack Compute, OpenStack Quantum and OpenStack Storage (Cinder and Swift).
+ \item[Web Management Interface:] OpenStack Horizon.
+ \item[Shared Services:] OpenStack Glance, OpenStack Keystone and other related services like a DBMS for persisting meta-data or a messaging queue.
 \end{description}
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{imagenes/012.pdf}
- \caption{Arquitectura de alto nivel de OpenStack}
+ \caption{OpenStack Arquitecture}
 \label{fig:arquitecturaos}
 \end{center}
 \end{figure}
 
-
-Los distintos componentes han sido ideados de manera que no se compartan estructuras globales de estado ---\emph{shared nothing}. Esto aporta al administrador del cloud la flexibilidad necesaria para poder repartir indiscriminadamente los m\'odulos constitutivos a lo largo de la infraestructura subyacente. De forma condensada, la figura \ref{fig:despliegueos} expone un ejemplo de despliegue posible de un cloud usando OpenStack Folsom. Apoy\'andonos en ella, resumiremos la funcionalidad que otorga cada m\'odulo de OpenStack, en rojo, junto con los servicios adicionales sobre los que se apoyan, en violeta. A pesar de que no se haya incluido en la figura por cuestiones de claridad, la comunicaci\'on inter-m\'odulo se realiza por paso de mensajes as\'incronos usando una cola. Las dos implementaciones de cola de mensajes documentadas son \texttt{RabbitMQ} y \texttt{Qpid}, siendo esta \'ultima la utilizada en el despliegue de prueba.
+The different components have been devised in a shared nothing fashion. This provides the cloud admin the flexibility required to distribute the modules over the cluster as pleased. An example of a particular OpenStack deployment is shown in figure \ref{fig:despliegueos}; OpenStack's own modules are displayed in red, supporting services are shown in violet. What it is missing from the diagram, for clarity, is the asynchronous queue that mediates inter-module communication. Qpid and RabbitMQ are the two queue implementations that are officially documented, being the former the one that we used in our test deployment.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/011.pdf}
- \caption{Ejemplo de despligue de OpenStack Folsom}
+ \caption{Example of an OpenStack Folsom deployment}
 \label{fig:despliegueos}
 \end{center}
 \end{figure}
 
-
 \section{Horizon}\label{sec:horizon}
-\noindent Es la ventana fundamental de configuraci\'on del cloud. Como hemos dejado constar, al menos de momento no permite controlar la cantidad global de infraestructura que ha sido aprovisionada. Horizon est\'a escrito en Python sobre \texttt{Django} como framework web. \'Este, a su vez, se vale de un servidor de p\'aginas (\texttt{httpd} por ejemplo), de un mecanismo de cach\'e para acelerar las cargas (\texttt{memcached}) y de un subsistema para embeber terminales en p\'aginas web (\texttt{noVNC}) que da la posibilidad de controlar las instancias en ejecuci\'on enviando comandos desde la ventana del navegador.\newline
 
-Para gestionar y utilizar el cloud, OpenStack otorga al administrador la posibilidad de crear roles de autorizaci\'on, que permitir\'an a los usuarios explotar aquellos servicios de la nube a los que su rol les d\'e acceso. Una distinci\'on interesante para Horizon separa el rol \emph{administrador} del cloud y el rol \emph{miembro} del cloud. \newline
+\noident Horizon represents the fundamental window to set up the cloud. As discussed in the previous section, Horizon does not currently --- as of Folsom version --- present a global view of the physical infrastructure, leaving the user in the dark in this respect. Horizon is written in Python on top of \texttt{Django}, the web framework. Django itself relays on a web server like \texttt{httpd} to expose static files, uses a caching mechanism (\texttt{memcached}) to speedup load times and a terminal embedding (\texttt{noVNC}) system to view the output of the virtual graphic card directly on Horizon.
 
-Un administrador podr\'a gestionar desde Horizon:
+To manage and create instances in the cloud, OpenStack gives the cloud admin the ability to register authorization roles that will let the users consume those services whose role give access to. While the admin is allowed to sign up custom roles, two roles that ship the distribution are the \emph{Cloud Admin} and the \emph{Cloud Member}.
 
-\begin{description}
- \item[Proyectos:] crear, borrar, usuarios asociados, modificar cuotas de uso, etc.
- \item[Usuarios:] crear, modificar o borrar.
- \item[Im\'agenes:] obtener un listado, borrar o modificar.
- \item[Instancias:] reiniciar, terminar, suspender, ver log, etc.
- \item[Vol\'umenes:] crear, obtener un listado, enganchar a una instancia, etc.
- \item[Computaciones:] crear, modificar o borrar.
- \item[Redes:] crear, modificar o borrar.
-\end{description}
-
-Un usuario conectado como miembro de un proyecto, podr\'a:
+A user granted the admin role will be able to manage:
 
 \begin{description}
- \item[Ver:] estado de cuota, consumo de recursos, etc.
- \item[Instancias:] crear, terminar, reiniciar, suspender, ver log, crear imagen de una instancia en ejecuci\'on (\emph{instance snapshot}).
- \item[Vol\'umenes:] obtener un listado, crear, modificar, enganchar a una instancia, crear imagen de un volumen (\emph{volume snapshot}).
- \item[Im\'agenes:] crear, obtener un listado, borrar, modificar, etc.
- \item[Redes:] gestionar IPs p\'ublicas (\emph{IPs flotantes}).
- \item[Grupos de seguridad:] crear, borrar o modificar reglas de seguridad.
- \item[Keypairs:] crear, modificar o borrar.
+ \item[Tenants:] Create, delete, member users, alter quotas, etc.
+ \item[Users:] Create, modify or delete.
+ \item[OS Images:] List, remove or modify meta-data.
+ \item[Instances:] Reset, shutdown, suspend, print log on screen, etc.
+ \item[Volumes:] Create, list, attach to an instance, etc.
+ \item[Networks:] Create, modify or delete.
 \end{description}
 
+A user granted the member role will be able to:
+
+\begin{description}
+ \item[Status:] Quota, resources, etc.
+ \item[Instances:] create, shutdown, reset, suspend, print log, create image from a running instance (snapshot), etc.
+ \item[Volumes:] List, create, modify, attach to an instance, create a volume snapshot, etc.
+ \item[Images:] Create, list, delete, modify, etc.
+ \item[Networking:] Manage public IPs (floating IPs).
+ \item[Security groups:] Create, delete or modify security rules.
+ \item[Keypairs:] Create, modify or delete.
+\end{description}
 
 \section{Keystone}\label{sec:keystone}
-\noindent Keystone es el punto central de control de la seguridad de acceso y el re\-po\-si\-to\-rio de informaci\'on necesaria para consumir los servicios instalados. Comprueba, previa ejecuci\'on de cada petici\'on, las credenciales de los usuarios y las autorizaciones de uso de los servicios de OpenStack. Keystone divide esta funcionalidad en dos partes: por una parte el control de usuarios y por otra el cat\'alogo de servicios prestados por el cloud.\newline
 
-Para gestionar los usuarios, Keystone los reparte entre distintos proyectos o \emph{tenants}. A los usuarios, tal y como se hab\'ia adelantado en Horizon, se les otorgan roles que definen sus capacidades operativas con el cloud. Keystone distingue, por defecto, entre \emph{administrador} y \emph{miembro} de un tenant, pero tambi\'en da la posibilidad de crear roles con autorizaciones personalizadas.\newline
+\noindent Keystone is the central security check point and information repository storing information needed to access the cloud installed services. It verifies, before each request, user credentials and authorizations in OpenStack services. Keystone divides this functionality in two parts: on the one hand user control, on the other service catalog.
 
-Para organizar el cat\'alogo disponible Keystone define otros dos conceptos: \emph{servicios} y \emph{endpoints}. Un servicio catalogado por Keystone es una simple des\-crip\-ci\'on de una prestaci\'on del cloud a un usuario. La implementaci\'on concreta del servicio corre a cargo de la colecci\'on de endpoints a \'el asociada. Dicha colecci\'on contiene toda la informaci\'on necesaria para que los usuarios puedan consumir los servicios del cat\'alogo. La figura \ref{fig:secuenciais} contiene un diagrama de secuencia de ejemplo que muestra los mensajes intercambiados entre las distintas entidades que participan para consumir el servicio \texttt{compute}, invocando su operaci\'on \emph{crear nueva instancia}.\newline
+To deal with users, Keystone assigns them tenants or projects. Users, as discussed above, are granted the membership to a tenant and a service quota they will have to adhere to; they are also restricted to the tenant quota.
+
+To organize the catalog at hand Keystone defines two other concepts within the service catalog: \emph{Services} and \emph{endpoints}. A service in the catalog is a mere abstract description of an exploitable cloud feature by the user. The particular implementation of the service is managed by the set of endpoints associated to it. Said collection contains every piece of information that is required for users to consume the services. Figure \ref{fig:secuenciais} shows a Sequence Diagram portraying the interchanged messages between the different entities taking part to consume a service: \emph{Create a new instance}.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/013.pdf}
- \caption{Diagrama de Secuencia --- Crear instancia}
+ \caption{Sequence Diagram --- create instance}
 \label{fig:secuenciais}
 \end{center}
 \end{figure}
 
-Para facilitar el manejo de la seguridad, y ya que Horizon implementa s\'olo un subconjunto de la funcionalidad del cloud, Keystone instala una he\-rra\-mien\-ta CLI para interactuar con el servicio REST que define la ejecuci\'on de las operaciones administrativas. La invocaci\'on por l\'inea de comandos de \'ordenes de gesti\'on requiere conocer el token de administrador (\emph{admin token}), que habr\'a de ser convenientemente protegido, o bien hacer invocaciones con un usuario que posea el rol de ad\-mi\-nis\-tra\-dor. Por \'ultimo, a\~nadir que Keystone utiliza una base de datos para que la informaci\'on de acceso de los usuarios y del cat\'alogo de servicios del cloud sea persistente ---normalmente \texttt{MySQL}, en producci\'on, o \texttt{sqlite}.
-
+Stemming from the fact the Horizon exposes only a part of OpenStack functionality, to help dealing with security Keystone installs a CLI tool to interact with the REST service in charge of administrative operations. Issuing certain commands to Keystone through a terminal requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
 
 \section{Quantum}\label{sec:quantum}
-\noindent Quantum es el nuevo m\'odulo en OpenStack Folsom para gestionar el des\-plie\-gue de red virtual. En la versi\'on previa del cloud (Essex) se utilizaba un servicio embebido en el propio m\'odulo Compute (Network), que configuraba la red virtual pero de forma m\'as acoplada. El hecho de que haya aparecido un m\'odulo aislado para mantener la red no es casual, y es que OpenStack evoluciona dando especial \'enfasis a la modularidad de sus servicios. Como funciona de forma totalmente aut\'onoma, se podr\'ia dedicar un servidor al completo para manejar Quantum. Para cubrir su funcionalidad, Quantum se apoya en unos plugins y en otros servicios del anfitri\'on en el que resida.\newline
 
-Dos de los posibles plugins que pueden usarse en despliegues con Quantum son: \texttt{OpenVSwitch} y \texttt{LinuxBridge}. La configuraci\'on de la infraestructura de red virtual, tanto con OpenVSwitch como con LinuxBridge, est\'a cubierta con cierto detalle en el manual del administrador de Quantum para OpenStack Folsom \cite{quantumadminfolsom}. Quantum se vale, adicionalmente, de iptables para con\-fi\-gu\-rar el firewall y el enrutamiento de paqueter\'ia, y de \texttt{dnsmasq} para el \emph{DNS} (\emph{Domain Name Server}), el \emph{DHCP} (\emph{Dynamic Host Configuration Protocol}), y la \emph{NAT} (\emph{Network Address Translation}).\newline
+\noindent Starting in Folsom, Quantum is the module to manage virtual networking. It was introduced to separate the networking part from the computing part, held together in \texttt{Compute} module. Certainly, the fact that it had been refactored out demonstrates OpenStack's evolving model toward a more coherent less coupled functional allocation; and as it is independent, it could be configured in a dedicated node.
 
-La figura \ref{fig:desplieguequantum} muestra un ejemplo de topolog\'ia de red virtual en el que cada proyecto tiene asignado un router virtual particular. Adem\'as, a cada proyecto se le pueden adjudicar nuevos enrutadores que gestionar\'an las redes virtuales privadas asociadas. El solapamiento de IPs privadas en las subredes de cada router virtual est\'a permitido, como se observa en la figura. La IP p\'ublica (flotante) de cada router y de cada m\'aquina virtual ha de asignarse de la subred de la red externa (\texttt{30.0.0.0/22} en la figura). Por \'ultimo, apuntar que las direcciones de red \texttt{30.0.0.X} se corresponden con IPs p\'ublicas, y las \texttt{10.0.X.Y} con IPs privadas, esto es, no accesibles desde m\'as all\'a de cada router.\newline
+To bring virtual networking into existence Quantum banks on external plug-ins. Two of those plug-ins whose usage is covered in the official Quantum administrator manual (\cite{quantumadminfolsom}) are \texttt{OpenVSwitch} and \texttt{LinuxBridge}. Additionally, Quantum relies on iptables to configure routing rules and firewall, \texttt{dnsmasq} for the \emph{DNS}, the \emph{DHCP} and the \emph{NAT}.
+
+Figure \ref{fig:desplieguequantum} pictures a topology example of a virtual network. On it, \emph{30.0.0.X} represent public IPs and \emph{10.0.X.Y} private. This virtual network assigns a virtual router to each tenant but more could be added with ease. Private IP overlapping over different networks is possible as expected (\emph{10.0.0.2}). The routers public IPs --- they could be assigned more external interfaces --- must be taken from the external network (\emph{30.0.0.0}).
 
 \begin{figure}[tbh]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{imagenes/014.pdf}
- \caption{Ejemplo de despliegue avanzado de red virtual con Quantum}
+ \caption{Virtual network deployment with Quantum}
 \label{fig:desplieguequantum}
 \end{center}
 \end{figure}
 
-Este ejemplo representa un despliegue de red virtual de lo m\'as gen\'erico; es posible, no obstante, definir topolog\'ias menos complejas en caso de que no fuese necesaria la aparici\'on de un enrutador en cada proyecto.
-
-
 \section{Compute}\label{sec:compute}
-\noindent Compute es el m\'odulo central de OpenStack. Su cometido consiste en orquestar el funcionamiento global del cloud, delegando cada funci\'on concreta al servicio responsable. A trav\'es de la interacci\'on con el servicio compute, seremos capaces de concebir nuevas instancias de servidores virtuales, que tomar\'an prestados ciclos de CPU, memoria RAM, memoria de disco e interfaces de red, de la capa hardware subyacente. OpenStack Compute no incluye un paquete de virtualizaci\'on hardware. Su aproximaci\'on a esa necesidad consiste en delegar el aprovisionamiento de infraestructuta en alg\'un servicio vir\-tua\-li\-za\-dor al que tenga acceso, ya sea en el mismo nodo donde resida Compute o en otro. Para exponer este servicio de procesado bajo demanda, Compute define, adem\'as, una interfaz en forma de API REST para que los usuarios dirijan el ciclo de vida de las instancias dentro del cloud.\newline
 
-Para poner en marcha una instancia no s\'olo se requiere la colaboraci\'on del hipervisor. Previamente, Compute establecer\'a comunicaciones as\'incronas con el resto de los componentes del cloud para configurar la ejecuci\'on.
+\noindent Compute is the central module. Its duty entails orchestrating the global workings in the cloud, delegating each particular function to the service on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor found typically, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute).
+
+To create an instance in effect, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
 
 \begin{description}
  \item[Keystone:] coteja credenciales y autoriza peticiones.
