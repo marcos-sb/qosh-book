@@ -122,8 +122,8 @@ Ofrece soporte a una buena variedad de clases de im\'agenes y formatos de su con
  \item[Persistente:] vali\'endose de vol\'umenes de almacenamiento gestionados por Cinder con ayuda de \emph{LVM} (\emph{Logical Volume Manager}), OpenStack otorga la posibilidad de enganchar a las instancias, en caliente, vol\'umenes l\'ogicos de tama\~nos indeterminados y creados bajo demanda. Con este tipo de salvaguarda, se garantiza que la informaci\'on no se pierde al terminar la sesi\'on de ejecuci\'on. Sin embargo, este mecanismo de almacenamiento tiene una importante limitaci\'on y es que no es posible enganchar un mismo volumen l\'ogico a dos instancias al mismo tiempo. La alta disponibilidad o la seguridad de la informaci\'on ante fallo no est\'an implementadas directamente, ya que los datos van a residir en un \'unico punto. Podr\'ian superarse estas limitaciones definiendo alguna pol\'itica de copia de seguridad o alguna cofiguraci\'on \emph{RAID} (\emph{Redundant Array of Idependent Disks}) sobre los vol\'umenes ---no recomendable porque OpenStack cuenta con un m\'odulo a tal fin (Swift).
  \item[Seguro:] OpenStack Swift es el m\'odulo que permite la gesti\'on autom\'atica del almacenamiento distribuido de forma segura y permitiendo despliegues para alta disponibilidad. Utiliza la replicaci\'on controlada para establecer el marco de seguridad y la alta disponibilidad, combatiendo as\'i los problemas derivados de la fragilidad inherente a los discos duros. Swift se escuda en \texttt{rsync} para sincronizar las r\'eplicas sobre particiones \emph{XFS}.
 \end{description}
- 
- 
+
+
 \subsection{Cinder}\label{subsec:cinder}
 \noindent Cinder es el m\'odulo de OpenStack que maneja los dispositivos virtuales de almacenamiento en bloque; de funcionalidad similar a la del \emph{EBS} (\emph{Elastic Block Storage}) de Amazon. Cinder utiliza una implementaci\'on de \emph{iSCSI} (\texttt{open-iscsi}) y LVM para Linux para gestionar las operaciones sobre los vol\'umenes. La creaci\'on, el enganche y desacople y el borrado de los bloques de almacenamiento persistente se maneja desde Horizon directamente.\newline
 
