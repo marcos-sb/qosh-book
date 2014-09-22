@@ -75,7 +75,7 @@ To organize the catalog at hand Keystone defines two other concepts within the s
 \end{center}
 \end{figure}
 
-Stemming from the fact the Horizon exposes only a part of OpenStack functionality, to help dealing with security Keystone installs a CLI tool to interact with the REST service in charge of administrative operations. Issuing certain commands to Keystone through a terminal requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
+Stemming from the fact that Horizon exposes only a part of OpenStack functionality, Keystone includes a CLI tool to interact with the REST service in charge of administrative operations to help dealing with administrative operations. Issuing certain commands to Keystone through a terminal requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
 
 \section{Quantum}\label{sec:quantum}
 
@@ -97,15 +97,17 @@ Figure \ref{fig:desplieguequantum} pictures a topology example of a virtual netw
 
 \noindent Compute is the central module. Its duty entails orchestrating the global workings in the cloud, delegating each particular function to the service on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor found typically, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute).
 
-To create an instance in effect, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
+To create effectively create an instance, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
 
 \begin{description}
- \item[Keystone:] coteja credenciales y autoriza peticiones.
- \item[Glance:] selecciona la imagen que ha de ser arrancada.
- \item[Quantum:] otorga IPs privadas y p\'ublicas y controla el tr\'afico de red de la instancia.
- \item[Cinder:] maneja el almacenamiento en bloque y el enganche en caliente de vol\'umenes.
- \item[Qpid:] soporta el intercambio de mensajes con los APIs de Keystone, Quantum, Glance y/o Cinder.
+ \item[Keystone:] Matches supplied vs. stored credentials, clearing or refusing requests.
+ \item[Glance:] Finds the OS image that should be run.
+ \item[Quantum:] Provides private and public IPs and checks network flow to/from the instance.
+ \item[Cinder:] Drives block storage and so it is in charge of exposing \emph{hot-plugged} volumes into the instance.
+ \item[Qpid:] Enables message passing among the different modules.
 \end{description}
+
+It has been said throughout the text that if there is a something aligning the differing IaaS implementations is their flexibility. Users' computational needs vary with time, so it seems reasonable to think they will expect their virtual services to adapt to them. Hypervisors have fulfilled this behavior since their design, making them ideal matches to help serve infrastructure as a service. OpenStack nomenclature --- inspired by AWS' --- calls each possible particular VM specification a \emph{flavor}.
 
 Se ha venido diciendo a lo largo del texto que si algo alinea a los distintos cloud es su flexibilidad. Puesto que las necesidades computacionales de los usuarios var\'ian en funci\'on del tiempo, es necesario que, dentro de unos l\'imites, se les permita concretar las caracter\'isticas t\'ecnicas de las m\'aquinas virtuales. En OpenStack cada posible configuraci\'on instanciable, esto es, cada realizaci\'on concreta de la cantidad de recursos que temporalmente se expropian del anfitri\'on, se denomina \emph{flavor} ---siguiendo la nomenclatura de los AWS. De manera que se va a otorgar la posibilidad de que los usuarios autorizados puedan crear sus propios \emph{sabores} computacionales, definiendo el tama\~no del disco, el n\'umero de VCPUs, etc., sin ninguna dificultad, a trav\'es de Horizon.
 
