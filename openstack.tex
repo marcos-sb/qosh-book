@@ -97,7 +97,7 @@ Figure \ref{fig:desplieguequantum} pictures a topology example of a virtual netw
 
 \noindent Compute is the central module. Its duty entails orchestrating the global workings in the cloud, delegating each particular function to the service on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor found typically, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute).
 
-To create effectively create an instance, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
+To effectively create an instance, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
 
 \begin{description}
  \item[Keystone:] Matches supplied vs. stored credentials, clearing or refusing requests.
