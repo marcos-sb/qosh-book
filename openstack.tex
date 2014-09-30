@@ -75,11 +75,11 @@ To organize the catalog at hand Keystone defines two other concepts within the s
 \end{center}
 \end{figure}
 
-Stemming from the fact that Horizon exposes only a part of OpenStack functionality, Keystone includes a CLI tool to interact with the REST service in charge of administrative operations to help dealing with administrative operations. Issuing certain commands to Keystone through a terminal requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
+Stemming from the fact the Horizon exposes only a part of OpenStack functionality, to help dealing with security Keystone installs a CLI tool to interact with the REST service in charge of administrative operations. Issuing certain commands to Keystone through a terminal requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
 
 \section{Quantum}\label{sec:quantum}
 
-\noindent Starting in Folsom, Quantum is the module to manage virtual networking. It was introduced to separate the networking part from the computing part, held together in \texttt{Compute} module. Certainly, the fact that it had been refactored out demonstrates OpenStack's evolving model toward a more coherent less coupled functional allocation; and as it is independent, it could be configured in a dedicated node.
+\noindent Starting with Folsom, Quantum is the module to manage virtual networking. It was introduced to separate the networking part from the computing part, held together in \texttt{Compute} module. Certainly, the fact that it had been refactored out demonstrates OpenStack's evolving model toward a more coherent less coupled functional allocation; and as it is independent, it could be configured in a dedicated node.
 
 To bring virtual networking into existence Quantum banks on external plug-ins. Two of those plug-ins whose usage is covered in the official Quantum administrator manual (\cite{quantumadminfolsom}) are \texttt{OpenVSwitch} and \texttt{LinuxBridge}. Additionally, Quantum relies on iptables to configure routing rules and firewall, \texttt{dnsmasq} for the \emph{DNS}, the \emph{DHCP} and the \emph{NAT}.
 
@@ -97,34 +97,31 @@ Figure \ref{fig:desplieguequantum} pictures a topology example of a virtual netw
 
 \noindent Compute is the central module. Its duty entails orchestrating the global workings in the cloud, delegating each particular function to the service on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor found typically, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute).
 
-To effectively create an instance, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
+To create an instance in effect, Compute will communicate with other modules within the cloud to orchestrate the execution and, finally, it will pass the request to the most suitable cluster node's hypervisor --- most suitable according to the cloud-defined rule set --- that will bring up the VM. Some of the supporting services are described bellow.
 
 \begin{description}
- \item[Keystone:] Matches supplied vs. stored credentials, clearing or refusing requests.
- \item[Glance:] Finds the OS image that should be run.
- \item[Quantum:] Provides private and public IPs and checks network flow to/from the instance.
- \item[Cinder:] Drives block storage and so it is in charge of exposing \emph{hot-plugged} volumes into the instance.
- \item[Qpid:] Enables message passing among the different modules.
+ \item[Keystone:] Collates credentials y authorizes requests.
+ \item[Glance:] Selects the OS image that will be used to start the VM.
+ \item[Quantum:] Grants private and public IPs as well as manages instance network traffic.
+ \item[Cinder:] Manages block storage and on-line volume attachments.
+ \item[Qpid:] Handles message interchange between Keystone, Quantum, Glance and/or Cinder.
 \end{description}
 
-It has been said throughout the text that if there is a something aligning the differing IaaS implementations is their flexibility. Users' computational needs vary with time, so it seems reasonable to think they will expect their virtual services to adapt to them. Hypervisors have fulfilled this behavior since their design, making them ideal matches to help serve infrastructure as a service. OpenStack nomenclature --- inspired by AWS' --- calls each possible particular VM specification a \emph{flavor}.
-
-Se ha venido diciendo a lo largo del texto que si algo alinea a los distintos cloud es su flexibilidad. Puesto que las necesidades computacionales de los usuarios var\'ian en funci\'on del tiempo, es necesario que, dentro de unos l\'imites, se les permita concretar las caracter\'isticas t\'ecnicas de las m\'aquinas virtuales. En OpenStack cada posible configuraci\'on instanciable, esto es, cada realizaci\'on concreta de la cantidad de recursos que temporalmente se expropian del anfitri\'on, se denomina \emph{flavor} ---siguiendo la nomenclatura de los AWS. De manera que se va a otorgar la posibilidad de que los usuarios autorizados puedan crear sus propios \emph{sabores} computacionales, definiendo el tama\~no del disco, el n\'umero de VCPUs, etc., sin ninguna dificultad, a trav\'es de Horizon.
-
+As it has been discussed all along, if there is some trait that aligns different IaaS Cloud implementations is their flexibility. Users' computational needs are as diverse as they are changing and therefore they expect to be given the chance to define virtual infrastructure adapting to those needs. In OpenStack, each possible particular configuration instance will take its VCPU, RAM and VHDD from a cluster host, and the users will be allowed to shape those to their requirements with ease.
 
 \section{Glance}\label{sec:glance}
-\noindent Glance es el servicio de hospedaje de im\'agenes para OpenStack. Se pueden configurar m\'ultiples backends de datos para guardarlas como: Swift, Amazon S3, el sistema de ficheros local o una ubicaci\'on HTTP; lo que mantiene el nivel de flexibilidad a la par con los dem\'as m\'odulos. Glance se vale de Keystone para manejar el acceso y la seguridad de las im\'agenes y se comunica con Compute para ponerlas en ejecuci\'on bajo demanda.
-Ofrece soporte a una buena variedad de clases de im\'agenes y formatos de su contenedor; pero este hecho es meramente informativo para el cloud, ya que la capacidad o incapacidad de arrancar una instancia est\'a vinculada al hipervisor desplegado y no a Glance. Tambi\'en est\'a presente la habilidad de asociar metadatos a las im\'agenes en forma de pares \texttt{(clave, valor)}. Esta metainformaci\'on se utiliza para diferenciar distintas im\'agenes o para configurar el \emph{direct kernel boot} necesario para redimensionar el volumen ra\'iz al arrancar las im\'agenes en distintos sabores.
+\noindent Glance is OpenStack's OS image storage service. Glance may be configured to drive images stored in a myriad of backends, ranging from Swift to an HTTP-addressable location. As happens with every other OpenStack module, Glance relies on Keystone to grant access to the images, and coordinates its operation with Compute to put them in execution on demand.
 
+Glance supports a good number of image and container types --- this fact being merely informative to the Cloud framework as it is the hypervisor who would have to support the particular combination image type, container type ---, and they are stored as metadata linked to the image in Glance.
 
-\section{Almacenamiento}\label{sec:almacenamiento}
-\noindent OpenStack otorga tres opciones a la hora de elegir el tipo de almacenamiento:
+\section{Storage}\label{sec:almacenamiento}
+\noindent OpenStack provides three main options regarding storage types:
+
 \begin{description}
- \item[Vol\'atil:] las dimensiones del disco r\'igido sobre el que se dispone la ra\'iz del \'arbol de ficheros se fijan, en el momento de arrancar la m\'aquina virtual, a las marcadas por el sabor elegido. Los archivos contenidos en \'el son aquellos que aparecen en la definici\'on de la imagen del sistema almacenada en Glance. Las alteraciones de este sistema de ficheros no persisten entre ejecuciones de las instancias. Al ordenar la finalizaci\'on de la ejecuci\'on de un servidor virtual, se destruye el fichero temporal que reflejaba las modificaciones del usuario a dicho sistema de ficheros en esa ejecuci\'on concreta.
- \item[Persistente:] vali\'endose de vol\'umenes de almacenamiento gestionados por Cinder con ayuda de \emph{LVM} (\emph{Logical Volume Manager}), OpenStack otorga la posibilidad de enganchar a las instancias, en caliente, vol\'umenes l\'ogicos de tama\~nos indeterminados y creados bajo demanda. Con este tipo de salvaguarda, se garantiza que la informaci\'on no se pierde al terminar la sesi\'on de ejecuci\'on. Sin embargo, este mecanismo de almacenamiento tiene una importante limitaci\'on y es que no es posible enganchar un mismo volumen l\'ogico a dos instancias al mismo tiempo. La alta disponibilidad o la seguridad de la informaci\'on ante fallo no est\'an implementadas directamente, ya que los datos van a residir en un \'unico punto. Podr\'ian superarse estas limitaciones definiendo alguna pol\'itica de copia de seguridad o alguna cofiguraci\'on \emph{RAID} (\emph{Redundant Array of Idependent Disks}) sobre los vol\'umenes ---no recomendable porque OpenStack cuenta con un m\'odulo a tal fin (Swift).
- \item[Seguro:] OpenStack Swift es el m\'odulo que permite la gesti\'on autom\'atica del almacenamiento distribuido de forma segura y permitiendo despliegues para alta disponibilidad. Utiliza la replicaci\'on controlada para establecer el marco de seguridad y la alta disponibilidad, combatiendo as\'i los problemas derivados de la fragilidad inherente a los discos duros. Swift se escuda en \texttt{rsync} para sincronizar las r\'eplicas sobre particiones \emph{XFS}.
+ \item[Ephemeral:] The size of the drive hosting the root file system is set following the particular flavor parameters when the VM starts. The files contained in this file system are those present in the image file stored in Glance. Any alteration to this file system will only persist the execution of the VM. Any change on the image files is written temporarily to be discarded as soon as the VM is shut down.
+ \item[Block:] By making use of storage volumes managed by Cinder with \emph{LVM} (\emph{Logical Volume Manager}) OpenStack provides the ability to attach indeterminably-sized logical volumes to instances on-demand. This store kind guaranties that information is preserved between VM executions. However, this method carries an important handicap, that of being unable to attach a single volume to two different instances at the time. High availability or data safety on failure are not supported, as data is stored in a single place. A backup or RAID policies may be established to get over these limitations but they are discouraged as OpenStack has it own module to deal with them.
+ \item[Safe:] Swift manages a safe distributed storage banking on controlled replication allowing for high availability deployments that overcome hard drive's inherent fragility. Swift draws on \texttt{rsync} to synchronize \emph{XFS} partitions.
 \end{description}
-
 
 \subsection{Cinder}\label{subsec:cinder}
 \noindent Cinder es el m\'odulo de OpenStack que maneja los dispositivos virtuales de almacenamiento en bloque; de funcionalidad similar a la del \emph{EBS} (\emph{Elastic Block Storage}) de Amazon. Cinder utiliza una implementaci\'on de \emph{iSCSI} (\texttt{open-iscsi}) y LVM para Linux para gestionar las operaciones sobre los vol\'umenes. La creaci\'on, el enganche y desacople y el borrado de los bloques de almacenamiento persistente se maneja desde Horizon directamente.\newline
