@@ -43,14 +43,9 @@ Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high 
 
 From the figures it can be deduced that Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}), that MapReduce requires a DFS implementation to rely on and that inter-node communication is conveyed through \emph{SSH} tunnels over TCP. Every module includes a web server (\emph{Jetty}) to ease collecting and reporting status information
 
-
-
-De las figuras se deduce que Hadoop corre sobre una m\'aquina virtual Java, que MapReduce precisa un \emph{DFS} (\emph{Distributed File System}) subyacente, ya sea HDFS o alguno de los soportados, y que la comunicaci\'on internodal se realiza usando RPC sobre TCP/IP a trav\'es de un t\'unel \emph{SSH} (\emph{Secure SHell}). Todos los m\'odulos de Hadoop contienen un microservidor web (\emph{Jetty}), para facilitar la recolecci\'on de informaci\'on de estado de cada uno.
-
-
-
-
 \section{Hadoop Distributed File System}\label{sec:hdfs}
+\noindent HDFS has been designed to act as archival repository for huge masses of data whose main access pattern be \emph{write-one} \emph{read-many}.
+
 \noindent El sistema de ficheros distribuido de Hadoop (HDFS) est\'a dise\~nado para archivar gigantescas masas de datos (TeraBytes, PetaBytes, etc.), cuyo patr\'on primario de acceso sea \emph{escribir-una-vez}, \emph{leer-muchas}. No es requisito que la informaci\'on albergada sea accedida exclusivamente siguiendo este patr\'on, pero la implementaci\'on de HDFS potencia los accesos de este tipo. El hardware subyancente no tiene ning\'un requisito especial y HDFS lo transforma en un repositorio de datos robusto, tolerante a fallos, f\'acilmente escalable, con balanceo de carga autom\'atico, reducci\'on del ancho de banda de red consumido, etc. Sin embargo, dado que la capa f\'isica soporte no tiene ning\'un car\'acter fuera de lo com\'un ---normalmente clusters formados por nodos en red con almacenamiento local---, en HDFS confluyen algunas limitaciones operativas:
 
 \begin{itemize}
