@@ -1,37 +1,34 @@
 \chapter{Hadoop}\label{cap:hadoop}
-\hyphenation{MapReduce}
-\noindent Este cap\'itulo busca exponer con simplicidad los fundamentos que definen la arquitectura de Hadoop. Inicialmente se introducir\'an conceptos globales para ir ahondando progresivamente en sus capas constitutivas: el subsistema de procesado y el de almacenamiento.
+\noindent This chapter tries to expose with simplicity the defining fundamentals of Hadoop architecture. Initially abstract concepts will be introduced to give way to more particular and deep ideas that explore Hadoop implementation of the MapReduce model in two layers: the processing and the storage subsystem.
 
+\section{The Beginnings}\label{sec:origen}
+\noindent Hadoop roots its origins in \emph{Apache Nutch}, Mike Cafarella and Doug Cutting's implementation of an open source web index and search engine. Nutch project began in 2002. In spite of the Internet being notoriously smaller at the time, Nutch's underlying technology was unable to make it scale to manage the billion pages that comprised the \emph{old} Internet. But in 2003 Google publishes a research paper introducing \emph{GFS} (\emph{Google File System}) \cite{gfs}, a file system to be used across their clusters of commodity pcs that greatly simplified its deployment. Nutch will inherit a large part of the concepts detailed there translated in their own distributed file system implementation (\emph{NDFS}).
 
-\section{Origen}\label{sec:origen}
-\noindent Hadoop tiene sus or\'igenes en \emph{Apache Nutch}, una implementaci\'on de Doug Cutting y Mike Cafarella de un \'indice web y buscador de c\'odigo abierto. Nutch comenz\'o sus andaduras en 2002. A pesar de que el tama\~no de Internet era notoriamente inferior por aquel entonces, la tecnolog\'ia bajo Nutch ser\'ia incapaz de hacerlo escalar hasta indizar el bill\'on de p\'aginas de las que constaba la web. Pero en 2003 se publica un art\'iculo sobre \emph{GFS} (\emph{Google File System}) \cite{gfs} que supone un gran empuje hacia la simplificaci\'on de las tareas administrativas de sistemas de ficheros distribuidos y Nutch utilizaba estos conceptos. A ra\'iz de esta publicaci\'on, en 2004 deciden dise\~nar un sistema de ficheros propio para Nutch (\emph{NDFS} o \emph{Nutch Distributed File System}).\newline
+Also in 2004 appeared another publication \cite{googlemapreduce} that presented MapReduce, bringing about successive efforts to port Nutch algorithms to adapt to the emerging model. In mid 2005 most of Nutch code run following MapReduce guidelines over NDFS.
 
-Es tambi\'en en 2004 cuando aparece otra publicaci\'on \cite{googlemapreduce} que presenta MapReduce y provoca la sucesi\'on de esfuerzos por portar los algoritmos de Nutch al nuevo modelo MapReduce. A mediados de 2005, la mayor parte del c\'odigo de Nutch corr\'ia, siguiendo las directrices de MapReduce, sobre NDFS.\newline
+Both NDFS and Nutch MapReduce implementation were generic enough to be used without refactoring beyond web page indexing. In 2006 an unrelated project was constituted to extend Nutch's potentially reusable parts to widen their applicability context. This project was called Hadoop. In 2008 \emph{Yahoo!} announced that the index for their search engine in production was being continually refreshed by 10,000 Hadoop nodes. This same year Hadoop is brought out to the world becoming an Apache-backed project corroborating its success.
 
-Tanto NDFS como la implementaci\'on de MapReduce para Nutch eran lo suficientemente gen\'ericas como para ser utilizadas, sin demasiado esfuerzo de refactorizaci\'on, m\'as all\'a del mundo de la indexaci\'on de webs. En 2006 se constituye un proyecto independiente a Nutch, que recoge precisamente sus partes reutilizables para extender el \'ambito de aplicaci\'on. Ese proyecto es Hadoop. En 2008 \emph{Yahoo!} anuncia que su \'indice de b\'usquedas web en producci\'on estaba siendo generado por un cl\'uster Hadoop de 10.000 n\'ucleos. Ese mismo a\~no Hadoop se convierte en proyecto de Apache, confirmando su \'exito y aplicabilidad.\newline
+Nowadays, Hadoop is without doubt the MapReduce implementation most widely used by a broad range of companies.
 
-Hoy en d\'ia Hadoop es, sin lugar a duda, el framework MapReduce m\'as utilizado en el mundo por una variad\'isima clase de empresas.
-
-
-\section{Arquitectura global de Hadoop}\label{sec:arquitecturahadoop}
-\noindent La composici\'on b\'asica de Hadoop diferencia cuatro m\'odulos:
+\section{General Hadoop Architecture}\label{sec:arquitecturahadoop}
+\noindent Hadoop composition differentiates four modules:
 \begin{description}
- \item[Hadoop Common:] un m\'odulo general con scripts y herramientas de configuraci\'on.
- \item[Hadoop YARN:] un framework para la planificaci\'on de ejecuci\'on y gesti\'on de recursos en entornos distribuidos.
- \item[Hadoop MapReduce:] un m\'odulo de ejecuci\'on, basado en concreciones sobre Hadoop YARN, que implementa el modelo MapReduce.
- \item[HDFS:] un acople de persistencia en forma de sistema de ficheros distribuido.
+ \item[Hadoop Common:] A module containing the parts used across the implementation. It is mainly comprised of scripts and configuration tools.
+ \item[Hadoop MapReduce:] The module implementing the MapReduce processing model.
+ \item[Hadoop YARN:] A general purpose framework abstracted from Hadoop MapReduce. It is employed to manage resources and schedule executions in distributed environments.
+ \item[Hadoop DFS:] The distributed file system sustaining inputs and outputs from Hadoop clusters.
 \end{description}
 
-La arquitectura de Hadoop responde al arquetipo \emph{Maestro-Esclavo} donde se distinguen dos roles en cada cl\'uster: un maestro \'unico y varios esclavos. El reparto de estos roles, y por lo tanto la distribuci\'on de responsabilidades, corre a cargo del administrador del cl\'uster. Esta segregaci\'on de comportamiento fija los roles maestro y esclavos a los nodos de manera permanente. En caso de que fuese necesario alterar el despliegue, por mantenimiento por ejemplo, s\'olo se requerir\'ia reiniciar el cl\'uster al completo si hubiese que mo\-di\-fi\-car el nodo que soporta la ejecuci\'on del rol maestro ---\emph{nodo maestro}.\newline
+Hadoop architecture corresponds to the \emph{Master-Worker} archetype where two roles on each cluster appear: a unique Master and various Workers. These roles, and thus responsibilities, are fixed to different nodes by the cluster admin. If necessary, e.g. for maintenance, the admin may freely re-set the roles to new cluster nodes, only requiring job resubmissions if the Master role were reassigned.
 
-Nos centraremos casi exclusivamente en MapReduce y en HDFS para desarrollar la funcionalidad cubierta por Hadoop, al ser \'estos sus m\'odulos centrales en la ejecuci\'on. Hadoop YARN es un subsistema que se ha venido cocinando en paralelo con las \'ultimas versiones de Hadoop. Es el resultado de la separaci\'on entre planificaci\'on de tareas y procesado de las mismas ---ambas capacidades cubiertas inicialmente en el antiguo m\'odulo MapReduce--- para conferir a Hadoop un car\'acter m\'as gen\'erico. No obstante, no hablaremos del m\'odulo YARN al ser una tecnolog\'ia presente a partir de Hadoop \texttt{2.x}, y que por el momento (mayo 2013) es una prestaci\'on en estado \emph{alfa}. \newline
+This section will almost exclusively center around MapReduce and Hadoop DFS (HDFS) modules to expose the functionally covered with Hadoop. Hadoop YARN, as discussed, is a subsystem resulting from the isolation of scheduling and processing, both found together in the old --- pre Hadoop 2 --- MapReduce module, retaining task distribution and planning within YARN. This way, YARN is allowed to untie from Hadoop allowing for deployments where YARN orchestrates an implementation-agnostic working set. As of this writing, Hadoop YARN is still an alpha version.
 
-Las figuras \ref{fig:hadoopmapredhdfs} y \ref{fig:hadoopmapreddfs} exhiben una visi\'on de alto nivel de la arquitectura de Hadoop. La figura \ref{fig:hadoopmapredhdfs} contempla una instalaci\'on con el sistema de ficheros de Hadoop (HDFS). La figura \ref{fig:hadoopmapreddfs} muestra la distribuci\'on modular de una instalaci\'on Hadoop con otro sistema de ficheros distribuido. \newline
+Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high level vision of Hadoop architecture. Figure \ref{fig:hadoopmapredhdfs} shows an hypothetical deployment with HDFS. Figure \ref{fig:hadoopmapreddfs} shows a particular Hadoop installation with another supporting distributed file system.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.7\textwidth]{imagenes/015.pdf}
- \caption{Hadoop con la capa MapReduce sobre HDFS}
+ \caption{Hadoop over HDFS}
 \label{fig:hadoopmapredhdfs}
 \end{center}
 \end{figure}
@@ -39,10 +36,14 @@ Las figuras \ref{fig:hadoopmapredhdfs} y \ref{fig:hadoopmapreddfs} exhiben una v
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.7\textwidth]{imagenes/016.pdf}
- \caption{Hadoop con la capa MapReduce sobre un DFS soportado}
+ \caption{Hadoop over another DFS}
 \label{fig:hadoopmapreddfs}
 \end{center}
 \end{figure}
+
+From the figures it can be deduced that Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}), that MapReduce requires a DFS implementation to rely on and that inter-node communication is conveyed through \emph{SSH} tunnels over TCP. Every module includes a web server (\emph{Jetty}) to ease collecting and reporting status information
+
+
 
 De las figuras se deduce que Hadoop corre sobre una m\'aquina virtual Java, que MapReduce precisa un \emph{DFS} (\emph{Distributed File System}) subyacente, ya sea HDFS o alguno de los soportados, y que la comunicaci\'on internodal se realiza usando RPC sobre TCP/IP a trav\'es de un t\'unel \emph{SSH} (\emph{Secure SHell}). Todos los m\'odulos de Hadoop contienen un microservidor web (\emph{Jetty}), para facilitar la recolecci\'on de informaci\'on de estado de cada uno.
 
