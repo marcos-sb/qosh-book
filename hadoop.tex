@@ -41,49 +41,44 @@ Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high 
 \end{center}
 \end{figure}
 
-From the figures it can be deduced that Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}), that MapReduce requires a DFS implementation to rely on and that inter-node communication is conveyed through \emph{SSH} tunnels over TCP. Every module includes a web server (\emph{Jetty}) to ease collecting and reporting status information
+From the figures it can be deduced that Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}), that MapReduce requires a DFS implementation to rely on and that inter-node communication is conveyed through \emph{SSH} tunnels over TCP. Every module includes a web server (\emph{Jetty}) to ease collecting and reporting status information.
 
 \section{Hadoop Distributed File System}\label{sec:hdfs}
-\noindent HDFS has been designed to act as archival repository for huge masses of data whose main access pattern be \emph{write-one} \emph{read-many}.
-
-\noindent El sistema de ficheros distribuido de Hadoop (HDFS) est\'a dise\~nado para archivar gigantescas masas de datos (TeraBytes, PetaBytes, etc.), cuyo patr\'on primario de acceso sea \emph{escribir-una-vez}, \emph{leer-muchas}. No es requisito que la informaci\'on albergada sea accedida exclusivamente siguiendo este patr\'on, pero la implementaci\'on de HDFS potencia los accesos de este tipo. El hardware subyancente no tiene ning\'un requisito especial y HDFS lo transforma en un repositorio de datos robusto, tolerante a fallos, f\'acilmente escalable, con balanceo de carga autom\'atico, reducci\'on del ancho de banda de red consumido, etc. Sin embargo, dado que la capa f\'isica soporte no tiene ning\'un car\'acter fuera de lo com\'un ---normalmente clusters formados por nodos en red con almacenamiento local---, en HDFS confluyen algunas limitaciones operativas:
+\noindent HDFS has been designed to act as archival repository for huge masses of data whose main access pattern be \emph{write-one} \emph{read-many}. While it is no requisite for a data query to follow this access pattern, HDFS performance shines with read queries in batch mode. The underlying infrastructure, again, is composed by commodity pcs that HDFS manages to transform into a reliable, scalable, fault tolerant, self-balancing and network traffic reducing data store. Yet, as individual nodes are regular pcs, in HDFS converge some operating limitations:
 
 \begin{itemize}
- \item Alta latencia de acceso al dato. La m\'axima de HDFS es priorizar las lecturas grandes, y as\'i se obtienen tiempos de acceso elevados en favor de un mayor ancho de banda.
- \item Alta latencia de escritura de ficheros de peque\~no tama\~no. Derivado de la primera limitaci\'on al tener que invalidar multitud de bloques de disco, en el peor caso uno por fichero, y redistribuir las versiones actualizadas en el cl\'uster.
- \item No se soportan ni m\'ultiples procesos escritores en un solo fichero ni escrituras a disco que no sean \emph{append} ---escrituras por el final. HDFS no es un sistema de ficheros \emph{POSIX} (\emph{Portable Operating System Interface}), s\'olo implementa la parte necesaria para optimizar el procesado de datos distribuidos, siguiendo el comentado patr\'on de acceso.
+ \item High data access time. HDFS prioritizes large reads in batches and thus, reading small files is generally discouraged. As complement though, HDFS delivers \emph{very} high throughput by leveraging parallel reads on the cluster.
+ \item High data writing time on many small files. Writing a file changes a block. Every file that be smaller than the HDFS block size must be persisted in a single block. That changed block must be send out across the network to keep the file system consistently updated. Thus, appending to many files requires updates in many blocks that would require synchronizing over the network.
+ \item Multiple writes to the same file or ``\emph{not-append}'' operations are not supported. HDFS is not a \emph{POSIX}-compilant file system implementing only a set of operations to try to maximize data throughput in distributed environments.
 \end{itemize}
 
-Para organizar el almacenamiento, HDFS utiliza el concepto de bloque como en los sistemas de ficheros tradicionales. Los bloques HDFS abstraen la organizaci\'on concreta de los datos en disco con una doble finalidad: 
+To organize storage, HDFS takes from traditional operating systems the concept of block: an abstraction of the particular drive structure with a double purpose:
+
 \begin{description}
- \item[Reducir la complejidad:] la escritura de un bloque comprende almacenar los datos y gestionar los metadatos asociados, como la informaci\'on de localizaci\'on del dato. Al utilizar el bloque como unidad organizativa, la expresi\'on de la localizaci\'on de los datos se simplifica y puede ser gestionada por otra entidad ---lo que favorece la paralelizaci\'on.
- \item[Aumentar la flexibilidad:] nada impide que un fichero sea mayor que cual\-quier disco del cl\'uster.
+ \item[Lowering DFS complexity:] Writing a block comprises storing data and meta-data, and handling information related to locate those data on disk. Using the block as the minimum organizational structure simplifies location expressions.
+ \item[Incrementing flexibility:] files are free to grow over the size of an HDFS block.
 \end{description}
 
-Para disponer los bloques en los discos locales de cada nodo del cl\'uster, HDFS se vale de una serie de subsistemas: el \emph{DataNode} y el \emph{NameNode}. Adem\'as, como soporte, las \'ultimas versiones de Hadoop permiten desplegar opcionalmente un \emph{Backup Node} y un \emph{Checkpoint Node}.
+To lay local drive blocks in position, HDFS makes use of two processes: the \emph{DataNode} and the \emph{NameNode}. Besides, as support, from Hadoop 0.21.0 onward it is permitted the optional deploying of a \emph{Backup Node} and a \emph{Checkpoint Node} in the same cluster.
 
-
-\subsection{Roles de los nodos}\label{subsec:rolesnodos}
-\noindent La figura \ref{fig:desplieguehdfs} muestra un despliegue de HDFS con la nomenclatura habitual en capas. En l\'inea punteada aparecen representados tanto el Backup Node como el Checkpoint Node para expresar su car\'acter opcional.
+\subsection{Node Roles}\label{subsec:rolesnodos}
+\noindent Figure \ref{fig:desplieguehdfs} shows a layered down HDFS deployment. In dotted line appear both the Backup Node and the Checkpoint Node.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.85\textwidth]{imagenes/017.pdf}
- \caption{Despliegue t\'ipico de HDFS}
+ \caption{Typical HDFS deployment}
 \label{fig:desplieguehdfs}
 \end{center}
 \end{figure}
 
-
 \subsubsection{DataNode}\label{subsubsec:datanode}
-\noindent Son aquellos nodos del cl\'uster encargados de almacenar en sus discos locales los bloques que contienen los datos de los ficheros del HDFS. Cada vez que escriben un bloque, porque se est\'e a\~nadiendo o actualizando, se comunican con su NameNode asociado para que \'este lleve la cuenta de los cambios seg\'un se van produciendo.
-
+\noindent DataNodes are those processes within nodes that handle the storage of HDFS blocks in their local drives. Every time a write to a file in a block succeeds, the DataNode in charge of the operation signals its supervising NameNode so that it could keep track the modifications to the DFS as they happen.
 
 \subsubsection{NameNode}\label{subsubsec:namenode}
-\noindent El NameNode es el encargado de manejar el espacio de nombres del cl\'uster, gestionando el \'arbol del sistema de ficheros y los metadatos que hacen posible recopilar la informaci\'on almacenada. Es una parte tan indispensable para el acceso a los datos que, si dejase de funcionar permanentemente el nodo que presta el servicio, toda la informaci\'on se perder\'ia, ya que ser\'ia inviable saber la relaci\'on entre bloques y ficheros. Por ello, el NameNode se refuerza con nodos de puntos de restauraci\'on (Checkpoint Nodes) o con un nodo de copia de seguridad (Backup Node).\newline
+\noindent The NameNode is the process appointed to deal with the name space of the cluster. It has to handle the file system tree and meta-data that make possible recovering data from the DFS. It is such an important process that if it went down, every piece of data in HDFS would get lost, rendering impossible to match files with their container blocks. Therefore, the NameNode is seldom deployed with no Checkpoint Nodes or Backup Nodes in case the HDFS data were not stored elsewhere.
 
-La informaci\'on sobre el sistema de ficheros, los metadatos, se guarda en el NameNode de forma persistente, tanto en memoria como en disco, en dos ficheros: uno contiene la imagen del espacio de nombres (\texttt{fsimage}) y el otro el \emph{log} de modificaciones de la imagen (\texttt{edits}). Cuando el NameNode arranca, crea una imagen nueva resultado de la uni\'on de la \'ultima imagen almacenada y el log de cambios registrados en ella. A medida que los DataNodes escriben en el HDFS, van enviando las modificaciones pertinentes al NameNode que mantiene actualizados los cambios en el log, pero no modifica la imagen creada al arrancar. El despliegue t\'ipico del NameNode, para que la escritura del log sea segura, incluye actualizaciones de las copias del \emph{log} en el sistema de ficheros local, en la memoria del NameNode y en un NFS remoto.
-
+The information about the file system, meta-data, is persisted to the NameNode both in memory and disk. In this latter form, meta-data is managed in two files: one contains the name space of the file system as an image (\texttt{fsimage}), the other progressively appends the changes to the fsimage (\emph{edits}) as a log. When the DataNode starts, it compiles an fsimage afresh by merging the existing fsimage with the edits file. As soon as changes to the HDFS are reported from the NameNodes, the DataNode will update the edits log but without touching the fsimage. In a typical secured deployment, the edits file is kept in memory within the NameNode host computer, on the local file system and remotely via NFS.
 
 \subsubsection{Checkpoint Node}\label{subsubsec:checkpointnode}
 \noindent El fin que se persigue agregando un nodo de este tipo es mitigar los problemas relacionados con la ca\'ida de operaci\'on del NameNode. Peri\'odicamente, el Nodo de Checkpoint va generando puntos de restauraci\'on, o \emph{checkpoints}, siguiendo la misma estrategia que en el NameNode, es decir, usando \texttt{fsimage} y \texttt{edits}. Cada cierto tiempo, se descargar\'an ambos ficheros desde el NameNode y se fundir\'an, formando una nueva imagen actualizada que ser\'a transferida al NameNode. Cuando haya finalizado con \'exito la operaci\'on, el NameNode tendr\'a que purgar la imagen antigua e iniciar un nuevo fichero de log que albergue los cambios que se vayan sucediendo.
