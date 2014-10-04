@@ -104,7 +104,7 @@ The way in which the NameNode calculates the distance among replicas lacks an  i
 
 HDFS overcomes this limitations by mapping every IP address to a tuple with as many components as levels there were in the network --- typically three-tuples \emph{(data center, rack, node)}. Figure \ref{fig:distnodos} shows the most common values of the replica distance. With the help of the figure the procedure to get to $d=4$ will be succinctly explained.
 
-The blue node holds the original block and the yellow one --- pointed by the $d=4$-labeled edge --- a replica. Both blocks are stored in nodes within the same data center but in different racks, thus, their nearest common ancestor gateway would be the one managing the routing between those two racks. Besides, every rack has an internal gateway that must be traversed in order for the internal traffic to exit the rack. So, each node would have to take \emph{2 steps} to get to their common gateway --- from node to \emph{in-rack} gateway to \emph{out-rack} gateway --- coming to \emph{4 steps}.
+The blue node holds the original block and the yellow one --- pointed by the $d=4$-labeled edge --- a replica. Both blocks are stored in nodes within the same data center but in different racks, thus, their nearest common ancestor gateway would be the one managing the routing between those two racks. Besides, every rack has an internal gateway that must be traversed in order for the internal traffic to exit the rack. So, each node would have to take \emph{2 steps} to get to their common gateway --- from node to \emph{in-rack} gateway to \emph{off-rack} gateway --- coming to \emph{4 steps}.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -115,31 +115,29 @@ The blue node holds the original block and the yellow one --- pointed by the $d=
 \end{figure}
 
 \subsubsection{Replication}\label{subsubsec:replicacionbloques}
-\noindent La replicaci\'on es una t\'ecnica transparente al usuario y controlada por el NameNode que, para ser explotado en \'optimas condiciones, deber\'ia tener conocimiento de la distancia internodal. El grado de separaci\'on entre dos r\'eplicas es directamente proporcional al grado de robustez que aporta la copia ---la tolerancia a fallo--- e inversamente proporcional a la eficiencia de transmisi\'on por red, puesto que el ancho de banda disponible para mover un bloque entre dos centros de datos, ser\'a menor que para gestionar la r\'eplica de modo local al nodo, como ya hemos indicado. De tal manera que si se produjese la ca\'ida de un computador, la probabilidad de propagaci\'on de esa ca\'ida disminuye a medida que nos alejamos del nodo problem\'atico ---imaginemos una inundaci\'on del centro de datos, por ejemplo.\newline
+\noindent Replication is a NameNode-controlled technique that relies on knowing the network topology to structure hierarchically the nodes in the cluster. Together with replica distance the NameNode is capable of enforcing a policy that balances data safety and throughput. What follows is the description of the method to distribute replicas over the cluster.
 
-La estrategia concreta que sigue HDFS consiste en colocar la primera r\'eplica en el mismo nodo que el cliente del sistema de ficheros, si \'este pertenece al cl\'uster de almacenamiento ---una aplicaci\'on cliente corriendo en un nodo del cl\'uster HDFS, por ejemplo. En caso de que el cliente sea externo al cl\'uster, se elige un nodo al azar, teniendo en cuenta su carga computacional ---prio\-ri\-zan\-do los de menor carga. La segunda r\'eplica se coloca fuera del rack en el que se encuentre la primera copia; el rack concreto se elige al azar. La tercera se emplaza en el mismo rack que la segunda copia pero en un nodo diferente, de nuevo eligiendo al azar y balanceando carga. Las r\'eplicas sucesivas ---el factor de replicaci\'on se controla en el fichero de despliegue de HDFS--- se env\'ian a nodos, siempre diferentes, de este \'ultimo rack.\newline
+When a new block is written to HDFS --- or when an existing one is appended new data --- a configured number of replicas have to be made and distributed. By default, the NameNode will maintain updated three replicas of each block. The first block is placed in a node at random prioritizing those not too full nor too busy. Then, the first replica is stored in the same node as the original block. The second replica is sent off-rack to a node at random, and finally, the third replica is stored in the same rack as second but in a different node. If the \emph{replica factor} --- the total number of replicas every block will have --- were made higher, the successive replicas would be placed, again, in the same rack as the second one but in different nodes whenever possible.
 
-La mec\'anica descrita aporta el equilibrio deseable entre tolerancia a fallo (ya que habr\'a copias de cada bloque en dos racks distintos), ancho de banda consumido (ya que la escritura de cada bloque s\'olo atraviesa un \emph{switch} o enrutador y las copias sucesivas se hacen dentro del mismo rack), rendimiento de lectura (al poder elegir entre dos racks ante cada petici\'on de lectura de un bloque) y distribuci\'on equilibrada de los bloques en el cl\'uster (que realiza HDFS al ejecutar el m\'etodo descrito). La figura \ref{fig:repbloque} muestra un ejemplo de replicaci\'on con factor 3 en un solo centro de datos. El n\'umero entre corchetes indica el orden de creaci\'on de cada copia; el bloque original, recientemente actualizado o creado, es el azul.
+This method provides the desirable equilibrium between fault tolerance (by assuring two copies of a block exist in different racks), consumed bandwidth (writing a new block would only need replicas to go through a single gateway as subsequent replicas are made within the rack), read performance (making it possible for every read request to be fulfilled from nodes in two racks) and balanced data distribution by executing the process just described. Figure \ref{fig:repbloque} exemplifies a factor 3 replication. The number in brackets indicates the order in which the replicas where created. The original block is the blue-colored one.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.75\textwidth]{imagenes/019.pdf}
- \caption{Ejemplo de replicaci\'on de un bloque, factor 3}
+ \caption{Replication factor 3}
 \label{fig:repbloque}
 \end{center}
 \end{figure}
 
 
 \section{Hadoop MapReduce}\label{sec:hadoopmapred}
-\noindent En un cl\'uster t\'ipico sobre HDFS se dispone la capa de operaci\'on de Hadoop, Hadoop MapReduce, que lleva a cabo la ejecuci\'on de los trabajos de mapeo y reducci\'on enviados al framework. Habiendo ya introducido las bases del paradigma MapReduce, corresponde ahora especificar aquellas desviaciones concretas de la implementaci\'on en Hadoop. Como era esperable, Hadoop MapReduce se basa en los principios expuestos en el art\'iculo de Google \cite{googlemapreduce} en cuanto a reparto de tareas y gesti\'on de fallos. Su arquitectura de alto nivel no dista mucho de la observada en la capa HDFS y as\'i se distinguen los roles \emph{maestro} y \emph{esclavo}.\newline
+\noindent In a typical Hadoop deployment, the execution module is lied over HDFS. This execution module is basically an implementation of the ideas exposed in the Google paper on MapReduce as a new programming paradigm \cite{googlemapreduce}. The core ideas that have been discussed for HDFS hold in this section, but with a different flavor. Hadoop MapReduce architecture is also based on the Master-Worker model and so appear two roles: a Master and a Worker.
 
-Por una parte, aparece el \emph{JobTracker}, encargado de planificar el reparto de las tareas a los nodos del cl\'uster; por la otra, el \emph{TaskTracker}, que ejecuta las tareas en los nodos como funciones Map y Reduce.\newline
+The Master role is functionally covered by a process called the \emph{JobTracker}, whose main responsibility is task scheduling to workers. Complementarily, the worker role is implemented in the \emph{TaskTracker} which will actually execute the individual tasks reporting their progress back to the JobTracker.
 
-Igual que su sistema de ficheros distribuido, Hadoop MapReduce est\'a escrito en Java.
-
-
-\subsection{Roles de los nodos}\label{subsec:rolesnodosmapred}
-\noindent La figura \ref{fig:desplieguehadoopmapred} representa un despliegue t\'ipico de Hadoop MapReduce en un cl\'uster, utilizando HDFS como sistema de ficheros distribuido soporte. Para completar la \emph{fotograf\'ia} habr\'ia que incluir los nodos responsables de gestionar el HDFS ---NameNode, Checkpoint Node y Backup Node--- omitidos por claridad.
+\subsection{Node Roles}\label{subsec:rolesnodosmapred}
+\noindent
+\noindent La figura \ref{fig:desplieguehadoopmapred} representa un despliegue t\'ipico de Hadoop MapReduce en un cl\'uster, utilizando HDFS como sistema de ficheros distribuido soporte. Para completar la \emph{fotograf\'ia} habr\'ia que incluir los nodos responsables de gestionar el HDFS --- NameNode, Checkpoint Node y Backup Node --- omitidos por claridad.
 
 \begin{figure}[tbp]
 \begin{center}
