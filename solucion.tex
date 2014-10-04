@@ -1,14 +1,13 @@
-\chapter{Cloud para aplicaciones MapReduce}\label{cap:solucion}
-\noindent Este cap\'itulo presenta la soluci\'on que combina las capacidades computacionales de OpenStack y de Hadoop. Se ha elegido la metodolog\'ia \emph{Top-Down} para explorar el problema y del mismo modo se expone a continuaci\'on: avanzando desde lo general hacia lo concreto.
+\chapter{A Private Cloud for MapReduce Applications}\label{cap:solucion}
+\noindent This chapter introduces a novel solution combining the virtual infrastructure managed with OpenStack and the Hadoop implementation of MapReduce to conform a powerful computational tandem. \emph{qosh}, as this project has been called, will be described along this section moving from architecture to implementation.
 
-
-\section{Dise\~no}\label{sec:diseno}
-\noindent La figura \ref{fig:arquitecturaglobal} muestra una visi\'on de alto nivel del entorno de ejecuci\'on del proyecto. En la parte derecha, sobre Fedora 17, se representa el componente de interacci\'on con el usuario: una interfaz web que abstrae la dificultad de configuraci\'on del cl\'uster virtual que soporta la ejecuci\'on de trabajos MapReduce. Como ya sabemos, la primera parte corre por cuenta de OpenStack, que genera la infraestructura virtual, y la segunda parte la gestiona Hadoop. La interfaz se hace cargo de asimilar la configuraci\'on computacional requerida por el usuario en cada trabajo, de establecer el marco de ejecuci\'on y de recoger los resultados producidos por Hadoop MapReduce al concluir el procesado.\newline
+\section{Architecture}\label{sec:diseno}
+\noindent Figure \ref{fig:arquitecturaglobal} shows a high level portrait of qosh execution environment. The component that acts as interface between system and user is displayed on the right end. It abstracts the inherent difficulty in configuring the job execution context and in deploying the virtual cluster. Furthermore, qosh will keep track of submitted jobs, MapReduce \texttt{jar} files, input data and output results, with no need to walk the HDFS to search for data.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.65\textwidth]{imagenes/021.pdf}
- \caption{Arquitectura global}
+ \caption{Global Architecture}
 \label{fig:arquitecturaglobal}
 \end{center}
 \end{figure}
