@@ -12,83 +12,78 @@
 \end{center}
 \end{figure}
 
-Se determina que el hardware soporte de la primera versi\'on del proyecto sea un computador personal para agilizar el desarrollo. Como muestra la figura \ref{fig:arquitecturaglobal}, sobre el hardware se instala el sistema operativo (Fedora 17) y sobre \'el OpenStack Folsom. No obstante, ha de tenerse en cuenta que ser\'ia \'optimo permitir que la interfaz pudiese gestionar ejecuciones MapReduce en un cloud remoto. As\'i estar\'iamos flexibilizando al m\'aximo el aprovisionamiento de infraestructura virtual que otorgan los cloud, sin estar limitados por las capacidades que pudiesen presentar nuestras instalaciones locales. En esta fase de dise\~no de alto nivel no nos centraremos en elaborar esa idea, pero s\'i es interesante que la tengamos presente. \newline
+To streamline development, it is determined that the very first qosh version be tested on a personal computer. As shown on figure \ref{fig:arquitecturaglobal}, Fedora Linux is installed atop the hardware and OpenStack Folsom set up within. qosh will draw on the infrastructure provided by the local OpenStack configuration to deploy virtual Hadoop clusters. While it would be better to make qosh more flexible allowing for remote infrastructure consumption, it would also become harder to test.
 
-La figura \ref{fig:arquitecturadetalle} representa la ampliaci\'on de los detalles de dise\~no de alto nivel expuestos en la figura \ref{fig:arquitecturaglobal}. La m\'aquina virtual contiene la instalaci\'on de Hadoop 1.0.4. Es gestionada por OpenStack y se ejecuta a cargo de KVM, el hipervisor seleccionado. Como se ve en la figura, se ha elegido el propio DFS de Hadoop (HDFS) para almacenar los datos de entrada y de salida del cl\'uster mientras no se hayan transferido al controlador del cloud. Recordemos que estamos hablando del almacenamiento vol\'atil de los cloud, es decir, toda informaci\'on que no haya sido extra\'ida de las m\'aquinas virtuales se perder\'a al concluir su ejecuci\'on. De modo que es nuestra tarea manejar la informaci\'on de salida; se ha decidido que sea almacenada en el nodo que sirva las p\'aginas web ---el nodo que ejecute Django.\newline
+Figure \ref{fig:arquitecturadetalle} shows a more detailed view on qosh design details. The VM contains a Hadoop installation ready to be put to use as soon as it was started. The VM life cycle is managed by OpenStack and its execution environment shaped by KVM, the chosen hypervisor. Besides, HDFS has been used as temporal persistence layer while the results are not send back to the controller --- the same machine in this testing environment. It shall be recalled that even though HDFS is a steady data store, the Hadoop VMs are created and removed for every work flow execution effectively destroying HDFS data at the end of processing each job. So, it is qosh's job to orchestrate data extraction before shutting down the virtual cluster.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.85\textwidth]{imagenes/022.pdf}
- \caption{Arquitectura global en detalle}
+ \caption{Detailed global architecture}
 \label{fig:arquitecturadetalle}
 \end{center}
 \end{figure}
 
-La figura \ref{fig:arquitecturainterfaz} contiene la visi\'on de alto nivel de los distintos m\'odulos participantes en la orquestaci\'on de las ejecuciones.
+Figure \ref{fig:arquitecturainterfaz} shows the modular decomposition of qosh orchestration module.
 
 \begin{figure}[bp]
 \begin{center}
 \includegraphics[width=0.8\textwidth]{imagenes/023.pdf}
- \caption{Composici\'on modular de la interfaz}
+ \caption{Core qosh modular decomposition}
 \label{fig:arquitecturainterfaz}
 \end{center}
 \end{figure}
 
 \begin{description}
- \item[Compute:] es el cliente de acceso que se encarga de concretar toda interacci\'on con el API REST de OpenStack, desacoplando el resto del proyecto del cloud concreto que genere la infraestructura virtual.
- \item[Django:] es un framework escrito en Python para crear y mantener sitios web completos.
- \item[Fabric:] es una librer\'ia Python (2.5+) y herramienta CLI para facilitar y mejorar el uso de SSH para el despliegue de aplicaciones o la ejecuci\'on de tareas de administraci\'on de sistemas.
+ \item[Compute:] Acts as client to OpenStack REST API. It handles every interaction with the cloud decoupling qosh fromt the particular IaaS Cloud.
+ \item[Django:] Is used in qosh to let users manage their MapReduce executions with ease via a web interface.
+ \item[Fabric:] Is the Python library included in qosh to configure the virtual cluster deployment and destruction.
 \end{description}
 
+\subsection{Design Diagrams}\label{subsec:diagramasaltonivel}
+\noindent Below are shown the design diagrams that make up the section on high level overview of the project.
 
-\subsection{Diagramas de dise\~no}\label{subsec:diagramasaltonivel}
-\noindent A continuaci\'on se muestran los diagramas que completan la secci\'on de comentarios del dise\~no de alto nivel del proyecto.
-
-
-\subsubsection{Componentes de Django}\label{subsubsec:componentesdjango}
-\noindent La figura \ref{fig:instalaciondjango} muestra los m\'odulos adyacentes a Django que se han seleccionado para apoyar su ejecuci\'on.
+\subsubsection{Django Components}\label{subsubsec:componentesdjango}
+\noindent Figure \ref{fig:instalaciondjango} portrays modules adjacent to Django to support its operation.
 
 \begin{figure}[bp]
 \begin{center}
 \includegraphics[width=0.23\textwidth]{imagenes/024.pdf}
- \caption{Instalaci\'on concreta de Django}
+ \caption{Django setup}
 \label{fig:instalaciondjango}
 \end{center}
 \end{figure}
 
 \begin{description}
- \item[Apache httpd:] conocido servidor web seguro, eficiente y extensible.
- \item[memcached:] m\'odulo de \emph{caching} utilizado extensamente en distintos \'ambitos. Django se vale de \'el para acelerar la carga de p\'aginas y sesiones de usuario.
- \item[MySQL:] una de las implementaciones de base de datos relacional m\'as utilizadas. Se acopla a Django para que la informaci\'on de los usuarios registrados en el cloud, sus sesiones en ejecuci\'on y los datos relacionados con todas las peticiones de procesado de trabajos MapReduce sea persistente.
+ \item[Apache httpd:] Relied on to manage user interaction with OpenStack Dashboard, it may also be used to with qosh web interface. Initially, qosh depends on Python web server module to handle user requests, but \emph{httpd} might be easily configured.
+ \item[memcached:] Is employed to cache web pages in order to speedup load times.
+ \item[MySQL:] Chosen relational DBMS to store job meta-data.
 \end{description}
 
 
-\subsubsection{Diagrama de Casos de Uso}\label{subsubsec:casosuso}
-\noindent La figura \ref{fig:casosuso} contiene el conjunto de casos de uso del proyecto. Refleja los cinco agentes fundamentales que interact\'uan en el sistema. Aqu\'i se pone de manifiesto la necesidad de tener una sesi\'on iniciada contra el servidor de la interfaz para interactuar con ella.
+\subsubsection{Use Cases Diagram}\label{subsubsec:casosuso}
+\noindent Figure \ref{fig:casosuso} displays the set of use cases that have been considered for qosh. It reflects the five fundamental agents comprising the system.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/025.pdf}
- \caption{Diagrama de Casos de Uso}
+ \caption{Use Cases Diagram}
 \label{fig:casosuso}
 \end{center}
 \end{figure}
 
+\subsubsection{Machine State Diagram}\label{subsubsec:navegacion}
+\noindent Figure \ref{fig:navegacion} presents a summary on the navigation flow across the web interface. An example interaction is subsequently described.
 
-
-\subsubsection{Diagrama de M\'aquina de Estados}\label{subsubsec:navegacion}
-\noindent La figura \ref{fig:navegacion} representa el flujo de navegaci\'on por la interfaz web mediante un diagrama de M\'aquina de Estados. Analicemos, fij\'andonos en la figura, una interacci\'on del usuario con el sistema.\newline
-
-Inicialmente, al usuario se le presenta la p\'agina de \emph{Login} para que pueda conectarse. Si las credenciales que aporta son correctas, y lo ser\'an si el usuario est\'a dado de alta en OpenStack ---el login se delega en el sistema de autenticaci\'on de OpenStack---, se le presenta la p\'agina \emph{Principal}. Desde ah\'i podr\'a \emph{Configurar trabajo} o acceder al \emph{Historial} de trabajos en\-via\-dos. Sin duda, la parte gruesa del proceso reside en la transici\'on \emph{Enviar trabajo} que pondr\'a en marcha la ejecuci\'on del trabajo definido.
+Initially, the user is presented the \emph{Login} page so that he/she could log into qosh. If the supplied credentials were cleared --- the user must be previously registered in Keystone as user/pass is shared with qosh ---, the \emph{Main} page is shown. From there the user may \emph{Configure Job} or go over the \emph{Job History} to get some \emph{Job Details}.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/026.pdf}
- \caption{M\'aquina de Estados de la interfaz web}
+ \caption{Web interface transitions}
 \label{fig:navegacion}
 \end{center}
 \end{figure}
-
 
 \subsubsection{Diagrama de Clases --- M\'odulo Compute}\label{subsubsec:diagramaclasescompute}
 \noindent La figura \ref{fig:diagramaclasescompute1} muestra un peque\~no Diagrama de Clases que describe las relaciones del cliente de acceso al API REST con algunos m\'odulos de Fabric y Python.
