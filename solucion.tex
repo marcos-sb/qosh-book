@@ -85,83 +85,78 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \end{center}
 \end{figure}
 
-\subsubsection{Diagrama de Clases --- M\'odulo Compute}\label{subsubsec:diagramaclasescompute}
-\noindent La figura \ref{fig:diagramaclasescompute1} muestra un peque\~no Diagrama de Clases que describe las relaciones del cliente de acceso al API REST con algunos m\'odulos de Fabric y Python.
+\subsubsection{Class Diagram --- Compute Module}\label{subsubsec:diagramaclasescompute}
+\noindent Figure \ref{fig:diagramaclasescompute1} shows a small Class Diagram describing how the REST client is related to Fabric and Python.
 
 \begin{description}
- \item[json:] \emph{parsea} y maneja datos estructurados en formato JSON. El API REST de OpenStack entiende tanto XML como JSON.
- \item[Exception:] clase Python que representa una excepci\'on gen\'erica.
- \item[ServiceError:] extensi\'on de \texttt{Exception}. Se utiliza como contenedor de los errores que pudiesen aparecer al interactuar con el servicio REST. Est\'a compuesto por el c\'odigo y la descripci\'on del error HTTP que se produzca.
- \item[Environment:] recoge las variables globales de configuraci\'on de la interfaz.
- \item[httplib:] es el paquete Python que contiene las funciones y clases necesarias para establecer comunicaciones HTTP. Se usa en este proyecto para consumir el servicio REST.
+ \item[json:] Parses structured JSON-formated data and permits its manipulation. OpenStack REST API understands both XML and JSON.
+ \item[Exception:] Python class representing a generic exception.
+ \item[ServiceError:] Extends \texttt{Exception} to notify and handle any error that may be raised during execution. It's objects have two properties: an HTTP error code and error description.
+ \item[Environment:] Contains the set of global options for configuring the virtual deployment.
+ \item[httplib:] The Python module containing functions, classes and helpers toward interacting with HTTP connections. qosh banks on it to help consume the OpenStack REST service.
 \end{description}
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.5\textwidth]{imagenes/027.pdf}
- \caption{Diagrama de Clases del cliente de acceso REST (I)}
+ \caption{Class Diagram --- Compute module (I)}
 \label{fig:diagramaclasescompute1}
 \end{center}
 \end{figure}
 
+\section{Implementation}\label{sec:implementacion}
+\noindent All the three modules conforming qosh core have been written in Python. The tests of the first version run over Fabric 1.4.3, Django 1.4.2 and Python 2.7.3. The configuration inside the VM is carried out by three \emph{Bash-Script}s in three different instants in the VM life cycle: before bringing the network up, after having completed the boot sequence and before shutdown. They will be detailed in section \ref{subsec:maquinavirtual}.
 
-\section{Implementaci\'on}\label{sec:implementacion}
-\noindent Los tres m\'odulos que componen la interfaz se han escrito en Python. Las pruebas de la primera versi\'on corren sobre las versiones 1.4.3 de Fabric, 1.4.2 de Django y 2.7.3 de Python. La configuraci\'on dentro de la m\'aquina virtual, para permitir su acceso desde el cloud, se realiza con tres scripts, escritos en \texttt{bash-script}, que se activan en tres momentos diferentes del ciclo de vida del servidor virtual: antes de configurar la red, despu\'es de haber arrancado con \'exito y antes de destruirse.
+\subsection{Hadoop Virtual Machine}\label{subsec:maquinavirtual}
+\noindent The Hadoop virtual machine is a vital asset for the qosh project; in the end it is Hadoop who executes work flows. The versions configured are Hadoop 1.0.4 and Oracle JRE 1.7. Installing and tunning every service in the VM has not been a complex process, whereas it has been long and interesting enough, for it is potentially reusable to create other customized VMs, to list every step followed to complete the setup.
 
-
-\subsection{M\'aquina virtual}\label{subsec:maquinavirtual}
-\noindent Una parte importante del proyecto ha sido la construcci\'on de la m\'aquina virtual que contiene la instalaci\'on de Hadoop 1.0.4 y el JRE 1.7 de Oracle. Su configuraci\'on y puesta a punto no result\'o un proceso muy complejo, pero s\'i lo suficientemente interesante y largo, por ser reutilizable para cualquier m\'aquina virtual que se pretenda preparar para correr en un cloud, como para elaborar una lista con todos los pasos seguidos. El entorno de instalaci\'on es el citado MacBook 6,1 bajo un Fedora 17 actualizado.
 \begin{itemize}
-    \item Se a\~nadi\'o con \texttt{yum} el \emph{Virtual Machine Manager} (\texttt{virt-manager}) y sus librer\'ias dependientes, entre las que destacamos: la librer\'ia de vir\-tua\-li\-za\-ci\'on (\texttt{libvirt}), el m\'odulo del kernel para el hypervisor (KVM) y un \emph{wrapper} de ese m\'odulo para gestionar su uso (QEMU).
- \item Utilizando el Virtual Machine Manager se configur\'o una m\'aquina virtual con 1 GB de RAM, 4 GB de disco en formato \emph{QCOW2} y tanto APIC como ACPI.
- \item Se prosigui\'o con la instalaci\'on en red de la \'ultima versi\'on estable de CentOS (la 6.3), eligiendo \emph{Basic Server} como conjunto de paquetes instalados por defecto; en una sola partici\'on ext4 y sin LVM.
- \item Al reiniciar, se pidi\'o a yum que actualizase todos los paquetes del sistema.
- \item Se descargaron desde las webs oficiales las versiones comentadas del JRE y Hadoop y se instalaron con \texttt{rpm}.
- \item Se cre\'o el usuario \emph{hduser} con grupo principal \emph{hadoop} y se retocaron los permisos de los ficheros relacionados con Hadoop ---ficheros de con\-fi\-gu\-ra\-ci\'on y scripts.
- \item Se configur\'o \texttt{sshd} para impedir la conexi\'on como \emph{root} y el acceso utilizando nombre de usuario y contrase\~na como credenciales; s\'olo se permite establecer t\'uneles SSH usando la parte privada de la clave que inyecta OpenStack en la m\'aquina virtual en cada arranque.
- \item Se escribieron tres scripts (\texttt{/etc/init.d/cloud-*}) para personalizar el comportamiento de la m\'aquina virtual, como escribir en su lugar (\texttt{/home/hduser/.ssh/authorized\_keys}) la clave p\'ublica de acceso SSH inyectada por el cloud.
- \item Se eliminaron, con \texttt{yum groups}, servicios no utilizados, como el \emph{X-server}.
- \item Se compact\'o la imagen QCOW2 creando un fichero indeterminadamente grande, con \texttt{dd}, y comprimiendo, desde el anfitri\'on, con \texttt{qemu-img}.
- \item Con \texttt{qemu-nbd} se mont\'o la imagen de la m\'aquina virtual como un dispositivo de bloque en red y con \texttt{fdisk} se observaron el tama\~no del bloque y el bloque inicial de la partici\'on que contiene la instalaci\'on de Hadoop, para calcular su desplazamiento con respecto al inicio del disco virtual.
- \item Finalmente, de nuevo con \texttt{qemu-nbd} se mont\'o la imagen con el des\-pla\-za\-mien\-to calculado, para extraer la \'unica partici\'on (la ra\'iz) del disco virtual contenido en la imagen. Asimismo, se copiaron al anfitri\'on tanto el kernel como la \emph{initram} de la instalaci\'on de CentOS.
+ \item In the local development machine the \emph{Virtual Machine Manager} (package \texttt{virt-manager}) was installed with \texttt{yum}. \texttt{yum} automatically installed dependent libraries like \texttt{libvirt}, the Kernel Virtual Machine hypervisor module (KVM) and a wrapper to handle it (\texttt{qemu-kvm}).
+ \item Through the Virtual Machine Manager, a VM with 1 GB of RAM, 4 GB for the drive image within a \texttt{qcow2} container and both APIC and ACPI was created anew.
+ \item A minimal network install of CentOS 6.3 was carried through. \emph{Basic Server} was chosen as initial package set on a single ext4 partition --- no swap partition --- without LVM.
+ \item After the initial boot sequence, the distribution was put to the latest stable version available.
+ \item The Oracle JRE 1.7 and Hadoop 1.0.4 were downloaded from official sources and subsequently installed on the VM.
+ \item A new user (\emph{hduser}) was registered and set \emph{hadoop} as its primary group. As a result, the permission of the files related to Hadoop --- configuration files and scripts ---- were updated to allow this new user to launch and kill MapReduce jobs.
+ \item \texttt{sshd} was tuned to disable superuser connections and user/pass authentication method; only ssh tunnels cleared by keypairs will be permitted.
+ \item Three scripts --- similar to Ubuntu \texttt{cloud-init} scripts --- were written to \texttt{/etc/init.d/cloud-*} to customize part of the VM behavior. An important feature of them being they manage injecting the public part of the keypair used for authentication into the VM file system --- in \texttt{/home/hduser/.ssh/authorized\_keys} --- when it boots, so the owner of the private part can authenticate.
+ \item The \texttt{yum groups} utility was applied to remove unused services like \emph{X-server}.
+ \item From the local machine the VM was terminated and its drive image was mounted with \texttt{qemu-nbd} to remove logs and user history from the VM. Then, a 5 GB zeroed-file was created with \texttt{dd} inside the VM file system, failing, for there was not enough free space to accommodate 5 GB within a 4 GB image, while filling the remaining space up with zeros. Just after that, \texttt{qemu-img} was invoked to compress the image into a new file.
+ \item Next, \texttt{fdisk} was used locally to observe the VM file system block size and initial block number of the Hadoop partition --- the only partition. By multiplying both values the partition offset was obtained, allowing for the extraction of the Hadoop partition using \texttt{qemu-nbd} offset-mounting capabilities and \texttt{dd} to dump, again, to a new file.
+ \item Finally, both the \emph{initram} and the kernel image were copied out from the VM to the local file system.
 \end{itemize}
 
+\subsection{Low Level Diagramas}\label{subsec:diagramasimpl}
+\noindent Next comes the diagram set that exposes those features closer to qosh implementation.
 
-
-\subsection{Diagramas de implementaci\'on}\label{subsec:diagramasimpl}
-\noindent Acto seguido se exponen aquellos diagramas que describen el proyecto desde un punto m\'as cercano a su implementaci\'on.
-
-
-\subsubsection{Diagrama de Clases --- M\'odulo Compute}\label{subsubsec:implementacioncompute}
-\noindent La figura \ref{fig:diagramaclasescompute2} expande el detalle del m\'odulo \texttt{Compute} de la figura \ref{fig:diagramaclasescompute1}. El comportamiento de las funciones se deduce f\'acilmente de las firmas de la figura. Si cabe, destacar que la nomenclatura utilizada para describir algunos tipos de funciones ---un tipo diccionario y un tipo lista, recuerda a la sintaxis de Python que declara esos tipos.
+\subsubsection{Class Diagram --- Compute Module}\label{subsubsec:implementacioncompute}
+\noindent Figure \ref{fig:diagramaclasescompute2} expands the \emph{Compute} module details on figure \ref{fig:diagramaclasescompute1}. Notice that types on function signatures have been borrowed from Python syntax on dictionaries and lists for brevity.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/028.pdf}
- \caption{Diagrama de Clases del cliente de acceso REST (II)}
+ \caption{Class Diagram --- Compute module (II)}
 \label{fig:diagramaclasescompute2}
 \end{center}
 \end{figure}
 
 \begin{description}
- \item[Lista:] \texttt{[TipoDeTodosLosValores]}
- \item[Diccionario:] \texttt{\{<Clave1> : <TipoValor1> ,<Clave2> : <TipoValor2>\}}
+ \item[List of type T:] \texttt{[T]}
+ \item[Dictionary:] \texttt{\{<Key1> : <T1>, <Key2> : <T2> ... \}}
 \end{description}
 
-
-\subsubsection{Diagrama de Clases --- Django y Fabric}\label{subsubsec:clasesdjangofabric}
-\noindent La figura \ref{fig:djangoyfabric} expone las relaciones entre los m\'odulos m\'as importantes de Django y Fabric. Veamos algunos comentarios sobre el diagrama.
+\subsubsection{Class Diagram --- Django and Fabric}\label{subsubsec:clasesdjangofabric}
+\noindent Figure \ref{fig:djangoyfabric} exposes the relationship between the most important Django and Fabric modules.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/029.pdf}
- \caption{Diagrama de Clases --- Django y Fabric}
+ \caption{Class Diagram --- Django and Fabric}
 \label{fig:djangoyfabric}
 \end{center}
 \end{figure}
 
 \begin{description}
- \item[Views:] es una clase Django que implementa el comportamiento de cada \emph{vista} (p\'agina web) de la interfaz del proyecto. Interact\'ua directamente con \texttt{Compute} para manejar la comunicaci\'on con el cloud.
+ \item[Views:] Is a delegate class implementing the behavior on each \emph{view}. It interacts with qosh Compute module to communicate with the cloud.
  \item[Process:] es una clase wrapper que encapsula tanto el comportamiento de creaci\'on de un proceso \texttt{multiprocessing.Process} como la funci\'on que ejecutar\'a el proceso creado. Esta funci\'on de \texttt{mapred.Process}, cuya firma no se ha incluido por simplicidad, controla el procesado de las instancias Hadoop a trav\'es de \texttt{Compute} y \texttt{Fabfile} (Fabric).
  \item[OpenStackBackend:] es un peque\~no backend que gestiona la conexi\'on de los usuarios. Django incluye un sistema bastante completo para manejar las credenciales de conexi\'on, pero en este proyecto hemos decidido apoyarnos en el de OpenStack para evitar la duplicidad de los usuarios, sus contrase\~nas y datos del perfil. Por tanto, el papel de este backend es hacer de \emph{puente} entre el sistema integrado de credenciales de Django y el de OpenStack; cada petici\'on de conexi\'on se reenv\'ia al \emph{pipe} de acceso a OpenStack. Es decir, s\'olo es necesario que el usuario est\'e registrado en el cloud soporte, OpenStack en nuestro caso, para lanzar trabajos MapReduce.
  \item[OSServer y OSFlavor:] son clases \emph{helper} que desacoplan a la interfaz del servicio REST. Crean representaciones equivalentes en forma de objetos de los JSON que procesan como resultado de las invocaciones de \texttt{Compute}.
