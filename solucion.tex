@@ -157,31 +157,27 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 
 \begin{description}
  \item[Views:] Is a delegate class implementing the behavior on each \emph{view}. It interacts with qosh Compute module to communicate with the cloud.
- \item[Process:] es una clase wrapper que encapsula tanto el comportamiento de creaci\'on de un proceso \texttt{multiprocessing.Process} como la funci\'on que ejecutar\'a el proceso creado. Esta funci\'on de \texttt{mapred.Process}, cuya firma no se ha incluido por simplicidad, controla el procesado de las instancias Hadoop a trav\'es de \texttt{Compute} y \texttt{Fabfile} (Fabric).
- \item[OpenStackBackend:] es un peque\~no backend que gestiona la conexi\'on de los usuarios. Django incluye un sistema bastante completo para manejar las credenciales de conexi\'on, pero en este proyecto hemos decidido apoyarnos en el de OpenStack para evitar la duplicidad de los usuarios, sus contrase\~nas y datos del perfil. Por tanto, el papel de este backend es hacer de \emph{puente} entre el sistema integrado de credenciales de Django y el de OpenStack; cada petici\'on de conexi\'on se reenv\'ia al \emph{pipe} de acceso a OpenStack. Es decir, s\'olo es necesario que el usuario est\'e registrado en el cloud soporte, OpenStack en nuestro caso, para lanzar trabajos MapReduce.
- \item[OSServer y OSFlavor:] son clases \emph{helper} que desacoplan a la interfaz del servicio REST. Crean representaciones equivalentes en forma de objetos de los JSON que procesan como resultado de las invocaciones de \texttt{Compute}.
+ \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop workflows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
+ \item[OpenStackBackend:] Is a small class that manages user logins. It is plugged into Django authenticating pipeline to delegate the clearing of user credentials to Keystone. In so doing, user access details will remain securely stored with Keystone with no need to have them duplicately stored.
+ \item[OSServer y OSFlavor:] Are a kind of \emph{Transfer Object}s holding a subset of the outputted JSON data returned from the invocation of OpenStack REST API.
 \end{description}
 
-
-
-\subsubsection{Diagrama de Clases --- Objetos de Django}\label{subsubsec:clasesobjetosdjango}
-\noindent La figura \ref{fig:clasesobjetosdjango} contiene, en detalle, las relaciones entre las \emph{clases de objetos del modelo concreto} de Django.
-
+\subsubsection{Class Diagram --- Django Objects}\label{subsubsec:clasesobjetosdjango}
+\noindent Figure \ref{fig:clasesobjetosdjango} details the relationships among the set of classes implementing the interaction with the web interface as provided by Django.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/030.pdf}
- \caption{Diagrama de Clases --- Objetos de Django}
+ \caption{Class Diagram --- Django Objects}
 \label{fig:clasesobjetosdjango}
 \end{center}
 \end{figure}
 
-
 \begin{description}
- \item[django.db.models:] este paquete lo proporciona la distribuci\'on de Django. Sirve de apoyo para escribir objetos del modelo de aplicaci\'on, basados en composiciones y extensiones de las clases contenidas.
+ \item[django.db.models:] The objects defined therein model the business logic of our application. Django supplies a large set of templates that may be extended and/or composed to implement the particularities of different applications.
   \begin{description}
-   \item[Model:] es la clase base de los objetos del modelo, esto es, todo objeto de nuestro minimundo ha de ser \emph{descendiente} suyo. Usando esta clase y las definiciones de las clases de objetos, Django se encargar\'a de gestionar todo lo relativo a la persistencia de los objetos del modelo en una base de datos.
-   \item[Fields:] son algunas de las implementaciones m\'as usuales de campos de inter\'es para los objetos que, junto con \texttt{Model}, permiten que Django establezca la morfolog\'ia del esquema l\'ogico de la base de datos asociada.
+   \item[Model:] Is the base class of the object model supporting the business logic. Every object within the \emph{model layer} of our application extends this class --- i.e. \texttt{Job} and \texttt{Server}. Django object-relational mapper automatically translates this object model into a relational model as well as object-based queries into SQL ones.
+   \item[Fields:] Hold the information related to object model classes helping Django persist the properties of the objects in a relational data base.
   \end{description}
  \item[Job:] representa un trabajo MapReduce para Hadoop. Comentar que se ha especializado la definici\'on del m\'etodo \texttt{save}, para poder organizar los trabajos en el sistema de ficheros por su identificador en la base de datos. Tal y como se ha comentado, la salvaguarda de informaci\'on de cada \texttt{Job} en una base datos corre a cargo de Django.
  \item[Server:] es la representaci\'on de la configuraci\'on individual de cada m\'aquina virtual que participe en un trabajo Hadoop MapReduce.
