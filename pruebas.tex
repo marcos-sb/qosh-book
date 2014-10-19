@@ -1,20 +1,20 @@
-\chapter{Pruebas de rendimiento}\label{cap:rendimiento}
-\noindent En este cap\'itulo analizaremos el rendimiento de la propuesta sobre un des\-plie\-gue real, describiendo brevemente el entorno de ejecuci\'on y, posteriormente, exponiendo y ana\-li\-zan\-do los resultados obtenidos.
+\chapter{Performance Analysis}\label{cap:rendimiento}
+\noindent In this chapter qosh performance will be evaluated in a deployment over a real cluster. The execution environment will be described first and the metrics collected will be analyzed and put in context thereafter.
 
-\section{Entorno de prueba}\label{sec:entornodeprueba}
-\noindent La figura \ref{fig:clusterdespliegue} muestra la configuraci\'on concreta del cl\'uster de ejecuci\'on. La parte izquierda de la imagen contiene el nodo \emph{controlador} del cloud; la parte derecha el nodo \emph{Nodo de cloud}. En el nodo controlador se ha realizado una instalaci\'on completa de OpenStack Folsom ---pero sin \texttt{Cinder}, \texttt{Swift} o \texttt{Quantum}---, \texttt{MySQL} ---para soportar la persistencia de los objetos tanto de OpenStack como de \texttt{Django}---, \texttt{Fabric} y \texttt{Qpid} como cola de mensajes para OpenStack. En el Nodo de Cloud se ha instalado lo m\'inimo requerido para ejecutar instancias virtuales: el m\'odulo \texttt{Compute}. Para cubrir el resto de la funcionalidad como el recuento de recursos disponibles, la seguridad de acceso o los detalles de las instancias o de las im\'agenes, el Nodo de Cloud se apoya en el controlador utilizando Qpid como medio de comunicaci\'on as\'incrona.\newline
+\section{Testing Environment}\label{sec:entornodeprueba}
+\noindent Figure \ref{fig:clusterdespliegue} shows how the cluster is configured. The leftmost part of the figure shows the Cloud Controller; the rightmost, the Cloud Node. The Cloud Controller has been put through a full OpenStack Folsom installation --- except for Cinder, Swift or Quantum as they will not used ---, plus MySQL, Fabric and Qpid as message broker. In the Cloud Node only the bare minimum to support VM execution has been installed --- OpenStack Compute. The other required \emph{amenities} of the Cloud Node are delegated to the Controller via Qpid.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/038.pdf}
- \caption{Morfolog\'ia del despliegue}
+ \caption{Deployment morphology}
 \label{fig:clusterdespliegue}
 \end{center}
 \end{figure}
 
-En cuanto al hardware, ambos nodos poseen la misma configuraci\'on f\'isica que, sin entrar en detalle, alberga un \emph{Xeon} de ocho n\'ucleos a 3.20 \emph{GHz} con VT-x, 8 GB de RAM, un disco duro de 200 GB SATA 3 Gb/s 7200 RPM y conectividad de red a 1 Gb/s.
+Regarding the physical layer, both nodes posses the same hardware configuration: Octa core Intel Xeon processor @ 3.2 \emph{GHz} with VT-x, 8 GB of RAM, 200 GB SATA 3 Gb/s 7200 RPM and Gigabit networking interface.
 
-La elaboraci\'on de la imagen que se carga en la m\'aquina virtual y que soporta la ejecuci\'on, se hab\'ia detallado en la secci\'on \ref{subsec:maquinavirtual}. La versi\'on de \texttt{Hadoop} utilizada es la 1.0.4 y la de \texttt{JRE} la 1.7v6. \newline
+The Hadoop virtual image, whose creation procedure is described in section \ref{subsec:maquinavirtual}, will be used to create the VM instances that will effectively carry out the computations. Hadoop version is 1.0.4 and JRE's is 1.7v6 from Oracle.
 
 La figura \ref{fig:clusterdespliegue} tambi\'en muestra la m\'aquina virtual soporte de ejecuci\'on para Hadoop. A esta m\'aquina virtual o instancia en ejecuci\'on se le conceder\'an entre 1 y 4 GB de RAM e id\'entico n\'umero de CPUs virtuales, conformando distinos casos de prueba que evaluar\'an la escalabilidad de la soluci\'on. La cantidad de RAM asignada en cada caso ser\'a compartida por el SO hu\'esped y la m\'aquina virtual Java sobre la que se ejecuta Hadoop. El des\-plie\-gue del cl\'uster virtual Hadoop se ha configurado de forma que la m\'aquina virtual Java tenga acceso a toda la RAM de las instancias; ser\'ia te\'oricamente posible que alguna ejecuci\'on de Hadoop se quedase corta de memoria RAM virtual, sobre todo en los casos con 1 GB solamente, forzando la transferencia de p\'aginas de memoria RAM virtual a disco duro virtual, lo que se traducir\'ia en una reducci\'on del ancho de banda de trabajos.
 
