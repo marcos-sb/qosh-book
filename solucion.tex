@@ -157,7 +157,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 
 \begin{description}
  \item[Views:] Is a delegate class implementing the behavior on each \emph{view}. It interacts with qosh Compute module to communicate with the cloud.
- \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop workflows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
+ \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop work flows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
  \item[OpenStackBackend:] Is a small class that manages user logins. It is plugged into Django authenticating pipeline to delegate the clearing of user credentials to Keystone. In so doing, user access details will remain securely stored with Keystone with no need to have them duplicately stored.
  \item[OSServer y OSFlavor:] Are a kind of \emph{Transfer Object}s holding a subset of the outputted JSON data returned from the invocation of OpenStack REST API.
 \end{description}
@@ -179,49 +179,46 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
    \item[Model:] Is the base class of the object model supporting the business logic. Every object within the \emph{model layer} of our application extends this class --- i.e. \texttt{Job} and \texttt{Server}. Django object-relational mapper automatically translates this object model into a relational model as well as object-based queries into SQL ones.
    \item[Fields:] Hold the information related to object model classes helping Django persist the properties of the objects in a relational data base.
   \end{description}
- \item[Job:] representa un trabajo MapReduce para Hadoop. Comentar que se ha especializado la definici\'on del m\'etodo \texttt{save}, para poder organizar los trabajos en el sistema de ficheros por su identificador en la base de datos. Tal y como se ha comentado, la salvaguarda de informaci\'on de cada \texttt{Job} en una base datos corre a cargo de Django.
- \item[Server:] es la representaci\'on de la configuraci\'on individual de cada m\'aquina virtual que participe en un trabajo Hadoop MapReduce.
- \item[User:] es la clase interna de Django que almacena la informaci\'on de los usuarios de la interfaz. Se utiliza como \emph{Transfer Object} desde el sistema de autorizaci\'on de OpenStack como portador de los datos de los usuarios en cada \emph{sesi\'on}.
+ \item[Job:] Holds the meta-data of a Hadoop MapReduce work flow. MySQL will store these data persistently, meanwhile the file system in the Cloud Controller will actually store the information associated with the execution --- the jar file with the implementing MapReduce algorithm, inputs and outputs.
+ \item[Server:] Contains the operating features of each virtual machine that had been part of a Hadoop job.
+ \item[User:] Is the {Transfer Object} that is used to convey user-related information from the authorization back-end to the web interface.
 \end{description}
 
-
-\subsubsection{Diagrama de Clases --- Formularios de Django}\label{subsubsec:clasesformulariosdjango}
-\noindent La figura \ref{fig:clasesformulariosdjango} muestra la descomposici\'on en clases de los formularios que recogen las credenciales de acceso y la configuraci\'on del procesado. El paquete \texttt{django.forms} tiene organizaci\'on y finalidad id\'enticos al paquete \texttt{django.db.\\models} comentado anteriormente. En este caso \texttt{Form}, junto con los \texttt{Field} necesarios, es la clase extensible que aporta Django para concretar los formularios de usuario.
+\subsubsection{Class Diagram --- Django Forms}\label{subsubsec:clasesformulariosdjango}
+\noindent Figura \ref{fig:clasesformulariosdjango} shows the class breakdown supporting the job configuration-holding forms of the web interface. \texttt{django.forms} package is laid out like the \texttt{django.db.models} package discussed above, being in this case \texttt{Form}, together with any \texttt{Field} required, the extensible class Django provides to concrete user forms.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/031.pdf}
- \caption{Diagrama de Clases --- Formularios de Django}
+ \caption{Class Diagram --- Django Forms}
 \label{fig:clasesformulariosdjango}
 \end{center}
 \end{figure}
 
 \begin{description}
- \item[LoginForm:] formulario de conexi\'on de usuarios. Formado por un par de campos car\'acter que recogen el nombre de usuario y su contrase\~na en OpenStack.
- \item[JobForm:] es el formulario que permite definir la computaci\'on para \\MapReduce. Incluye: el prefijo del nombre de los servidores virtuales que se crear\'an, el nombre cualificado de la clase implementaci\'on de las funciones Map y Reduce, el fichero de entrada (paquete comprimido), el paquete \emph{Jar} que contiene la clase implementaci\'on, el n\'umero de servidores virtuales necesarios y su \emph{flavor} computacional.
+ \item[LoginForm:] Is the user sign in form. Made up of two character fields holding the user name and password.
+ \item[JobForm:] As its name suggests, is the form that allows for defining the work flow configuration. It is formed up by a set of \texttt{Fields} containing the following information: the virtual server name prefix, the qualified name of the Java class implementing the Mapper and Reducer, the input file, the \texttt{jar} package, the number of virtual servers to be deployed and their computational \emph{flavor}.
 \end{description}
 
 
-\subsubsection{Diagrama Entidad-Relaci\'on}\label{subsubsec:entidadrelacion}
-\noindent Se hab\'ia apuntado brevemente que Django posee la habilidad de construir autom\'aticamente el esquema l\'ogico de una base de datos relacional derivando el modelo de objetos escrito por el desarrollador. Era de esperar que la gesti\'on de las operaciones \emph{CRUD} (\emph{Create, Read, Update, Delete}) sobre las tuplas almacenadas tambi\'en estuviese implementada. La figura \ref{fig:entidadrelacion} muestra el diagrama Entidad-Relaci\'on correspondiente a la gesti\'on de trabajos. Se han omitido las entidades y relaciones adyacentes que gestionan las sesiones o las autorizaciones de los usuarios, entre otras, por transparencia.
+\subsubsection{Entity-Relationship Diagram}\label{subsubsec:entidadrelacion}
+\noindent It has been pointed briefly that Django can automatically build the data base logical model derived from the object schema as written by the developer. And as expected, \emph{CRUD} operations on the DB are also managed by Django. Figure \ref{fig:entidadrelacion} shows the actual \emph{Entity-Relationship} diagram of the schema that is contained in the DB.
 
-\begin{figure}[tbp]
+\begin{figure}[bp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/032.pdf}
- \caption{Diagrama Entidad-Relaci\'on}
+ \caption{Entity-Relationship Diagram}
 \label{fig:entidadrelacion}
 \end{center}
 \end{figure}
 
-
-\subsubsection{Diagrama de Secuencia}\label{subsubsec:secuencia}
-
-\noindent Se presentan en las figuras \ref{fig:secuencia1} y \ref{fig:secuencia2} dos Diagramas de Secuencia. Reflejan el subconjunto m\'as interesante de los mensajes intercambiados entre las entidades participantes en un procesado MapReduce. Estamos suponiendo que no se produce ning\'un error, que el usuario est\'a conectado a la interfaz con sus credenciales, que introduce correctamente todos los datos de definici\'on del procesado y que posee la autorizaci\'on necesaria para lanzar m\'aquinas virtuales en OpenStack. La figura \ref{fig:secuencia1} contiene la interacci\'on completa. La \ref{fig:secuencia2} expone con detalle la activaci\'on posterior al mensaje \texttt{\#24} de la figura \ref{fig:secuencia1}.
+\subsubsection{Sequence Diagrams}\label{subsubsec:secuencia}
+\noindent Figures \ref{fig:secuencia1} y \ref{fig:secuencia2} present two Sequence Diagams. They reflect the most interesting subset of messages that are interchanged between the different execution-participating entities. The sequences suppose that no errors raise during the interaction, that the user has previously signed in, that every job defining information is typed correctly and that the quota lets the deployment of the virtual cluster be carried through. Figura \ref{fig:secuencia1} pictures the full interaction. Figure \ref{fig:secuencia2} details the collaboration between classes after message \emph{\#24} in figure \ref{fig:secuencia1}.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/033.pdf}
- \caption{Diagrama de Secuencia (I)}
+ \caption{Sequence Diagram (I)}
 \label{fig:secuencia1}
 \end{center}
 \end{figure}
@@ -229,7 +226,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/034.pdf}
- \caption{Diagrama de Secuencia (II)}
+ \caption{Sequence Diagram (II)}
 \label{fig:secuencia2}
 \end{center}
 \end{figure}
