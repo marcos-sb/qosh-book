@@ -23,42 +23,39 @@ To actually assess the horizontal scalability, the size of the virtual cluster w
 
 As Glance and Compute cooperate to cache images, the time required to start an instance of some image will be longer the first time it launches, effectively skewing results. To get rid of those divergences, the instances on each flavor will be \textbf{warmed} by starting and destroying them before taking measures.
 
-
-
-A priori, la variabilidad esperada de los resultados entre ejecuciones es lo suficientemente peque\~na como para fijar a \emph{diez} el n\'umero de realizaciones de cada caso de prueba ---esta suposici\'on a priori se ve confirmada a posteriori a la vista del resultado de los experimentos. Para ello se har\'an medidas auto\-ma\-ti\-za\-das, con marcas de tiempo directamente en el c\'odigo, que distinguir\'an los siguientes cinco tiempos de inter\'es:
+\emph{A priori}, the expected variance of the timings between executions is small enough to consider \emph{ten} to be a representative number of repeated measures --- this hypothesis will be validated \emph{a posteriori} on analyzing the results. To measure timings, the code will include a set of time marks that will help take apart the following times:
 
 \begin{description}
-    \item[Despliegue:] tiempo transcurrido desde que se hace la petici\'on \emph{crear ins\-tan\-cia} hasta que se puede acceder a todas ellas.
-  \item[Configuraci\'on:] tiempo necesario para que se establezca el marco de ejecuci\'on para Hadoop. Incluye el tiempo de transferencia y descompresi\'on de los datos de entrada a la m\'aquina virtual y a HDFS, y la configuraci\'on del cl\'uster virtual Hadoop conformado por todas las instancias creadas.
-  \item[MapReduce:] tiempo dedicado por Hadoop a la ejecuci\'on del trabajo wordcount.
-  \item[Borrado:] tiempo utilizado para limpiar el entorno de ejecuci\'on. No incluye el tiempo requerido por OpenStack para eliminar por completo las ins\-tan\-cias.
-  \item[Total:] tiempo que transcurre desde que se inicia el despliegue hasta que finaliza la petici\'on de borrado de las instancias.
+    \item[Deploying:] time elapsed since the virtual cluster creation request is send until every instance is accessible.
+    \item[Configuring:] time required to establish the Hadoop execution environment. It comprises the time to configure the virtual Hadoop cluster plus the time to distribute input data onto HDFS.
+    \item[MapReducing:] time dedicated by Hadoop to execute the \emph{wordcount} work flow.
+    \item[Cleaning:] time required to wipe out the execution environment. It does not include the time it takes OpenStack to completely remove the instances.
+    \item[Total:] 
 \end{description}
 
-Notar que los resultados presentados hacen referencia a la media aritm\'etica de las diez ejecuciones para cada caso. 
+It should be noted that the timings shown are the averaged results of the ten executions in each case.
 
-
-\section{An\'alisis de resultados}\label{sec:analisisresultados}
+\section{Analysis of the Results}\label{sec:analisisresultados}
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.98\textwidth]{imagenes/039.pdf}
-\caption{Escalabilidad horizontal}
+\caption{Scaling out}
 \label{fig:eschorizontal}
 \end{center}
 \end{figure}
 
-\noindent La figura \ref{fig:eschorizontal} presenta la evoluci\'on de los distintos tiempos de inter\'es en funci\'on del n\'umero de instancias creadas, desde una hasta ocho. \newline
-
-En ella se observa que los tiempos de despliegue, configuraci\'on y borrado aumentan ligeramente con el n\'umero de instancias desplegadas, mientras el tiempo de procesamiento se ve reducido. Esto es, el despliegue, la con\-fi\-gu\-ra\-ci\'on y el borrado dependen solamente del tama\~no del cl\'uster virtual; por el contrario, el tiempo MapReduce ---y por lo tanto tambi\'en el tiempo total--- depende adem\'as del volumen del trabajo a ejecutar. La figura \ref{fig:escvertical} presenta la evoluci\'on de los cinco tiempos de inter\'es a medida que se aumentan la cantidad de RAM y las CPUs virtuales de las dos instancias creadas; desde 1 GB y 1 VCPU hasta 4. \newline
+\noindent Figure \ref{fig:eschorizontal} shows the evolution of the different timings as the instance count increases from one to eight. It may be observed that deployment, configuring and cleaning time raise with the number of instances deployed, meanwhile processing time is reduced. I.e, the time required for a virtual cluster to deploy, configure and delete every instance depends only on its size --- as it could have been hypothesized. On the other hand, MapReducing time --- and thus total time --- is also bound to input size. Figure \ref{fig:escvertical} presents the tendency of the five timings as the cluster is scaled in from 1 GB of VCPU and RAM to 4 each.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.98\textwidth]{imagenes/041.pdf}
-\caption{Escalabilidad vertical}
+\caption{Scaling in}
 \label{fig:escvertical}
 \end{center}
 \end{figure}
+
+
 
 A la vista de esta figura, tal vez lo m\'as llamativo sean los tiempos de des\-plie\-gue y borrado, pudiendo considerarse pr\'acticamente constantes a pesar de aumentar la capacidad de c\'alculo de las instancias. Dicho de otro modo, la dificultad que supone desplegar o borrar un cl\'uster virtual en nuestro entorno depende exclusivamente del n\'umero de instancias o nodos virtuales ---conclusi\'on que ya hab\'iamos alcanzado previamente. Precisamente, hab\'iamos observado c\'omo la complejidad de configuraci\'on crec\'ia proporcionalmente con el tama\~no del cl\'uster. En este caso sucede lo contrario: al estar mejorando las caracter\'isticas t\'ecnicas de las dos instancias, los tiempos de configuraci\'on de Hadoop se ven l\'ogicamente reducidos. Es decir, la conclusi\'on revisada dicta que el tiempo de configuraci\'on var\'ia de forma directa con el n\'umero de instancias y de forma inversa con las capacidades operativas de las mismas. \newline
 
