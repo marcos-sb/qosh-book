@@ -55,18 +55,16 @@ It should be noted that the timings shown are the averaged results of the ten ex
 \end{center}
 \end{figure}
 
+It should be highlighted from figure \ref{fig:escvertical} that deploying and cleaning times are approximately flat even though the instances are made larger. I.e., the difficulty to deploy or delete a virtual cluster in our environment depends exclusively on the number of instances or virtual nodes --- conclusion we had drawn earlier. Configuring times in this case are reduced for the instances are more capable computationally --- while testing horizontal scaling revealed that configuring time increased proportionally with the cluster size.
 
-
-A la vista de esta figura, tal vez lo m\'as llamativo sean los tiempos de des\-plie\-gue y borrado, pudiendo considerarse pr\'acticamente constantes a pesar de aumentar la capacidad de c\'alculo de las instancias. Dicho de otro modo, la dificultad que supone desplegar o borrar un cl\'uster virtual en nuestro entorno depende exclusivamente del n\'umero de instancias o nodos virtuales ---conclusi\'on que ya hab\'iamos alcanzado previamente. Precisamente, hab\'iamos observado c\'omo la complejidad de configuraci\'on crec\'ia proporcionalmente con el tama\~no del cl\'uster. En este caso sucede lo contrario: al estar mejorando las caracter\'isticas t\'ecnicas de las dos instancias, los tiempos de configuraci\'on de Hadoop se ven l\'ogicamente reducidos. Es decir, la conclusi\'on revisada dicta que el tiempo de configuraci\'on var\'ia de forma directa con el n\'umero de instancias y de forma inversa con las capacidades operativas de las mismas. \newline
-
-Los resultados contenidos en estas gr\'aficas demuestran que nuestra soluci\'on se comporta de modo m\'as eficaz cuando se mejora la capacidad de c\'omputo de las instancias ---escalabilidad vertical--- en vez de aumentar el tama\~no del cl\'uster virtual soporte ---escalabilidad horizontal. Este hecho se observa con claridad en las figuras \ref{fig:eschorizontal} y \ref{fig:escvertical} al comparar los casos extremos de prueba: ocho instancias de 1 GB de RAM frente a 4 GB de RAM y VCPUs por ins\-tan\-cia, respectivamente. Ambos casos distribuyen sendos clusters virtuales con las mismas caracter\'isticas de 8 VCPUs y 8 GB de RAM sobre nuestros nodos de prueba. Sin embargo, el tiempo de ejecuci\'on total es casi un \texttt{28\%} menor al mejorar las dos instancias (figura \ref{fig:escvertical}); esperable, en cierta medida, al ahorrar la sobrecarga de comunicaci\'on por la red. \newline
+In light of the results, it can be concluded that qosh behaves more efficiently on vertical scaling versus horizontal scaling. This fact is specially evident when contrasting the extreme testing cases from figures \ref{fig:eschorizontal} and \ref{fig:escvertical}: eight instances, 1 GB of RAM and 1 VCPU each and 4 GB of RAM and 4 VCPUs respectively. Both test cases deploy a virtual cluster with 8 VCPUs and 8 GB of RAM total over the physical infrastructure. Yet, total execution time is almost \emph{28\%} smaller with two larger instances.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.98\textwidth]{imagenes/042.pdf}
-\caption{Tama\~no de entrada frente a tiempo de ejecuci\'on}
+\caption{Input size versus execution time}
 \label{fig:evotemporal}
 \end{center}
 \end{figure}
 
-La figura \ref{fig:evotemporal} muestra la evoluci\'on de los tiempos de ejecuci\'on al incrementar la magnitud de los datos a procesar. Como era de esperar, la duraci\'on de la etapa MapReduce y la duraci\'on total crecen en relaci\'on directa con el tama\~no de entrada, pero en menor medida. Los tiempos de despliegue y bo\-rra\-do se mantienen pr\'acticamente constantes en cada caso, mientras que el tiempo de configuraci\'on crece ligeramente, al englobar la descompresi\'on y posterior distribuci\'on de los ficheros de entrada sobre el cl\'uster Hadoop.
+Figure \ref{fig:evotemporal} shows the tendency on execution times when increasing the input size. As expected, MapReducing and total times increase with the input size but in a smaller fashion. Deploying and cleaning times are almost constant on each case, while configuring time rises slightly as it covers decompressing and distribution of the input files over the Hadoop cluster.
