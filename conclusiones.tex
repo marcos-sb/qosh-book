@@ -27,55 +27,51 @@ qosh deploys clusters with a single hybrid master-worker node --- with NameNode,
 
 Regarding the execution flow, EMR allows for keeping the instances alive when they had finished scheduled processing to avoid the computational overhead of their spawning. qosh's default behavior is to destroy instances upon completion. As expected, defaults may be easily overridden.
 
-EMR draws on Amazon S3 to store input data to Hadoop as well as to write final results. Intermediate information is stored within the virtual instances and is destroyed as they are.
-
-En lo que concierne al almacenamiento, EMR se apoya en el S3 de Amazon tanto para cargar los datos de entrada en el flujo de Hadoop, como para escribir los resultados finales. La informaci\'on intermedia se guarda en el HDFS de las m\'aquinas virtuales, que se crea y destruye con las instancias que le dan soporte, eliminando aquella entre ejecuciones. Nuestra aproximaci\'on supone utilizar el sistema de ficheros del nodo en el que resida el servidor web para E/S al cl\'uster Hadoop y de la misma forma nos valemos de HDFS para los resultados intermedios. Hadoop soporta la E/S tambi\'en sobre S3 entre otros; el problema radica en organizar las entradas y salidas al cl\'uster hasta un repositorio externo al sistema de ficheros del nodo. Organizar en sentido global, es decir, no s\'olo disponer la E/S de Hadoop sino tambi\'en actualizar la BD o localizar el fichero para descargar cuando as\'i se requiera desde la interfaz. Django proporciona una implementaci\'on por defecto para gestionar la recogida y el env\'io de ficheros a la web. Esta implementaci\'on se acopla al flujo natural de Django, otorgando la posibilidad de utilizar un adaptador personal para que Django pueda gestionar, del mismo modo, los ficheros alojados en cualquier otro tipo de repositorio.
-
+EMR draws on Amazon S3 to store input data to Hadoop as well as to write final results. Intermediate information is stored within the virtual instances and is destroyed as they are. qosh uses the file system of the Controller Node to store I/O data from the virtual cluster, and, like EMR, employs the virtual instances' file system to save intermediate data. qosh may also be plugged a different repository to store final results. To that end, a new back end module would have to be written for Django to correctly locate data and update the DB to point elsewhere.
 
 \section{Resilin}\label{sec:resilin}
-\noindent \emph{Resilin} \cite{resilin} pretende mejorar las caracter\'isticas del EMR superando sus li\-mi\-ta\-cio\-nes. El equipo de desarrollo ha escrito un API (ver figura \ref{fig:arquitecturaresilin}) capaz de recibir peticiones con sintaxis EMR que traduce en dos tipos de acciones:
+\noindent \emph{Resilin} \cite{resilin} main intention is to improve EMR by trying to overcome its limitations. The development team has written an API (see figure \ref{fig:arquitecturaresilin}) capable of receiving EMR-like requests that will translate into two kinds of actions:
+
 \begin{itemize}
- \item Interacciones con un cloud IaaS para crear y destruir instancias ---que nuestra propuesta maneja con el m\'odulo \texttt{Compute}.
- \item Conexiones SSH a las instancias Hadoop, para configurar y ejecutar las tareas. Nuestro proyecto se apoya en \emph{Fabric} y el m\'odulo \texttt{fabfile} para crear y gestionar los trabajos.
+    \item An interaction flow with an IaaS Cloud to create and destroy instances (what qosh does in its Compute module).
+    \item An SSH connection to the virtual Hadoop cluster to configure and execute tasks (what qosh does with its Fabric module).
 \end{itemize}
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.5\textwidth]{imagenes/035.pdf}
- \caption{Arquitectura de Resilin. Fuente: \cite{resilin}}
+ \caption{Resilin architecture. Source: \cite{resilin}}
 \label{fig:arquitecturaresilin}
 \end{center}
 \end{figure}
 
-El almac\'en de informaci\'on y la E/S la controlan a trav\'es del API de compatibilidad con S3 que implementan tanto Nimbus como Eucalyptus ---con Cumulus y Walrus respectivamente. Bien es cierto que, como mencionan en \cite{resilin}, tuvieron que realizar ciertas alteraciones en los fuentes.\newline
+Information storage and I/O is delegated upon an S3 compatibility adaptor supported both by Nimbus and Eucalyptus --- with \emph{Cumulus} and \emph{Walrus} respectively.
 
-A mayores, y tal vez lo m\'as interesante de Resilin, se experimenta con la posibilidad de ejecutar flujos de trabajo tomando infraestructura de m\'ultiples clouds. A pesar de no ser la mejor aproximaci\'on en general, debido sobre todo a la dificultad de lidiar la heterogeneidad inherente ---como las diferencias entre instancias virtuales--- y a la sobrecarga de comunicaci\'on introducida. No obstante, s\'i identifican ciertas aplicaciones MapReduce que pudieran verse afectadas favorablemente con esta adici\'on. El modo de proceder elegido para Resilin, que permite conectar nodos virtuales de distintos clouds, consiste en poner en contacto al nodo maestro de un cloud con los esclavos de otro de forma que la comunicaci\'on intercloud sea transparente, tanto para usuarios como para Hadoop.\newline
+Besides, and maybe the most interesting Resilin trait, its implementors experiment with the possibility to execute MapRecude work flows atop infrastructure provided by different clouds. Though it may not be the general approach to provision private infrastructure to virtual deployments due to the inherent heterogeneity among different IaaS frameworks, it might prove useful when the infrastructure has to be drawn upon from public clouds. In the abstract, the idea has been implemented bridging deployments on different clouds by exposing instances on one cloud to the other cloud Master Node as if they were part of the same virtual cluster.
 
-Nuestra propuesta no soporta la funcionalidad de dirigir trabajos de reducci\'on en distintos clouds. Sin embargo, se podr\'ia ampliar la cobertura retocando el m\'odulo \texttt{Compute}.\newline
+qosh does not support hybrid cloud deployments. Yet, it cloud be implemented without much ado modifying the Compute module accordingly.
 
-En resumen, Resilin presenta la aproximaci\'on m\'as similar a la nuestra de las analizadas, delegando la reducci\'on de los fujos MapReduce en Hadoop y la configuraci\'on del hardware virtual en un cloud cuyo API sea compatible con el de EC2 ---los cuatro evaluados en la secci\'on \ref{sec:frameworksevaluados} lo son. Por \'ultimo, la figura \ref{fig:resilinproyecto} compara las herramientas que soportan la funcionalidad expuesta.
+The bottom line is that Resilin is the solution resembling qosh the most; delegating the reduction of MapReduce work flows on Hadoop and the virtual deployments on an IaaS Cloud EC2-compatible --- all of the four evaluated in \ref{sec:frameworksevaluados} are. Lastly, figure \ref{fig:resilinproyecto} lists the different tools that aid supporting the functionality exposed.
 
 \begin{figure}[tbp]
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
-& \textbf{Resilin} & \textbf{Proyecto} \\
+& \textbf{Resilin} & \textbf{qosh} \\
 \hline
 \textbf{Global} & \texttt{Python} & \texttt{Python} \\
 \hline
 \textbf{HTTP} & \texttt{Twisted} & \texttt{Django} \\
 \hline
-\textbf{Interacci\'on API cloud} & \texttt{boto} & \texttt{Compute} (m\'odulo propio) \\
+\textbf{IaaS Cloud interaction} & \texttt{boto} & \texttt{Compute} (custom module) \\
 \hline
-\textbf{Interacci\'on instancias SSH} & \texttt{paramiko} & \texttt{Fabric} \\
+\textbf{Virtual instances interaction} & \texttt{paramiko} & \texttt{Fabric} \\
 \hline
 \end{tabular}
-\caption{Comparaci\'on de herramientas}
+\caption{Tool listing}
 \label{fig:resilinproyecto}
 \end{center}
 \end{figure}
-
-
 
 \section{Cloud MapReduce}\label{sec:cloudmapred}
 \noindent \emph{Cloud MapReduce} representa una aproximaci\'on diametralmente opuesta a Resilin. Mientras Resilin pretende implementar un API MapReduce centr\'andose en \emph{organizar} los distintos componentes necesarios, Cloud MapReduce se apoya en los servicios de un cloud ---en concreto el de Amazon--- para implementar el modelo MapReduce \cite{googlemapreduce} \emph{directamente} sobre \'el.\newline
