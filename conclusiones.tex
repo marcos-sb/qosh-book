@@ -51,6 +51,8 @@ Besides, and maybe the most interesting Resilin trait, its implementors experime
 
 qosh does not support hybrid cloud deployments. Yet, it cloud be implemented without much ado modifying the Compute module accordingly.
 
+Another salient feature of Resilin is the capacity to grow or shrink virtual clusters when the processing had already started. New instances will be assigned tasks as soon as they are registered in the Master process. qosh does not support on-line cluster resizing.
+
 The bottom line is that Resilin is the solution resembling qosh the most; delegating the reduction of MapReduce work flows on Hadoop and the virtual deployments on an IaaS Cloud EC2-compatible --- all of the four evaluated in \ref{sec:frameworksevaluados} are. Lastly, figure \ref{fig:resilinproyecto} lists the different tools that aid supporting the functionality exposed.
 
 \begin{figure}[tbp]
@@ -74,30 +76,29 @@ The bottom line is that Resilin is the solution resembling qosh the most; delega
 \end{figure}
 
 \section{Cloud MapReduce}\label{sec:cloudmapred}
-\noindent \emph{Cloud MapReduce} representa una aproximaci\'on diametralmente opuesta a Resilin. Mientras Resilin pretende implementar un API MapReduce centr\'andose en \emph{organizar} los distintos componentes necesarios, Cloud MapReduce se apoya en los servicios de un cloud ---en concreto el de Amazon--- para implementar el modelo MapReduce \cite{googlemapreduce} \emph{directamente} sobre \'el.\newline
+\noindent \emph{Cloud MapReduce} approaches the problem of processing MapReduce work flows over \emph{elastic} infrastructure in a different manner. While Resilin tries to orchestrate executions by putting together every component required to carry computations through, Cloud MapReduce is backed by Amazon's EC2 services to implement the MapReduce model \cite{googlemapreduce} \emph{directly} on top of them.
 
-A continuaci\'on comentamos algunas propiedades de Cloud MapReduce que consideramos m\'as relevantes:
+Following there is a list of the most relevant characteristics of Cloud MapReduce.
 
 \begin{description}
-\item[Escalabilidad incremental:] es la capacidad de a\~nadir nuevos nodos al cl\'uster MapReduce cuando el trabajo ya ha comenzado; de tal forma que las nuevas instancias se informen autom\'aticamente del estado global del trabajo y se asignen tareas ellas mismas. Resilin \cite{resilin} lo soporta tambi\'en, nuestro proyecto no.
-\item[Simetr\'ia y descentralizaci\'on:] con esta idea se pone manifiesto la falta de jerarqu\'ia en los despligues: cada nodo de un cl\'uster tendr\'a las mismas responsabilidades que sus colegas. Este representa el primer punto de distinci\'on importante frente a las dem\'as aproximaciones ---MapReduce, Hadoop, Amazon EMR, Resilin y nuestro proyecto--- en las que la configuraci\'on, reparto, planificaci\'on, etc. de los trabajos y tareas tiene lugar dentro de los nodos maestro, y la ejecuci\'on y almacenamiento sucede en los esclavos. En Cloud MapReduce los nodos act\'uan de modo independiente, controlando el estado global del trabajo para determinar qu\'e tarea se adec\'ua mejor a las necesidades instant\'aneas del flujo de trabajo. Se debe citar asimismo, que esta simetr\'ia de Cloud MapReduce hace que sea menos problem\'atico superar los problemas en los maestros.
-\item[Heterogeneidad:] entendida con una doble componente: por una parte, la posible coexistencia de instancias de distintos \emph{sabores} ---siguiendo la notaci\'on de Amazon--- en un mismo trabajo, y por la otra, la capacidad de crear instancias en m\'ultiples clouds. Resilin soporta ambas cuestiones, nuestra propuesta no.
+    \item[Incremental scalability:] is the ability to add new nodes to the virtual cluster when job processing had already begun. New instances will fetch the global job state and will be assigned new tasks as they become online.
+    \item[Symmetry and Decentralization:] is the quality by which Cloud MapReduce will deploy virtual clusters with a flat hierarchy. This feature represents the first separation from what it has been discussed hitherto, where at least one node was in charge of scheduling the execution and storage of the others. In Cloud MapReduce the nodes in a virtual cluster collaborate independently from each other, choosing to process the task that would best accommodate its capabilities and that it would work best from a global job perspective. This symmetry makes it easier for a cluster to overcome failing nodes as there is no single point of failure.
+    \item[Heterogeneity:] understood with a double component: on the one hand, the possible coexistence of VMs of different computational flavors in the same work flow; on the other, the ability to create instances on multiple clouds. Resilin supports both features, qosh does not out of the box.
 \end{description}
 
-En Cloud MapReduce el almacenamiento global ---la E/S y los datos intermedios--- se hace sobre S3, la comunicaci\'on y sincronizaci\'on entre nodos con el servicio de colas de Amazon (\emph{SQS} o \emph{Simple Queue Service}) y el almacenamiento de estado de las tareas y nodos en el servicio de base de datos de Amazon, \emph{SimpleDB}. En nuestro proyecto, el almacenamiento global se hace sobre el sistema de ficheros del servidor web; que probablemente no sea la mejor opci\'on debido a las limitaciones de ancho de banda y la falta de tolerancia a fallo. Para modificar este comportamiento, ser\'ia necesario, por ejemplo, dise\~nar un backend de datos personalizado y acoplarlo al \emph{pipe} de almacenamiento de Django, o montar alg\'un sistema de ficheros y apuntar a Django en su direcci\'on. En cuanto a la sincronizaci\'on, comunicaci\'on y estado de las instancias, se delega toda esa funcionalidad en Hadoop.\newline
+Cloud MapReduce stores I/O and intermediate data into S3. Internode communication is solved using Amazon queue service (\emph{SQS} or \emph{Simple Queue Service}). Meta-data is saved in \emph{SimpleDB}.
 
-Por \'ultimo se presenta la figura \ref{fig:arquitecturacloudmapreduce}, que recoge la instant\'anea de alto nivel de un instante de la ejecuci\'on de un trabajo en el Cloud MapReduce. Esta figura recuerda, y no casualmente, a la figura \ref{fig:exmapreduce} que presentaba las fases t\'ipicas de procesamiento del paradigma MapReduce original \cite{googlemapreduce}.
+Lastly, figure \ref{fig:arquitecturacloudmapreduce} represents a high level snapshot of Cloud MapReduce. This figure resembles, not coincidentally, figure \ref{fig:exmapreduce} which showed the typical MapReduce execution phases.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{imagenes/036.pdf}
- \caption{Arquitectura de Cloud MapReduce. Fuente: \cite{cloudmapreduce}}
+ \caption{Cloud MapReduce architecture. Source: \cite{cloudmapreduce}}
 \label{fig:arquitecturacloudmapreduce}
 \end{center}
 \end{figure}
 
 \section{Dynamic Cloud MapReduce}\label{sec:dynamicmapreduce}
-\hyphenation{SmartFrog}
 \noindent La figura \ref{fig:arquitecturadynamicmapreduce} presenta la arquitectura de la soluci\'on propuesta en \cite{dynamicmapreduce} para la apropiaci\'on y configuraci\'on autom\'aticas de infraestructura virtual que procesar\'a aplicaciones MapReduce. Como se ve, los componentes de alto nivel se corresponden directamente con los de nuestra aproximaci\'on; sin embargo (\emph{Dynamic Cloud MapReduce}) presenta algunas diferencias.
 
 \begin{figure}[tbp]
