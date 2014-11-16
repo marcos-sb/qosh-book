@@ -5,21 +5,21 @@
 \noindent \emph{Amazon Elastic MapReduce} \cite{aws} exposes a web service interface that allows the user to send MapReduce execution requests. EMR is supported internally by Amazon EC2 to provision, on demand, the required infrastructure by the MapReduce work flow. Thus, an EMR user will not have to worry about provisioning, creating, configuring and destroying the virtual clusters that would support execution. This convenient transparency to the user comes with a series of important limitations:
 
 \begin{description}
-    \item[Underlying infrastructure restriction]: being as it is a service owned by Amazon, it was expected that usage of computational resources out of their reach were limited; and so it is: EMR users will not be able to couple their virtual instances to other clouds that may incur in lower exploitation costs.
+    \item[Underlying infrastructure restriction]: Being as it is a service owned by Amazon, it was expected that usage of computational resources out of their reach were limited; and so it is: EMR users will not be able to couple their virtual instances to other clouds that may incur in lower exploitation costs.
     qosh, as it has been shown, separates and exposes responsibilities in a way that using a different cloud, for example, requires only adapting a new Compute module to the particular REST API of the cloud that would be used.
-    \item[Installation restriction]: it is not possible to deploy a custom-built VM to execute MapReduce applications in EMR. qosh will handle work flows driving a Hadoop VM with a loose coupling with the deploying subsystem (Fabric) with a doble end:
+    \item[Installation restriction]: It is not possible to deploy a custom-built VM to execute MapReduce applications in EMR. qosh will handle work flows driving a Hadoop VM with a loose coupling with the deploying subsystem (Fabric) with a doble end:
     \begin{itemize}
         \item To ease VM customizations and upgrades (Kernel, Hadoop, JRE, etc.).
         \item To give the possibility to create custom VMs from scratch.
     \end{itemize}
-    \item[Information restriction:] some users are under non disclosure agreements that render impossible sharing data with third parties like Amazon, effectively leaving those services out of the equation. qosh's open source nature makes it easy for a developer to adapt qosh to its concrete functional requirements with no sharing of private data.
+    \item[Information restriction:] Some users are under non disclosure agreements that render impossible sharing data with third parties like Amazon, effectively leaving those services out of the equation. qosh's open source nature makes it easy for a developer to adapt qosh to its concrete functional requirements with no sharing of private data.
 \end{description}
 
 EMR node typology is described next. EMR clusters present three kinds of nodes:
 
 \begin{description}
     \item[Master:] this node, unique per EMR cluster, executes both a NameNode and a JobTracker.
-    \item[Core:] this kind of nodes store data and process job tasks. The are basically comprised of a DataNode and a TaskTracker.
+    \item[Core:] This kind of nodes store data and process job tasks. They are basically comprised of a DataNode and a TaskTracker.
     \item[Task:] they only run TaskTracker processes.
 \end{description}
 
@@ -81,9 +81,9 @@ The bottom line is that Resilin is the solution resembling qosh the most; delega
 Following there is a list of the most relevant characteristics of Cloud MapReduce.
 
 \begin{description}
-    \item[Incremental scalability:] is the ability to add new nodes to the virtual cluster when job processing had already begun. New instances will fetch the global job state and will be assigned new tasks as they become online.
-    \item[Symmetry and Decentralization:] is the quality by which Cloud MapReduce will deploy virtual clusters with a flat hierarchy. This feature represents the first separation from what it has been discussed hitherto, where at least one node was in charge of scheduling the execution and storage of the others. In Cloud MapReduce the nodes in a virtual cluster collaborate independently from each other, choosing to process the task that would best accommodate its capabilities and that it would work best from a global job perspective. This symmetry makes it easier for a cluster to overcome failing nodes as there is no single point of failure.
-    \item[Heterogeneity:] understood with a double component: on the one hand, the possible coexistence of VMs of different computational flavors in the same work flow; on the other, the ability to create instances on multiple clouds. Resilin supports both features, qosh does not out of the box.
+    \item[Incremental scalability:] Is the ability to add new nodes to the virtual cluster when job processing had already begun. New instances will fetch the global job state and will be assigned new tasks as they become online.
+    \item[Symmetry and Decentralization:] Is the quality by which Cloud MapReduce will deploy virtual clusters with a flat hierarchy. This feature represents the first separation from what it has been discussed hitherto, where at least one node was in charge of scheduling the execution and storage of the others. In Cloud MapReduce the nodes in a virtual cluster collaborate independently from each other, choosing to process the task that would best accommodate its capabilities and that it would work best from a global job perspective. This symmetry makes it easier for a cluster to overcome failing nodes as there is no single point of failure.
+    \item[Heterogeneity:] Understood with a double component: On the one hand, the possible coexistence of VMs of different computational flavors in the same work flow; on the other, the ability to create instances on multiple clouds. Resilin supports both features, qosh does not out of the box.
 \end{description}
 
 Cloud MapReduce stores I/O and intermediate data into S3. Internode communication is solved using Amazon queue service (\emph{SQS} or \emph{Simple Queue Service}). Meta-data is saved in \emph{SimpleDB}.
@@ -99,20 +99,27 @@ Lastly, figure \ref{fig:arquitecturacloudmapreduce} represents a high level snap
 \end{figure}
 
 \section{Dynamic Cloud MapReduce}\label{sec:dynamicmapreduce}
-\noindent La figura \ref{fig:arquitecturadynamicmapreduce} presenta la arquitectura de la soluci\'on propuesta en \cite{dynamicmapreduce} para la apropiaci\'on y configuraci\'on autom\'aticas de infraestructura virtual que procesar\'a aplicaciones MapReduce. Como se ve, los componentes de alto nivel se corresponden directamente con los de nuestra aproximaci\'on; sin embargo (\emph{Dynamic Cloud MapReduce}) presenta algunas diferencias.
+\noindent Figure \ref{fig:arquitecturadynamicmapreduce} shows the high level architecture of Dynamic Cloud MapReduce \cite{dynamicmapreduce}. It can be easily seen how these high level components directly correspond to qosh's, though Dynamic Cloud MapReduce presents a series of disparities.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{imagenes/037.pdf}
- \caption{Dynamic Cloud MapReduce. Fuente: \cite{dynamicmapreduce}}
+ \caption{Dynamic Cloud MapReduce. Source: \cite{dynamicmapreduce}}
 \label{fig:arquitecturadynamicmapreduce}
 \end{center}
 \end{figure}
 
 \begin{description}
-\item[GUI:] a pesar de que la interfaz con el usuario tambi\'en es una p\'agina web, en este caso han implementado un servicio \emph{RESTful} (la capa de direcci\'on de los trabajos MapReduce) que desacopla el manejo del servicio de procesamiento MapReduce. Adem\'as, dicha capa permite que los usuarios del despliegue encadenen la ejecuci\'on de m\'ultiples trabajos MapReduce. En nuestra propuesta hemos implementado las acciones de despliegue y procesado formando parte de la mec\'anica de la web. Este \'ultimo punto, el encadenamiento de flujos MapReduce, no se soporta.
-\item[Monitoring Layer:] como su nombre indica, es una capa orientada a la monitorizaci\'on de los procesos MapReduce. Si bien no hemos integrado esta caracter\'istica en la interfaz web, tampoco hemos limitado el acceso a los servicios de monitorizaci\'on integrados en Hadoop; en referencia a los comentados microservidores web de cada m\'odulo \emph{Tracker}.
-\item[Automatic Deployment Layer:] con esta capa software se controla el des\-plie\-gue virtual. Equivale a nuestro m\'odulo \emph{Fabric} (\texttt{fabfile.py}). La diferencia fundamental, a parte de que usan \emph{SmartFrog} para gestionar el despliegue, es que la m\'aquina virtual parte de una instalaci\'on \emph{limpia} del sistema operativo a la que se le ha agregado exclusivamente  SmartFrog. De manera que, antes de ejecutar cada flujo MapReduce, SmartFrog gestiona la descarga, instalaci\'on y configuraci\'on de Hadoop en cada m\'aquina virtual. Esta aproximaci\'on es m\'as flexible que la propuesta en el proyecto ---nos apoyamos en una imagen con Hadoop y el JRE preinstalados---, pero a\~nade una importante sobrecarga de descarga y configuraci\'on.
+    \item[GUI:] Dynamic Cloud MapReduce implements a RESTful web service to decouple job management from the particular interface with the user, though the main interaction with the service is through a web site plugged directly to the web service.
+    \item[Chain Work Flows:] Dynamic Cloud MapReduce allows for chaining MapReduce executions with no need to recreate the virtual cluster to process new jobs.
+    \item[Monitoring Layer:] As its name indicates, Dynamic Cloud MapReduce dedicates an independent front to oversee the framework status. qosh does not implement a separate layer to supervise the health of the cluster or the evolution of jobs, but this information could be easily extracted from OpenStack Dashboard or Hadoop web interface.
+    \item[Automatic Deployment Layer:] Being functionally equivalent to qosh's Fabric module, it controls the virtual deployment. The main difference is that virtual instances are created empty: besides the core OS only \emph{SmartFrog} is installed. Hence, before mapping or reducing, every VM will delegate to SmartFrog the download, installation and configuration of Hadoop.
+    While more flexible, this approach introduces an important overhead compared to qosh's preconfigured VM that, nonetheless, would become less significant as the job size increased.
+    \item[Infrastructure Provider Abstraction Layer:] This facade separates the REST web service from the particular IaaS Cloud in use, allowing for the definition of adapters to deal with each one. qosh does not abstract an interface to implement different cloud adapters transparently, yet, rewriting the behavior of some functions in the Compute module and 
+\end{description}
+
+
+De manera que, antes de ejecutar cada flujo MapReduce, SmartFrog gestiona la descarga, instalaci\'on y configuraci\'on de Hadoop en cada m\'aquina virtual. Esta aproximaci\'on es m\'as flexible que la propuesta en el proyecto ---nos apoyamos en una imagen con Hadoop y el JRE preinstalados---, pero a\~nade una importante sobrecarga de descarga y configuraci\'on.
 \item[Infrastructure Provider Abstraction Layer:] con esta fachada separan la sintaxis del servicio REST del cloud concreto desplegado, permitiendo definir adaptadores para cada uno. En nuestra propuesta no hemos aislado una interfaz que permita definir adaptadores de forma transparente. Sin embargo, y tal como se ha apuntado, bastar\'ia definir el comportamiento de las funciones del m\'odulo \texttt{Compute} (\texttt{compute.py}) y adaptar los \emph{Transfer Objects} (\texttt{objects.py}) a cada sintaxis.
 \end{description}
 
