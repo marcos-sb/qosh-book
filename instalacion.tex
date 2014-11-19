@@ -1,21 +1,21 @@
-\chapter{Instalaci\'on y explotaci\'on de quick-openstacked-hadoop}\label{cap:guiainstalacion}
-\noindent Para hacer un despliegue r\'apido en un solo nodo de \texttt{qosh} y poder lanzar flujos de trabajo MapReduce sin esfuerzo, hemos habilitado un repositorio en el que se encuentran los ficheros con el c\'odigo fuente, los scripts de configuraci\'on y la imagen de la m\'aquina virtual Hadoop. Esta sencilla gu\'ia nos describe los pasos para conseguir una instalaci\'on b\'asica sin esfuerzo.
+\chapter{Installation and Exploitation --- quick-openstacked-hadoop}\label{cap:guiainstalacion}
+\noindent To make a quick deployment in a single node and be able to run MapReduce work flows effortlessly, a \emph{git} repository has been set up with source files, configuration scripts, and the Hadoop VM. This guide will describe the steps required to achieve a basic installation.
 
-\section{Instalaci\'on r\'apida de qosh}\label{sec:instalacionqosh}
+\section{Quick Installation}\label{sec:instalacionqosh}
 
-\subsection{Requisitos del sistema}\label{subsec:reqsis}
-\noindent Los requisitos para que quosh se ejecute son:
+\subsection{System Requirements}\label{subsec:reqsis}
+\noindent qosh's operating requirements:
 
 \begin{itemize}
-\item CPU con arquitectura x86\_64 y extensiones de virtualizaci\'on hardware (VT-x o AMD-V).
-\item 4 GB de memoria RAM o m\'as.
-\item 10 GB de espacio de HDD.
-\item Instalaci\'on de Fedora 17.
+    \item x86\_64 CPU with virtualization extensions (VT-x or AMD-V).
+    \item 4 GB of RAM or more.
+    \item 10 GB of HDD space.
+    \item Fedora 17 installation.
 \end{itemize}
 
-La cantidad de memoria RAM y de espacio en disco duro van a limitar el n\'umero de instancias concurrentes que podr\'an existir ---recordemos que a cada m\'aquina virtual se le otorgan al arrancar 1 GB de RAM y 4 de HDD del anfitri\'on.
+The amount of RAM and HDD will limit the number of concurrent instances that are allowed to run --- recall that each instance will be provisioned 1 GB of RAM and 4 GB of HDD on boot from the host computer.
 
-\subsection{Instalaci\'on}\label{subsec:instalacion}
+\subsection{Installation}\label{subsec:instalacion}
 \noindent La figura \ref{fig:comandosshell} contiene la serie de comandos que habr\'an de ser introducidos en un terminal para iniciar los scripts de instalaci\'on y configuraci\'on.
 
 \begin{figure}[tbp]
