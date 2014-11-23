@@ -16,7 +16,7 @@
 The amount of RAM and HDD will limit the number of concurrent instances that are allowed to run --- recall that each instance will be provisioned 1 GB of RAM and 4 GB of HDD on boot from the host computer.
 
 \subsection{Installation}\label{subsec:instalacion}
-\noindent La figura \ref{fig:comandosshell} contiene la serie de comandos que habr\'an de ser introducidos en un terminal para iniciar los scripts de instalaci\'on y configuraci\'on.
+\noindent Figure \ref{fig:comandosshel} contains the command list that will have to be typed in a terminal to run the installation and configuration scripts.
 
 \begin{figure}[tbp]
  \begin{center}
@@ -25,33 +25,33 @@ The amount of RAM and HDD will limit the number of concurrent instances that are
    \texttt{{\bf \$} sudo yum install -y git} \\
    \texttt{{\bf \$} sudo yum update -y} \\
    \texttt{{\bf \$} sudo reboot} \\ \\
-   \texttt{{\bf \$} cd <carpeta\_destino>} \\
+   \texttt{{\bf \$} cd <destination\_folder>} \\
    \texttt{{\bf \$} git clone https://code.google.com/p/quick-openstacked-hadoop} \\
-   (se crear\'a la carpeta quick-openstacked-hadoop) \\ \\
+   (quick-openstacked-hadoop folder will be created) \\ \\
    \texttt{{\bf \$} cd quick-openstacked-hadoop} \\
    \texttt{{\bf \$} sudo python install.py} \\
-   (instalar\'a OpenStack Folsom, la m\'aquina virtual Hadoop, Fabric y Django) \\ \\
+   (OpenStack Folsom, Hadoop VM, Fabric and Django will be installed) \\ \\
    \texttt{{\bf \$} python configure.py} \\
-   (ajustar\'a Django) \\
+   (Django will be adjusted) \\
    \hline
   \end{tabular}
-  \caption{Serie de commandos en el terminal}
+  \caption{Command sequence I}
   \label{fig:comandosshell}
  \end{center}
 \end{figure}
 
-\subsection{Test de instalaci\'on}\label{subsec:testejecucion}
-\noindent En este momento OpenStack y Django deber\'ian estar instalados correctamente. Para comprobar que as\'i sea abrimos la direcci\'on \url{http://localhost/dashboard} en un navegador; tras breves instantes aparecer\'a la p\'agina inicial de \texttt{Horizon} que permite iniciar sesi\'on ---el nombre de usuario por defecto es \emph{udc} y la contrase\~na \emph{udc}. Una vez introducidas las mencionadas credenciales de acceso, se nos presentar\'a la p\'agina principal para el usuario \emph{udc} en caso de que la instalaci\'on de OpenStack haya sido satisfactoria (ver imagen \ref{fig:homeos}).\newline
+\subsection{Test-Driving the Instalaci\'on}\label{subsec:testejecucion}
+\noindent If the commands in the previous section have succeeded, OpenStack and Django should be correctly installed. To assert this, open \url{http://localhost/dashboard} in a web browser. After a few seconds there should appear the welcoming Horizon splash screen that would allow to log into OpenStack --- user name and password default to \emph{udc}. Once logged in, a web page like the one in figure \ref{fig:homeos} should be displayed.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/045.png}
-\caption{P\'agina principal de OpenStack Folsom}
+\caption{OpenStack Folsom overview page}
 \label{fig:homeos}
 \end{center}
 \end{figure}
 
-Ahora lanzaremos el servidor de desarrollo de Django para interactuar directamente con la interfaz de qosh, y as\'i comprobar su correcta configuraci\'on; la figura \ref{fig:comandosshell2} muestra la secuencia de comandos para arrancar el servidor. De nuevo, abriremos un navegador y nos dirigiremos a \url{http://localhost:8000/albaproject/mapred} para que se cargue la interfaz de acceso ---el nombre de usuario y la contrase\~na son los mismos que en OpenStack (de hecho, como se hab\'ia comentado en el cap\'itulo \ref{cap:solucion}, se delega en \texttt{Keystone} la comprobaci\'on de las credenciales de acceso a qosh).
+At this point Django's development web server may be started to directly interact with qosh and check whether its installation succeeded --- figure \ref{fig:comandlsshell2} shows the command sequence to start the server. Again, a web browser shall be used to open \url{http://localhost:8000/albaproject/mapred}; then, qosh log in interface should load. Username and password are \emph{udc} again --- recall that user access is delegated entirely to OpenStack Keystone. Figure \ref{fig:comandosshell2} lists the commands that should be typed in a terminal.
 
 \begin{figure}[tbp]
     \begin{center}
@@ -61,31 +61,30 @@ Ahora lanzaremos el servidor de desarrollo de Django para interactuar directamen
             \texttt{{\bf \$} python manage.py runserver} \\
             \hline
         \end{tabular}
-        \caption{Serie de comandos en el terminal}
+        \caption{Command sequence II}
         \label{fig:comandosshell2}
     \end{center}
 \end{figure}
 
-\subsection{Flujo de prueba para Hadoop}\label{subsec:flujohadoop}
-\noindent Por \'ultimo, probaremos la instalaci\'on completa haciendo el procesamiento de un trabajo MapReduce. Pueden descargarse de \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list} los ficheros que utilizaremos para la prueba de ejecuci\'on: \texttt{just\_imagine.tar.gz}, \texttt{bigtxt.tar.gz} ---ficheros comprimidos que contienen archivos de texto plano cuyo n\'umero de palabras vamos a contar--- y \texttt{wordcount.jar} ---paquete que contiene la implementaci\'on en Java del flujo MapReduce que procesar\'a Hadoop. \newline
+\subsection{Testing a Work Flow for Hadoop}\label{subsec:flujohadoop}
+\noindent Finally, to ensure every component is completely installed and configured, a real MapReduce work flow should be run in qosh. Input files for this test case might be downloaded from \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list} (\texttt{just\_imagine.tar.gz} and \texttt{bigtxt.tar.gz} --- zipped files containing plain-text files whose words will be counted --- and \texttt{wordcount.jar} --- package containing the classical word count MapReduce implementation.
 
-Justo despu\'es de que nuestras credenciales hayan sido autorizadas, se carga la p\'agina principal de qosh. Desde ella haremos click en \emph{Define Job}, rellenaremos los campos del formulario de modo similar a como muestra la imagen \ref{fig:defmapredjob} y haremos click en \emph{launch} para arrancar el trabajo MapReduce. Una vez completado el procesado podremos descargar los ficheros de resultados desde la p\'agina \emph{Job History}. \newline
+Just after logging in, qosh's main page should load on screen. From there, \emph{Define Job} shall be clicked and the form that sets up the MapReduce job should appear. The fields should be filled in in a similar way as in figure \ref{fig:defmapredjob} before clicking \emph{launch} to begin the process. Once the job be completed the results may be downloaded from the \emph{Job History} page.
 
 \begin{figure}[bp]
 \begin{center}
 \includegraphics[width=0.90\textwidth]{imagenes/046.png}
-\caption{Definici\'on de un trabajo MapReduce}
+\caption{MapReduce job definition}
 \label{fig:defmapredjob}
 \end{center}
 \end{figure}
 
-La imagen \ref{fig:mapredjobhistory} muestra una captura de pantalla del historial y la imagen \ref{fig:mapredjobdetails} una captura de los detalles del trabajo n\'umero 56.
-
+The image \ref{fig:mapredjobhistory} captures the \emph{Job History} page, and the image \ref{fig:mapredjobdetails} shows a capture detailing job \#56 from the \ref{Job Details} page.
 
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.99\textwidth]{imagenes/047.png}
-\caption{Historial de trabajos MapReduce}
+\caption{MapReduce Job History}
 \label{fig:mapredjobhistory}
 \end{center}
 \end{figure}
@@ -93,19 +92,14 @@ La imagen \ref{fig:mapredjobhistory} muestra una captura de pantalla del histori
 \begin{figure}[tbp]
 \begin{center}
 \includegraphics[width=0.60\textwidth]{imagenes/048.png}
-\caption{Detalles del trabajo n\'umero 56}
+\caption{Job \#56 details}
 \label{fig:mapredjobdetails}
 \end{center}
 \end{figure}
 
+\section{qosh's exploitation and maintenance}\label{sec:explotacionqosh}
+\noindent To send MapReduce work flows into qosh, the operating procedure described in section \ref{subsec:flujohadoop} should be followed. Changing job options, cluster size, and main class may be accomplished by filling the form field according to the user's needs.
 
-\section{Explotaci\'on y mantenimiento de qosh}\label{sec:explotacionqosh}
-\noindent Para la ejecuci\'on de trabajos MapReduce de cualquier tipo habremos de seguir la operativa comentada en el apartado \ref{subsec:flujohadoop}, introduciendo cualquier paquete \emph{Jar} en el selector de fichero correspondiente y definiendo la clase principal en la caja de texto correspondiente. \newline
+By default qosh is configured to run in debug mode. This behavior may be easily modified by altering the flag \textbf{DEBUG} within \texttt{settings.py}. Furthermore, it should be noted that qosh will operate much faster when deployed to a production-level web server.
 
-Como qosh se apoya en OpenStack para manejar la infraestructura, tendremos que escalar el cloud convenientemente para reducir los tiempos de latencia de trabajo ---no s\'olo es suficiente crear m\'as instancias desde la web de qosh. Para mejorar los tiempos de respuesta en la carga de p\'aginas se puede alterar el \emph{flag} \textbf{DEBUG} en el fichero \texttt{settings.py} o exportar qosh a un servidor web m\'as r\'apido. \newline
-
-Muy brevemente, recordar que los log de OpenStack se encuentran en \texttt{/var/log/nova} y que Django hace el log siguiendo el sistema de Python 2.7. Por otra parte, resaltar que los ficheros resultado de las operaciones se encontrar\'an, por defecto, bajo \texttt{\$HOME/Public} ---esa ruta la determina la variable \textbf{MEDIA\_ROOT} en \texttt{settings.py} y puede ser alterada.
-
-
-
-
+OpenStack Compute will keep a log in \texttt{/var/log/nova} that could be read should any issue appeared. By default, work flow computed results will be stored to \texttt{\$HOME/Public} which may be changed in \texttt{settings.py}, variable \textbf{MEDIA\_ROOT}.
