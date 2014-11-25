@@ -1,5 +1,5 @@
 \chapter{Installation and Exploitation --- quick-openstacked-hadoop}\label{cap:guiainstalacion}
-\noindent To make a quick deployment in a single node and be able to run MapReduce work flows effortlessly, a \emph{git} repository has been set up with source files, configuration scripts, and the Hadoop VM. This guide will describe the steps required to achieve a basic installation.
+\noindent To make a quick deployment in a single node and be able to run MapReduce workflows effortlessly, a \emph{git} repository has been set up with source files, configuration scripts, and the Hadoop VM. This guide will describe the steps required to achieve a basic installation.
 
 \section{Quick Installation}\label{sec:instalacionqosh}
 
@@ -40,7 +40,7 @@ The amount of RAM and HDD will limit the number of concurrent instances that are
  \end{center}
 \end{figure}
 
-\subsection{Test-Driving the Instalaci\'on}\label{subsec:testejecucion}
+\subsection{Test-driving the Setup}\label{subsec:testejecucion}
 \noindent If the commands in the previous section have succeeded, OpenStack and Django should be correctly installed. To assert this, open \url{http://localhost/dashboard} in a web browser. After a few seconds there should appear the welcoming Horizon splash screen that would allow to log into OpenStack --- user name and password default to \emph{udc}. Once logged in, a web page like the one in figure \ref{fig:homeos} should be displayed.
 
 \begin{figure}[tbp]
@@ -66,8 +66,8 @@ At this point Django's development web server may be started to directly interac
     \end{center}
 \end{figure}
 
-\subsection{Testing a Work Flow for Hadoop}\label{subsec:flujohadoop}
-\noindent Finally, to ensure every component is completely installed and configured, a real MapReduce work flow should be run in qosh. Input files for this test case might be downloaded from \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list} (\texttt{just\_imagine.tar.gz} and \texttt{bigtxt.tar.gz} --- zipped files containing plain-text files whose words will be counted --- and \texttt{wordcount.jar} --- package containing the classical word count MapReduce implementation.
+\subsection{Testing a Workflow for Hadoop}\label{subsec:flujohadoop}
+\noindent Finally, to ensure every component is completely installed and configured, a real MapReduce workflow should be run in qosh. Input files for this test case might be downloaded from \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list} (\texttt{just\_imagine.tar.gz} and \texttt{bigtxt.tar.gz} --- zipped files containing plain-text files whose words will be counted --- and \texttt{wordcount.jar} --- package containing the classical word count MapReduce implementation.
 
 Just after logging in, qosh's main page should load on screen. From there, \emph{Define Job} shall be clicked and the form that sets up the MapReduce job should appear. The fields should be filled in in a similar way as in figure \ref{fig:defmapredjob} before clicking \emph{launch} to begin the process. Once the job be completed the results may be downloaded from the \emph{Job History} page.
 
@@ -97,9 +97,9 @@ The image \ref{fig:mapredjobhistory} captures the \emph{Job History} page, and t
 \end{center}
 \end{figure}
 
-\section{qosh's exploitation and maintenance}\label{sec:explotacionqosh}
-\noindent To send MapReduce work flows into qosh, the operating procedure described in section \ref{subsec:flujohadoop} should be followed. Changing job options, cluster size, and main class may be accomplished by filling the form fields according to the user's needs.
+\section{Long-term Operation}\label{sec:explotacionqosh}
+\noindent To send MapReduce workflows into qosh, the operating procedure described in section \ref{subsec:flujohadoop} should be followed. Changing job options, cluster size, and main class may be accomplished by filling the form fields according to the user's needs.
 
 By default qosh is configured to run in debug mode. This behavior may be easily modified by altering the flag \textbf{DEBUG} within \texttt{settings.py}. Furthermore, it should be noted that qosh will operate much faster when deployed to a production-level web server.
 
-OpenStack Compute will keep a log in \texttt{/var/log/nova} that could be read should any issue appeared. By default, work flow computed results will be stored to \texttt{\$HOME/Public} which may be changed in \texttt{settings.py}, variable \textbf{MEDIA\_ROOT}.
+OpenStack Compute will keep a log in \texttt{/var/log/nova} that could be read should any issue appeared. By default, workflow computed results will be stored to \texttt{\$HOME/Public} which may be changed in \texttt{settings.py}, variable \textbf{MEDIA\_ROOT}.

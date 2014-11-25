@@ -1,13 +1,13 @@
-\chapter{Trabajo relacionado}\label{cap:conclusiones}
+\chapter{Related Works}\label{cap:conclusiones}
 \noindent The present chapter describes other particular solutions for executing MapReduce applications. Each one's characteristics will be briefly explored by contrasting them against qosh's.
 
 \section{Amazon Elastic MapReduce}\label{sec:emc}
-\noindent \emph{Amazon Elastic MapReduce} \cite{aws} exposes a web service interface that allows the user to send MapReduce execution requests. EMR is supported internally by Amazon EC2 to provision, on demand, the required infrastructure by the MapReduce work flow. Thus, an EMR user will not have to worry about provisioning, creating, configuring and destroying the virtual clusters that would support execution. This convenient transparency to the user comes with a series of important limitations:
+\noindent \emph{Amazon Elastic MapReduce} \cite{aws} exposes a web service interface that allows the user to send MapReduce execution requests. EMR is supported internally by Amazon EC2 to provision, on demand, the required infrastructure by the MapReduce workflow. Thus, an EMR user will not have to worry about provisioning, creating, configuring and destroying the virtual clusters that would support execution. This convenient transparency to the user comes with a series of important limitations:
 
 \begin{description}
     \item[Underlying infrastructure restriction]: Being as it is a service owned by Amazon, it was expected that usage of computational resources out of their reach were limited; and so it is: EMR users will not be able to couple their virtual instances to other clouds that may incur in lower exploitation costs.
     qosh, as it has been shown, separates and exposes responsibilities in a way that using a different cloud, for example, requires only adapting a new Compute module to the particular REST API of the cloud that would be used.
-    \item[Installation restriction]: It is not possible to deploy a custom-built VM to execute MapReduce applications in EMR. qosh will handle work flows driving a Hadoop VM with a loose coupling with the deploying subsystem (Fabric) with a doble end:
+    \item[Installation restriction]: It is not possible to deploy a custom-built VM to execute MapReduce applications in EMR. qosh will handle workflows driving a Hadoop VM with a loose coupling with the deploying subsystem (Fabric) with a doble end:
     \begin{itemize}
         \item To ease VM customizations and upgrades (Kernel, Hadoop, JRE, etc.).
         \item To give the possibility to create custom VMs from scratch.
@@ -47,13 +47,13 @@ EMR draws on Amazon S3 to store input data to Hadoop as well as to write final r
 
 Information storage and I/O is delegated upon an S3 compatibility adaptor supported both by Nimbus and Eucalyptus --- with \emph{Cumulus} and \emph{Walrus} respectively.
 
-Besides, and maybe the most interesting Resilin trait, its implementors experiment with the possibility to execute MapRecude work flows atop infrastructure provided by different clouds. Though it may not be the general approach to provision private infrastructure to virtual deployments due to the inherent heterogeneity among different IaaS frameworks, it might prove useful when the infrastructure has to be drawn upon from public clouds. In the abstract, the idea has been implemented bridging deployments on different clouds by exposing instances on one cloud to the other cloud Master Node as if they were part of the same virtual cluster.
+Besides, and maybe the most interesting Resilin trait, its implementors experiment with the possibility to execute MapRecude workflows atop infrastructure provided by different clouds. Though it may not be the general approach to provision private infrastructure to virtual deployments due to the inherent heterogeneity among different IaaS frameworks, it might prove useful when the infrastructure has to be drawn upon from public clouds. In the abstract, the idea has been implemented bridging deployments on different clouds by exposing instances on one cloud to the other cloud Master Node as if they were part of the same virtual cluster.
 
 qosh does not support hybrid cloud deployments. Yet, it cloud be implemented without much ado modifying the Compute module accordingly.
 
 Another salient feature of Resilin is the capacity to grow or shrink virtual clusters when the processing had already started. New instances will be assigned tasks as soon as they are registered in the Master process. qosh does not support on-line cluster resizing.
 
-The bottom line is that Resilin is the solution resembling qosh the most; delegating the reduction of MapReduce work flows on Hadoop and the virtual deployments on an IaaS Cloud EC2-compatible --- all of the four evaluated in \ref{sec:frameworksevaluados} are. Lastly, figure \ref{fig:resilinproyecto} lists the different tools that aid supporting the functionality exposed.
+The bottom line is that Resilin is the solution resembling qosh the most; delegating the reduction of MapReduce workflows on Hadoop and the virtual deployments on an IaaS Cloud EC2-compatible --- all of the four evaluated in \ref{sec:frameworksevaluados} are. Lastly, figure \ref{fig:resilinproyecto} lists the different tools that aid supporting the functionality exposed.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -76,14 +76,14 @@ The bottom line is that Resilin is the solution resembling qosh the most; delega
 \end{figure}
 
 \section{Cloud MapReduce}\label{sec:cloudmapred}
-\noindent \emph{Cloud MapReduce} approaches the problem of processing MapReduce work flows over \emph{elastic} infrastructure in a different manner. While Resilin tries to orchestrate executions by putting together every component required to carry computations through, Cloud MapReduce is backed by Amazon's EC2 services to implement the MapReduce model \cite{googlemapreduce} \emph{directly} on top of them.
+\noindent \emph{Cloud MapReduce} approaches the problem of processing MapReduce workflows over \emph{elastic} infrastructure in a different manner. While Resilin tries to orchestrate executions by putting together every component required to carry computations through, Cloud MapReduce is backed by Amazon's EC2 services to implement the MapReduce model \cite{googlemapreduce} \emph{directly} on top of them.
 
 Following there is a list of the most relevant characteristics of Cloud MapReduce.
 
 \begin{description}
     \item[Incremental scalability:] Is the ability to add new nodes to the virtual cluster when job processing had already begun. New instances will fetch the global job state and will be assigned new tasks as they become online.
     \item[Symmetry and Decentralization:] Is the quality by which Cloud MapReduce will deploy virtual clusters with a flat hierarchy. This feature represents the first separation from what it has been discussed hitherto, where at least one node was in charge of scheduling the execution and storage of the others. In Cloud MapReduce the nodes in a virtual cluster collaborate independently from each other, choosing to process the task that would best accommodate its capabilities and that it would work best from a global job perspective. This symmetry makes it easier for a cluster to overcome failing nodes as there is no single point of failure.
-    \item[Heterogeneity:] Understood with a double component: On the one hand, the possible coexistence of VMs of different computational flavors in the same work flow; on the other, the ability to create instances on multiple clouds. Resilin supports both features, qosh does not out of the box.
+    \item[Heterogeneity:] Understood with a double component: On the one hand, the possible coexistence of VMs of different computational flavors in the same workflow; on the other, the ability to create instances on multiple clouds. Resilin supports both features, qosh does not out of the box.
 \end{description}
 
 Cloud MapReduce stores I/O and intermediate data into S3. Internode communication is solved using Amazon queue service (\emph{SQS} or \emph{Simple Queue Service}). Meta-data is saved in \emph{SimpleDB}.
@@ -123,5 +123,5 @@ Again, the storage back end is a combination of HDFS and the instances' local fi
 \section{Summary}\label{sec:resumenconclusiones}
 \noindent Bearing in mind all that has been discussed up to this point, it may be though that qosh is the most limited of the solutions. However, it introduces an important advantage: its utmost simplicity. What could be a subordinate matter comes to foreground if the user is not an expert or if a quick \emph{elastic} Hadoop test-drive is due.
 
-No other solution presents such a simple and self-contained installation, configuration and infrastructure exploitation. They all need a larger effort from the user to start processing MapReduce work flows. In general, they require: knowing their inner workings, previous deployment of an IaaS cloud, \emph{pay-per-use} or share inputs with third parties. qosh, is the natural choice for initially small deployments or as introductory point to MapReduce and IaaS Cloud technologies. Starting from the minimum automatic deployment, the admin. could add new nodes to the cloud, update the Hadoop VM, alter the infrastructure provisioning mechanics or install another IaaS Cloud with no effort.
+No other solution presents such a simple and self-contained installation, configuration and infrastructure exploitation. They all need a larger effort from the user to start processing MapReduce workflows. In general, they require: knowing their inner workings, previous deployment of an IaaS cloud, \emph{pay-per-use} or share inputs with third parties. qosh, is the natural choice for initially small deployments or as introductory point to MapReduce and IaaS Cloud technologies. Starting from the minimum automatic deployment, the admin. could add new nodes to the cloud, update the Hadoop VM, alter the infrastructure provisioning mechanics or install another IaaS Cloud with no effort.
 

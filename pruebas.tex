@@ -17,7 +17,7 @@ Regarding the physical layer, both nodes posses the same hardware configuration:
 The Hadoop virtual image, whose creation procedure is described in section \ref{subsec:maquinavirtual}, will be used to create the VM instances that will effectively carry out the computations. Hadoop version is 1.0.4 and JRE's is 1.7v6 from Oracle. Figure \ref{fig:clusterdespliegue} shows the Hadoop VM in context. This instance will be increasingly provided from 1 to 4 GB of RAM and the same number of VCPUs to assess qosh's scaling. This varying amount of RAM will be shared between the guest OS and the JVM. The deployment has been configured to allow Hadoop to address all the memory in the VM --- except for those addresses in use by the OS and the JVM.
 
 \section{Testing Methodology}\label{sec:metodologiaprueba}
-\noindent This section contains both in and out scalability analysis and a study on the behavior on increasing input sizes. To evaluate how qosh scales, a map reduce work flow, large enough to stress every instance in the virtual cluster, will be fed to Hadoop; the work flow will count the words in 62.5 MB of plain text.
+\noindent This section contains both in and out scalability analysis and a study on the behavior on increasing input sizes. To evaluate how qosh scales, a map reduce workflow, large enough to stress every instance in the virtual cluster, will be fed to Hadoop; the work flow will count the words in 62.5 MB of plain text.
 
 To actually assess the horizontal scalability, the size of the virtual cluster will progressively be doubled starting from one instance up to four. To test vertical scalability, two VMs will be initially spawned with 1 GB of RAM each, to have their RAM and VCPU count doubled on each test case until reaching 4 GB. Finally, to evaluate running time tendency input text size will be doubled from the original 62.5 MB to 250 MB.
 
@@ -28,14 +28,14 @@ As Glance and Compute cooperate to cache images, the time required to start an i
 \begin{description}
     \item[Deploying:] time elapsed since the virtual cluster creation request is send until every instance is accessible.
     \item[Configuring:] time required to establish the Hadoop execution environment. It comprises the time to configure the virtual Hadoop cluster plus the time to distribute input data onto HDFS.
-    \item[MapReducing:] time dedicated by Hadoop to execute the \emph{wordcount} work flow.
+    \item[MapReducing:] time dedicated by Hadoop to execute the \emph{wordcount} workflow.
     \item[Cleaning:] time required to wipe out the execution environment. It does not include the time it takes OpenStack to completely remove the instances.
     \item[Total:] 
 \end{description}
 
 It should be noted that the timings shown are the averaged results of the ten executions in each case.
 
-\section{Analysis of the Results}\label{sec:analisisresultados}
+\section{Analyzing the Results}\label{sec:analisisresultados}
 
 \begin{figure}[tbp]
 \begin{center}

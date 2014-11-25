@@ -14,7 +14,7 @@
 
 To streamline development, it is determined that the very first qosh version be tested on a personal computer. As shown on figure \ref{fig:arquitecturaglobal}, Fedora Linux is installed atop the hardware and OpenStack Folsom set up within. qosh will draw on the infrastructure provided by the local OpenStack configuration to deploy virtual Hadoop clusters. While it would be better to make qosh more flexible allowing for remote infrastructure consumption, it would also become harder to test.
 
-Figure \ref{fig:arquitecturadetalle} shows a more detailed view on qosh design details. The VM contains a Hadoop installation ready to be put to use as soon as it was started. The VM life cycle is managed by OpenStack and its execution environment shaped by KVM, the chosen hypervisor. Besides, HDFS has been used as temporal persistence layer while the results are not send back to the controller --- the same machine in this testing environment. It shall be recalled that even though HDFS is a steady data store, the Hadoop VMs are created and removed for every work flow execution effectively destroying HDFS data at the end of processing each job. So, it is qosh's job to orchestrate data extraction before shutting down the virtual cluster.
+Figure \ref{fig:arquitecturadetalle} shows a more detailed view on qosh design details. The VM contains a Hadoop installation ready to be put to use as soon as it was started. The VM life cycle is managed by OpenStack and its execution environment shaped by KVM, the chosen hypervisor. Besides, HDFS has been used as temporal persistence layer while the results are not send back to the controller --- the same machine in this testing environment. It shall be recalled that even though HDFS is a steady data store, the Hadoop VMs are created and removed for every workflow execution effectively destroying HDFS data at the end of processing each job. So, it is qosh's job to orchestrate data extraction before shutting down the virtual cluster.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -108,7 +108,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \noindent All the three modules conforming qosh core have been written in Python. The tests of the first version run over Fabric 1.4.3, Django 1.4.2 and Python 2.7.3. The configuration inside the VM is carried out by three \emph{Bash-Script}s in three different instants in the VM life cycle: before bringing the network up, after having completed the boot sequence and before shutdown. They will be detailed in section \ref{subsec:maquinavirtual}.
 
 \subsection{Hadoop Virtual Machine}\label{subsec:maquinavirtual}
-\noindent The Hadoop virtual machine is a vital asset for the qosh project; in the end it is Hadoop who executes work flows. The versions configured are Hadoop 1.0.4 and Oracle JRE 1.7. Installing and tunning every service in the VM has not been a complex process, whereas it has been long and interesting enough, for it is potentially reusable to create other customized VMs, to list every step followed to complete the setup.
+\noindent The Hadoop virtual machine is a vital asset for the qosh project; in the end it is Hadoop who executes workflows. The versions configured are Hadoop 1.0.4 and Oracle JRE 1.7. Installing and tunning every service in the VM has not been a complex process, whereas it has been long and interesting enough, for it is potentially reusable to create other customized VMs, to list every step followed to complete the setup.
 
 \begin{itemize}
  \item In the local development machine the \emph{Virtual Machine Manager} (package \texttt{virt-manager}) was installed with \texttt{yum}. \texttt{yum} automatically installed dependent libraries like \texttt{libvirt}, the Kernel Virtual Machine hypervisor module (KVM) and a wrapper to handle it (\texttt{qemu-kvm}).
@@ -125,7 +125,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
  \item Finally, both the \emph{initram} and the kernel image were copied out from the VM to the local file system.
 \end{itemize}
 
-\subsection{Low Level Diagramas}\label{subsec:diagramasimpl}
+\subsection{Low Level Diagrams}\label{subsec:diagramasimpl}
 \noindent Next comes the diagram set that exposes those features closer to qosh implementation.
 
 \subsubsection{Class Diagram --- Compute Module}\label{subsubsec:implementacioncompute}
@@ -157,7 +157,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 
 \begin{description}
  \item[Views:] Is a delegate class implementing the behavior on each \emph{view}. It interacts with qosh Compute module to communicate with the cloud.
- \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop work flows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
+ \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop workflows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
  \item[OpenStackBackend:] Is a small class that manages user logins. It is plugged into Django authenticating pipeline to delegate the clearing of user credentials to Keystone. In so doing, user access details will remain securely stored with Keystone with no need to have them duplicately stored.
  \item[OSServer y OSFlavor:] Are a kind of \emph{Transfer Object}s holding a subset of the outputted JSON data returned from the invocation of OpenStack REST API.
 \end{description}
@@ -179,7 +179,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
    \item[Model:] Is the base class of the object model supporting the business logic. Every object within the \emph{model layer} of our application extends this class --- i.e. \texttt{Job} and \texttt{Server}. Django object-relational mapper automatically translates this object model into a relational model as well as object-based queries into SQL ones.
    \item[Fields:] Hold the information related to object model classes helping Django persist the properties of the objects in a relational data base.
   \end{description}
- \item[Job:] Holds the meta-data of a Hadoop MapReduce work flow. MySQL will store these data persistently, meanwhile the file system in the Cloud Controller will actually store the information associated with the execution --- the jar file with the implementing MapReduce algorithm, inputs and outputs.
+ \item[Job:] Holds the meta-data of a Hadoop MapReduce workflow. MySQL will store these data persistently, meanwhile the file system in the Cloud Controller will actually store the information associated with the execution --- the jar file with the implementing MapReduce algorithm, inputs and outputs.
  \item[Server:] Contains the operating features of each virtual machine that had been part of a Hadoop job.
  \item[User:] Is the {Transfer Object} that is used to convey user-related information from the authorization back-end to the web interface.
 \end{description}
@@ -197,7 +197,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 
 \begin{description}
  \item[LoginForm:] Is the user sign in form. Made up of two character fields holding the user name and password.
- \item[JobForm:] As its name suggests, is the form that allows for defining the work flow configuration. It is formed up by a set of \texttt{Fields} containing the following information: the virtual server name prefix, the qualified name of the Java class implementing the Mapper and Reducer, the input file, the \texttt{jar} package, the number of virtual servers to be deployed and their computational \emph{flavor}.
+ \item[JobForm:] As its name suggests, is the form that allows for defining the workflow configuration. It is formed up by a set of \texttt{Fields} containing the following information: the virtual server name prefix, the qualified name of the Java class implementing the Mapper and Reducer, the input file, the \texttt{jar} package, the number of virtual servers to be deployed and their computational \emph{flavor}.
 \end{description}
 
 
