@@ -92,7 +92,7 @@ Slowly but steadily these managing systems became larger in reach and responsibi
 \section{MapReduce Paradigm}\label{sec:mapred}
 \noindent The origin of the paradigm centers around a publication by two Google employees \cite{googlemapreduce}. In this paper they explained a method implementation devised to abstract the common parts present in distributed computing that rendered simple but large problems much more complex to solve when paralleling their own code on massive clusters.
 
-A concise definition states that MapReduce is ``\textit{a data processing model and execution environment that runs on large clusters of commodity computers}'' \cite{hadoopdefguide}.
+A concise definition states that MapReduce is ``\emph{a data processing model and execution environment that runs on large clusters of commodity computers}'' \cite{hadoopdefguide}.
 
 \subsection{Programming Model}\label{subsec:programacionmapred}
 \noindent The MapReduce programming model requires the developer express problems as a partition of two well-defined pieces. A first part deals with the reading of input data and with producing a set of intermediate results that will be scattered over the cluster nodes. These intermediate transformations will be grouped according to an intermediate key value. A second phase begins with that grouping of intermediate results, and concludes when every \emph{reduce} operation on the groupings succeeds. Seen from another vantage point, the first phase corresponds, broadly speaking, to the behavior of the functional \emph{map} and the second to the functional \emph{fold}.
