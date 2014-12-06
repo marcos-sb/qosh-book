@@ -1,8 +1,8 @@
 \chapter{A Private Cloud for MapReduce Applications}\label{cap:solucion}
-\noindent This chapter introduces a novel solution combining the virtual infrastructure managed with OpenStack and the Hadoop implementation of MapReduce to conform a powerful computational tandem. \emph{qosh}, as this project has been called, will be described along this section moving from architecture to implementation.
+\noindent This chapter introduces a novel solution that combines the virtual infrastructure managed with OpenStack and the Hadoop implementation of MapReduce to conform a powerful computational tandem. \emph{qosh}, as it has been called, will be described throughout this section moving from architecture to implementation.
 
 \section{Architecture}\label{sec:diseno}
-\noindent Figure \ref{fig:arquitecturaglobal} shows a high level portrait of qosh execution environment. The component that acts as interface between system and user is displayed on the right end. It abstracts the inherent difficulty in configuring the job execution context and in deploying the virtual cluster. Furthermore, qosh will keep track of submitted jobs, MapReduce \texttt{jar} files, input data and output results, with no need to walk the HDFS to search for data.
+\noindent Figure \ref{fig:arquitecturaglobal} shows a high level portrait of qosh's execution environment. The component that acts as interface between system and user is displayed on the right end. It abstracts the inherent difficulty in configuring the job execution context and in deploying the virtual cluster. Furthermore, qosh will keep track of submitted jobs, MapReduce \texttt{jar} files, input data and output results, with no need to walk the HDFS to search for data.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -14,7 +14,7 @@
 
 To streamline development, it is determined that the very first qosh version be tested on a personal computer. As shown on figure \ref{fig:arquitecturaglobal}, Fedora Linux is installed atop the hardware and OpenStack Folsom set up within. qosh will draw on the infrastructure provided by the local OpenStack configuration to deploy virtual Hadoop clusters. While it would be better to make qosh more flexible allowing for remote infrastructure consumption, it would also become harder to test.
 
-Figure \ref{fig:arquitecturadetalle} shows a more detailed view on qosh design details. The VM contains a Hadoop installation ready to be put to use as soon as it was started. The VM life cycle is managed by OpenStack and its execution environment shaped by KVM, the chosen hypervisor. Besides, HDFS has been used as temporal persistence layer while the results are not send back to the controller --- the same machine in this testing environment. It shall be recalled that even though HDFS is a steady data store, the Hadoop VMs are created and removed for every workflow execution effectively destroying HDFS data at the end of processing each job. So, it is qosh's job to orchestrate data extraction before shutting down the virtual cluster.
+Figure \ref{fig:arquitecturadetalle} shows a more detailed view on qosh design details. The VM contains a Hadoop installation ready to be put to use as soon as it was started. The VM life-cycle is managed by OpenStack and its execution environment shaped by KVM, the chosen hypervisor. Besides, HDFS has been used as temporal persistence layer while the results are not send back to the controller --- the same machine in this testing environment. It shall be recalled that even though HDFS is a safe data store, the Hadoop VMs are created and removed for every workflow execution effectively destroying HDFS data at the end of processing each job. So, it is qosh's job to orchestrate data extraction before shutting down the virtual cluster.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -35,7 +35,7 @@ Figure \ref{fig:arquitecturainterfaz} shows the modular decomposition of qosh or
 \end{figure}
 
 \begin{description}
- \item[Compute:] Acts as client to OpenStack REST API. It handles every interaction with the cloud decoupling qosh fromt the particular IaaS Cloud.
+ \item[Compute:] Acts as client to OpenStack REST API. It handles every interaction with the cloud decoupling qosh from the particular IaaS Cloud.
  \item[Django:] Is used in qosh to let users manage their MapReduce executions with ease via a web interface.
  \item[Fabric:] Is the Python library included in qosh to configure the virtual cluster deployment and destruction.
 \end{description}
@@ -55,7 +55,7 @@ Figure \ref{fig:arquitecturainterfaz} shows the modular decomposition of qosh or
 \end{figure}
 
 \begin{description}
- \item[Apache httpd:] Relied on to manage user interaction with OpenStack Dashboard, it may also be used to with qosh web interface. Initially, qosh depends on Python web server module to handle user requests, but \emph{httpd} might be easily configured.
+ \item[Apache httpd:] Relied on to manage user interaction with OpenStack Dashboard, it may also be used to with qosh web interface. qosh relies on Python's \texttt{SimpleHTTPServer} web server module to handle user requests, but \texttt{httpd} can be easily configured for real-life deployments.
  \item[memcached:] Is employed to cache web pages in order to speedup load times.
  \item[MySQL:] Chosen relational DBMS to store job meta-data.
 \end{description}
@@ -75,7 +75,7 @@ Figure \ref{fig:arquitecturainterfaz} shows the modular decomposition of qosh or
 \subsubsection{Machine State Diagram}\label{subsubsec:navegacion}
 \noindent Figure \ref{fig:navegacion} presents a summary on the navigation flow across the web interface. An example interaction is subsequently described.
 
-Initially, the user is presented the \emph{Login} page so that he/she could log into qosh. If the supplied credentials were cleared --- the user must be previously registered in Keystone as user/pass is shared with qosh ---, the \emph{Main} page is shown. From there the user may \emph{Configure Job} or go over the \emph{Job History} to get some \emph{Job Details}.
+Initially, the user is presented the \emph{Login} page so that he/she could log into qosh. If the supplied credentials were cleared --- the user must be previously registered in Keystone as access is handled by OpenStack ---, the \emph{Main} page would be shown. From there the user may \emph{Configure Job} or go over the \emph{Job History} to get \emph{Job Details}.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -91,7 +91,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \begin{description}
  \item[json:] Parses structured JSON-formated data and permits its manipulation. OpenStack REST API understands both XML and JSON.
  \item[Exception:] Python class representing a generic exception.
- \item[ServiceError:] Extends \texttt{Exception} to notify and handle any error that may be raised during execution. It's objects have two properties: an HTTP error code and error description.
+ \item[ServiceError:] Extends \texttt{Exception} to notify and handle any error that may be raised during execution. Its objects have two member fields: an HTTP error code and an error description.
  \item[Environment:] Contains the set of global options for configuring the virtual deployment.
  \item[httplib:] The Python module containing functions, classes and helpers toward interacting with HTTP connections. qosh banks on it to help consume the OpenStack REST service.
 \end{description}
@@ -105,22 +105,22 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \end{figure}
 
 \section{Implementation}\label{sec:implementacion}
-\noindent All the three modules conforming qosh core have been written in Python. The tests of the first version run over Fabric 1.4.3, Django 1.4.2 and Python 2.7.3. The configuration inside the VM is carried out by three \emph{Bash-Script}s in three different instants in the VM life cycle: before bringing the network up, after having completed the boot sequence and before shutdown. They will be detailed in section \ref{subsec:maquinavirtual}.
+\noindent All of the three modules conforming qosh's core have been written in Python. The tests of the first version have been run over Fabric 1.4.3, Django 1.4.2 and Python 2.7.3. The configuration inside the VM is carried out by three \emph{Bash-Script}s in three different moments in the VM life-cycle: before bringing the network up, after having completed the boot sequence and before shutdown. They will be detailed in section \ref{subsec:maquinavirtual}.
 
 \subsection{Hadoop Virtual Machine}\label{subsec:maquinavirtual}
-\noindent The Hadoop virtual machine is a vital asset for the qosh project; in the end it is Hadoop who executes workflows. The versions configured are Hadoop 1.0.4 and Oracle JRE 1.7. Installing and tunning every service in the VM has not been a complex process, whereas it has been long and interesting enough, for it is potentially reusable to create other customized VMs, to list every step followed to complete the setup.
+\noindent The Hadoop virtual machine is a vital asset for qosh; in the end it is Hadoop that executes user workflows. The versions configured are Hadoop 1.0.4 and Oracle JRE 1.7. Installing and tunning every service in the VM has not been a complex process, whereas it has been long and interesting enough, for it is potentially reusable to create other customized VMs, to list every step followed to complete the setup.
 
 \begin{itemize}
- \item In the local development machine the \emph{Virtual Machine Manager} (package \texttt{virt-manager}) was installed with \texttt{yum}. \texttt{yum} automatically installed dependent libraries like \texttt{libvirt}, the Kernel Virtual Machine hypervisor module (KVM) and a wrapper to handle it (\texttt{qemu-kvm}).
+ \item In the local development machine the \emph{Virtual Machine Manager} (package \texttt{virt-manager}) was installed with \texttt{yum}. It automatically installed dependent libraries like \texttt{libvirt}, the Kernel Virtual Machine hypervisor module (KVM) and a wrapper to handle it (\texttt{qemu-kvm}).
  \item Through the Virtual Machine Manager, a VM with 1 GB of RAM, 4 GB for the drive image within a \texttt{qcow2} container and both APIC and ACPI was created anew.
  \item A minimal network install of CentOS 6.3 was carried through. \emph{Basic Server} was chosen as initial package set on a single ext4 partition --- no swap partition --- without LVM.
- \item After the initial boot sequence, the distribution was put to the latest stable version available.
+ \item After the initial boot sequence, the distribution was updated to the latest \emph{stable} version available.
  \item The Oracle JRE 1.7 and Hadoop 1.0.4 were downloaded from official sources and subsequently installed on the VM.
  \item A new user (\emph{hduser}) was registered and set \emph{hadoop} as its primary group. As a result, the permission of the files related to Hadoop --- configuration files and scripts ---- were updated to allow this new user to launch and kill MapReduce jobs.
- \item \texttt{sshd} was tuned to disable superuser connections and user/pass authentication method; only ssh tunnels cleared by keypairs will be permitted.
- \item Three scripts --- similar to Ubuntu \texttt{cloud-init} scripts --- were written to \texttt{/etc/init.d/cloud-*} to customize part of the VM behavior. An important feature of them being they manage injecting the public part of the keypair used for authentication into the VM file system --- in \texttt{/home/hduser/.ssh/authorized\_keys} --- when it boots, so the owner of the private part can authenticate.
- \item The \texttt{yum groups} utility was applied to remove unused services like \emph{X-server}.
- \item From the local machine the VM was terminated and its drive image was mounted with \texttt{qemu-nbd} to remove logs and user history from the VM. Then, a 5 GB zeroed-file was created with \texttt{dd} inside the VM file system, failing, for there was not enough free space to accommodate 5 GB within a 4 GB image, while filling the remaining space up with zeros. Just after that, \texttt{qemu-img} was invoked to compress the image into a new file.
+ \item \texttt{sshd} was tuned to disable superuser connections and user/pass authentication method; only ssh tunnels cleared by keypairs would be permitted.
+ \item Three scripts --- similar to Ubuntu \texttt{cloud-init} scripts --- were written to \texttt{/etc/init.d/cloud-*} to customize part of the VM behavior. An important feature of them being they manage injecting the public part of the keypair used for authentication into the VM file system --- in \texttt{/home/hduser/.ssh/authorized\_keys} --- when it boots, so the holder of the private part can connect.
+ \item The \texttt{yum groups} utility was applied to remove unused services like the \emph{X-server}.
+ \item From the local machine, the VM was terminated and its drive image was mounted with \texttt{qemu-nbd} to remove logs and user history from the VM. Then, a 5 GB zeroed-file was created with \texttt{dd} inside the VM file system, failing, for there was not enough free space to accommodate 5 GB within a 4 GB image, while filling the remaining space up with zeros. Just after that, \texttt{qemu-img} was invoked to compress the image into a new file.
  \item Next, \texttt{fdisk} was used locally to observe the VM file system block size and initial block number of the Hadoop partition --- the only partition. By multiplying both values the partition offset was obtained, allowing for the extraction of the Hadoop partition using \texttt{qemu-nbd} offset-mounting capabilities and \texttt{dd} to dump, again, to a new file.
  \item Finally, both the \emph{initram} and the kernel image were copied out from the VM to the local file system.
 \end{itemize}
@@ -158,8 +158,8 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \begin{description}
  \item[Views:] Is a delegate class implementing the behavior on each \emph{view}. It interacts with qosh Compute module to communicate with the cloud.
  \item[Process:] Is a \texttt{multiprocessing.Process} wrapper class encapsulating the logic to create processes that will handle Hadoop workflows execution collaborating with \texttt{Compute} and \texttt{Fabric} modules.
- \item[OpenStackBackend:] Is a small class that manages user logins. It is plugged into Django authenticating pipeline to delegate the clearing of user credentials to Keystone. In so doing, user access details will remain securely stored with Keystone with no need to have them duplicately stored.
- \item[OSServer y OSFlavor:] Are a kind of \emph{Transfer Object}s holding a subset of the outputted JSON data returned from the invocation of OpenStack REST API.
+ \item[OpenStackBackend:] Is a small class that manages user logins. It is plugged into Django authenticating pipeline to delegate the clearing of user credentials to Keystone. In so doing, user access details will remain securely stored with Keystone with no need to have them duplicately stored elsewhere.
+ \item[OSServer y OSFlavor:] Are a kind of \emph{Transfer Object}s holding a subset of the outputted JSON data returned from the invocation of the OpenStack REST service.
 \end{description}
 
 \subsubsection{Class Diagram --- Django Objects}\label{subsubsec:clasesobjetosdjango}
@@ -185,7 +185,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \end{description}
 
 \subsubsection{Class Diagram --- Django Forms}\label{subsubsec:clasesformulariosdjango}
-\noindent Figura \ref{fig:clasesformulariosdjango} shows the class breakdown supporting the job configuration-holding forms of the web interface. \texttt{django.forms} package is laid out like the \texttt{django.db.models} package discussed above, being in this case \texttt{Form}, together with any \texttt{Field} required, the extensible class Django provides to concrete user forms.
+\noindent Figura \ref{fig:clasesformulariosdjango} shows the class breakdown supporting the job configuration-holding forms of the web interface. \texttt{django.forms} package is laid out like the \texttt{django.db.models} package discussed above, being in this case \texttt{Form}, together with any \texttt{Field} required, the extensible class Django provides to customize user forms.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -202,7 +202,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 
 
 \subsubsection{Entity-Relationship Diagram}\label{subsubsec:entidadrelacion}
-\noindent It has been pointed briefly that Django can automatically build the data base logical model derived from the object schema as written by the developer. And as expected, \emph{CRUD} operations on the DB are also managed by Django. Figure \ref{fig:entidadrelacion} shows the actual \emph{Entity-Relationship} diagram of the schema that is contained in the DB.
+\noindent It has been briefly pointed out that Django can automatically build the data base logical model derived from the object schema written by the developer. And as expected, \emph{CRUD} operations on the DB are also managed by Django. Figure \ref{fig:entidadrelacion} shows the actual \emph{Entity-Relationship} diagram of the schema that is contained in MySQL.
 
 \begin{figure}[bp]
 \begin{center}
@@ -213,7 +213,7 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \end{figure}
 
 \subsubsection{Sequence Diagrams}\label{subsubsec:secuencia}
-\noindent Figures \ref{fig:secuencia1} y \ref{fig:secuencia2} present two Sequence Diagams. They reflect the most interesting subset of messages that are interchanged between the different execution-participating entities. The sequences suppose that no errors raise during the interaction, that the user has previously signed in, that every job defining information is typed correctly and that the quota lets the deployment of the virtual cluster be carried through. Figura \ref{fig:secuencia1} pictures the full interaction. Figure \ref{fig:secuencia2} details the collaboration between classes after message \emph{\#24} in figure \ref{fig:secuencia1}.
+\noindent Figures \ref{fig:secuencia1} y \ref{fig:secuencia2} present two Sequence Diagams. They reflect the most interesting subset of messages that are interchanged between the different execution-participating entities. The sequences suppose that no errors raise during the interaction, that the user has previously signed in, that every job defining information is typed correctly and that the quota lets the deployment of the virtual cluster be carried through. Figure \ref{fig:secuencia1} pictures the full interaction. Figure \ref{fig:secuencia2} details the collaboration between classes after message \emph{\#24} in figure \ref{fig:secuencia1}.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -230,4 +230,3 @@ Initially, the user is presented the \emph{Login} page so that he/she could log 
 \label{fig:secuencia2}
 \end{center}
 \end{figure}
-
