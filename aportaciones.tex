@@ -9,12 +9,12 @@
 The main qosh characteristics may be summarized as follows.
 
 \begin{description}
-    \item[Simplicity:] both for installation and exploitation. The installer cannot be any easier and the web interface provides the means to define Hadoop clusters indeterminately large, send in MapReduce workflows and retrieve results directly and intuitively. The Annex \ref{cap:guiainstalacion} shows a quick guide to complete a testing deployment.
-    \item[Vertical integration:] of every component that allows qosh function. The installation script sets up the execution environment for every level needing no interaction from the user.
+    \item[Simplicity] both for installation and exploitation. The installer cannot be any easier and the web interface provides the means to define Hadoop clusters indeterminately large, send in MapReduce workflows and retrieve results directly and intuitively. The Annex \ref{cap:guiainstalacion} shows a quick guide to complete a testing deployment.
+    \item[Vertical integration] of every component that allows qosh function. The installation script sets up the execution environment for every level needing no interaction from the user.
     \item[High performance:] in the initial deployment. qosh has devised to be simple and flexible but also performing. Other simple solutions like \emph{DevStack}, while easy to configure and run, impose a serious penalty to performance rendering them unable to provide the required environment to develop applications on top of OpenStack --- which, of course, it is not its main purpose.
-    \item[Reusability:] of fundamental components. By having followed AWS' guidelines of letting the injected meta-data configure the instances when booting, it allows any IaaS Cloud to be used --- provided it be AWS-compatible ---, or seen from another perspective, it allows the default Hadoop VM to be installed directly on a real cluster, i.e., without virtualization.
-    \item[Adaptability:] of qosh's to handle infrastructure from other clouds. Using the Compute module as starting point, a partial rewrite would suffice to support any IaaS Cloud.
-    \item[Transparency:] of the whole. The code of any module may be openly accessed, downloaded and modified --- some restrictions may apply ---; including OpenStack, Django, Fabric, Hadoop, Python and qosh.
+    \item[Reusability] of fundamental components. By having followed AWS' guidelines of letting the injected meta-data configure the instances when booting, it allows any IaaS Cloud to be used --- provided it be AWS-compatible ---, or seen from another perspective, it allows the default Hadoop VM to be installed directly on a real cluster, i.e., without virtualization.
+    \item[Adaptability] of qosh's to handle infrastructure from other clouds. Using the Compute module as starting point, a partial rewrite would suffice to support any IaaS Cloud.
+    \item[Transparency] of the whole. The code of any module may be openly accessed, downloaded and modified --- some restrictions may apply ---; including OpenStack, Django, Fabric, Hadoop, Python and qosh.
 \end{description}
 
 \section*{Future Development}\label{sec:directricesfuturo}

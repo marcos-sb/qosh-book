@@ -1,29 +1,29 @@
 \chapter{Hadoop}\label{cap:hadoop}
-\noindent This chapter tries to expose the defining fundamentals of Hadoop architecture. Initially, abstract concepts will be introduced to give way to more particular and deep ideas that explore Hadoop implementation of the MapReduce model in two layers: the processing model and the storage subsystem.
+\noindent This chapter will try to expose the defining fundamentals of Hadoop architecture. General concepts will be introduced first, to give way to deeper ones that will help explore the Hadoop implementation of the MapReduce paradigm in two layers: the processing model and the storage subsystem.
 
 \section{The Beginnings}\label{sec:origen}
-\noindent Hadoop roots its origins in \emph{Apache Nutch}, Mike Cafarella and Doug Cutting's implementation of an open source web index and search engine. Nutch project began in 2002. In spite of the Internet being notoriously smaller at the time, Nutch's underlying technology was unable to make it scale to manage the billion pages that comprised the \emph{old} Internet. But in 2003 Google publishes a research paper introducing \emph{GFS} (\emph{Google File System}) \cite{gfs}, a file system to be used across their clusters of commodity pcs that greatly simplified its deployment. Nutch will inherit a large part of the concepts detailed there translated in their own distributed file system implementation (\emph{NDFS}).
+\noindent Hadoop roots its origins in \emph{Apache Nutch}: Mike Cafarella and Doug Cutting's implementation of an open source web index and search engine. The Nutch project began in 2002. In spite of the Internet being notoriously smaller at the time, Nutch's underlying technology was unable to make it scale to manage the billion pages that comprised that \emph{reduced} Internet. But in 2003 Google publishes a research paper introducing \emph{GFS} (\emph{Google File System}) \cite{gfs}, a file system to be used across their clusters of commodity machines that greatly simplified storing and recovering data from them. Nutch will come to inherit a large part of the concepts detailed there, translating in their own distributed file system implementation (\emph{NDFS}).
 
-Also in 2004 appeared another publication \cite{googlemapreduce} that presented MapReduce, bringing about successive efforts to port Nutch algorithms to adapt to the emerging model. In mid 2005 most of Nutch code run following MapReduce guidelines over NDFS.
+Also in 2004, there appeared another Google publication \cite{googlemapreduce} that presented the MapReduce execution paradigm. This paper would bring about successive efforts to port Nutch algorithms to the recently introduced model. In mid 2005, most of Nutch workflows could be run as MapReduce workflows over NDFS.
 
-Both NDFS and Nutch MapReduce implementation were generic enough to be used without refactoring beyond web page indexing. In 2006 an unrelated project was constituted to extend Nutch's potentially reusable parts to widen their applicability context. This project was called Hadoop. In 2008 \emph{Yahoo!} announced that the index for their search engine in production was being continually refreshed by 10,000 Hadoop nodes. This same year Hadoop is brought out to the world becoming an Apache-backed project corroborating its success.
+Both NDFS and the Nutch MapReduce implementation were generic enough to be used beyond web page indexing without refactoring. In 2006, an unrelated project was started to extend Nutch's potentially reusable parts and widen its applicability context. This project was called Hadoop. In 2008 \emph{Yahoo!} announced that their web index was being continually refreshed by a 10,000-node Hadoop cluster. This same year Hadoop is brought out to the world becoming an Apache-backed project.
 
-Nowadays, Hadoop is without doubt the MapReduce implementation most widely used by a broad range of companies.
+Nowadays, Hadoop is without a doubt the MapReduce implementation most widely used in a broad range of applications.
 
 \section{General Hadoop Architecture}\label{sec:arquitecturahadoop}
-\noindent Hadoop composition differentiates four modules:
+\noindent Hadoop architecture separates four modules:
 \begin{description}
  \item[Hadoop Common:] A module containing the parts used across the implementation. It is mainly comprised of scripts and configuration tools.
- \item[Hadoop MapReduce:] The module implementing the MapReduce processing model.
- \item[Hadoop YARN:] A general purpose framework abstracted from Hadoop MapReduce. It is employed to manage resources and schedule executions in distributed environments.
- \item[Hadoop DFS:] The distributed file system sustaining inputs and outputs from Hadoop clusters.
+ \item[Hadoop MapReduce:] the module implementing the MapReduce processing model.
+ \item[Hadoop YARN:] A general-purpose framework abstracted from the \emph{classical} Hadoop MapReduce. It is employed to manage resources and schedule executions in distributed environments.
+ \item[Hadoop DFS:] The distributed file system sustaining inputs and outputs from Hadoop clusters. It is the default repository for Hadoop I/O.
 \end{description}
 
-Hadoop architecture corresponds to the \emph{Master-Worker} archetype where two roles on each cluster appear: a unique Master and various Workers. These roles, and thus responsibilities, are fixed to different nodes by the cluster admin. If necessary, e.g. for maintenance, the admin may freely re-set the roles to new cluster nodes, only requiring job resubmissions if the Master role were reassigned.
+Hadoop architecture corresponds to the \emph{Master-Worker} archetype: in the clusters of machines there will be two operating roles: a unique Master and various Workers. These roles, and thus responsibilities, are set during daemon start-up and may not change unless they be rebooted. If necessary, e.g. for maintenance, the cluster admin may freely re-set the roles to new cluster nodes, only requiring job resubmissions if the Master role were reassigned and pending jobs were present.
 
-This section will almost exclusively center around MapReduce and Hadoop DFS (HDFS) modules to expose the functionally covered with Hadoop. Hadoop YARN, as discussed, is a subsystem resulting from the isolation of scheduling and processing, both found together in the old --- pre Hadoop 2 --- MapReduce module, retaining task distribution and planning within YARN. This way, YARN is allowed to untie from Hadoop allowing for deployments where YARN orchestrates an implementation-agnostic working set. As of this writing, Hadoop YARN is still an alpha version.
+Hadoop YARN is a subsystem resulting from the isolation of scheduling and processing, coupled together in the old --- pre Hadoop 2 --- MapReduce library, separating task distribution and planning into YARN. In this way, it may be possible for Hadoop deployments to process implementation-agnostic working sets.
 
-Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high level vision of Hadoop architecture. Figure \ref{fig:hadoopmapredhdfs} shows an hypothetical deployment with HDFS. Figure \ref{fig:hadoopmapreddfs} shows a particular Hadoop installation with another supporting distributed file system.
+Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high level vision of Hadoop architecture. Figure \ref{fig:hadoopmapredhdfs} shows an hypothetical deployment with HDFS. Figure \ref{fig:hadoopmapreddfs} shows a particular Hadoop installation with another distributed file system as storage layer.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -41,22 +41,22 @@ Figures \ref{fig:hadoopmapredhdfs} and \ref{fig:hadoopmapreddfs} exhibit a high 
 \end{center}
 \end{figure}
 
-From the figures it can be deduced that Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}), that MapReduce requires a DFS implementation to rely on and that inter-node communication is conveyed through \emph{SSH} tunnels over TCP. Every module includes a web server (\emph{Jetty}) to ease collecting and reporting status information.
+As exposed in the figures, Hadoop runs atop a \emph{Java Virtual Machine} (emph{JVM}) and inter-node communication is securely conveyed through \emph{SSH} tunnels. Besides, every Hadoop module includes a web server (\emph{Jetty}) to ease collecting and reporting status information with standard tools like web browsers.
 
 \section{Hadoop Distributed File System}\label{sec:hdfs}
-\noindent HDFS has been designed to act as archival repository for huge masses of data whose main access pattern be \emph{write-one} \emph{read-many}. While it is no requisite for a data query to follow this access pattern, HDFS performance shines with read queries in batch mode. The underlying infrastructure, again, is composed by commodity pcs that HDFS manages to transform into a reliable, scalable, fault tolerant, self-balancing and network traffic reducing data store. Yet, as individual nodes are regular pcs, in HDFS converge some operating limitations:
+\noindent HDFS has been designed to act as archival repository for huge masses of data whose main access pattern be \emph{write-one} \emph{read-many}. While it is no requisite for a data query to follow this access pattern, HDFS performance shines with read queries in batches. The underlying infrastructure, again, is composed by commodity machines that HDFS will manage to transform into a reliable, scalable, fault tolerant, self-balancing and network traffic reducing data store. Yet, as individual nodes may be regular computers, in HDFS converge some operating limitations:
 
 \begin{itemize}
- \item High data access time. HDFS prioritizes large reads in batches and thus, reading small files is generally discouraged. As complement though, HDFS delivers \emph{very} high throughput by leveraging parallel reads on the cluster.
- \item High data writing time on many small files. Writing a file changes a block. Every file that be smaller than the HDFS block size must be persisted in a single block. That changed block must be send out across the network to keep the file system consistently updated. Thus, appending to many files requires updates in many blocks that would require synchronizing over the network.
- \item Multiple writes to the same file or ``\emph{not-append}'' operations are not supported. HDFS is not a \emph{POSIX}-compilant file system implementing only a set of operations to try to maximize data throughput in distributed environments.
+ \item High \emph{data access time}. HDFS prioritizes large reads in batches and thus, reading small files is  discouraged. However, HDFS delivers \emph{very} high throughput by leveraging parallel reads on the cluster.
+ \item High \emph{data write time} on many small files. Writing a file changes a block. Every file that be smaller than the HDFS block size must be persisted in a single block. That changed block must be sent out across the network to keep the file system coherently updated. Thus, appending to \emph{n} files may at least require updating \emph{n} blocks that would need be synchronized over the network.
+ \item Multiple writers to the same file or \emph{not-append} operations are not supported. HDFS is not a \emph{POSIX}-compilant file system as it implements only the set of operations required to maximize data throughput in distributed environments.
 \end{itemize}
 
-To organize storage, HDFS takes from traditional operating systems the concept of block: an abstraction of the particular drive structure with a double purpose:
+To organize storage, HDFS takes from traditional operating systems the concept of \emph{block}: an abstraction of the particular local file system with a double purpose:
 
 \begin{description}
- \item[Lowering DFS complexity:] Writing a block comprises storing data and meta-data, and handling information related to locate those data on disk. Using the block as the minimum organizational structure simplifies location expressions.
- \item[Incrementing flexibility:] files are free to grow over the size of an HDFS block.
+ \item[Lower DFS complexity:] Writing a block comprises storing data and meta-data, and handling information related to locate those data on disk. Using the block as the minimum organizational structure simplifies location expressions.
+ \item[Increment flexibility:] files are free to grow over the size of an HDFS block.
 \end{description}
 
 To lay local drive blocks in position, HDFS makes use of two processes: the \emph{DataNode} and the \emph{NameNode}. Besides, as support, from Hadoop 0.21.0 onward it is permitted the optional deploying of a \emph{Backup Node} and a \emph{Checkpoint Node} in the same cluster.
@@ -91,7 +91,7 @@ Compared to the Checkpoint Node this process draws less bandwidth due to the fac
 The Hadoop version used in the VM of this project --- version 1.0.4 --- allows only a Backup Node per NameNode or multiple Checkpoint Nodes, not both. It should be noted that including a Backup Node in a cluster gives the possibility to run the NameNode with no persistent storage, i.e. with no allocated space in the local drive to write the fsimage and the edits, making the Backup Node the sole responsible for the duty.
 
 \subsection{Network Topology}\label{subsec:topologiared}
-\noindent One of the fundamental parts to a file system in a distributed environment is the capacity to provide a transparent mechanism by which information is persisted securely while, at the same, a certain amount of performance is maintained. HDFS makes use of an already discussed technique, \emph{replication}, that provides high performance, scalability and fault tolerance. Besides, HDFS has been devised to reduce the network congestion that stems from regular operation giving special emphasis to the way in which data is to be distributed in the cluster, controlling replica count or distance between replicas, among other variables, to concrete the block allocation policy.
+\noindent One of the fundamental parts to a file system in a distributed environment is the capacity to provide a transparent mechanism by which information is persisted securely while, at the same time, a certain amount of performance is maintained. HDFS makes use of an already discussed technique, \emph{replication}, that provides high performance, scalability and fault tolerance. Besides, HDFS has been devised to reduce the network congestion that stems from regular operation giving special emphasis to the way in which data is to be distributed in the cluster, controlling replica count or distance between replicas, among other variables, to concrete the block allocation policy.
 
 \subsubsection{Node Distance}\label{subsubsec:distnodos}
 \noindent To support the features that have been mentioned, it is fundamental for the NameNode to possess some information on the participating DataNodes physical location. With that information, the NameNode would be able to balance the \emph{physical distance} of the replicas, realizing that, generally, fault tolerance increases with replica distance but the bandwidth available to transfer replicas narrows. Thus, the NameNode will have to distribute the replicas across the cluster with a procedure that make the cluster safe without clogging the network.
@@ -131,7 +131,7 @@ This method provides the desirable equilibrium between fault tolerance (by assur
 
 
 \section{Hadoop MapReduce}\label{sec:hadoopmapred}
-\noindent In a typical Hadoop deployment, the execution module is lied over HDFS. This execution module is basically an implementation of the ideas exposed in the Google paper on MapReduce as a new programming paradigm \cite{googlemapreduce}. The core ideas that have been discussed for HDFS hold in this section, but with a different flavor. Hadoop MapReduce architecture is also based on the Master-Worker model and so appear two roles: a Master and a Worker.
+\noindent In a typical Hadoop deployment, the execution module is lied over HDFS. This execution module is basically an implementation of the ideas exposed in the Google paper on MapReduce as a new programming paradigm \cite{googlemapreduce}. The core ideas that have been discussed for HDFS also hold in this section, but with a different flavor. Hadoop MapReduce architecture is also based on the Master-Worker model and so appear two roles: a Master and a Worker.
 
 The Master role is functionally covered by a process called the \emph{JobTracker}, whose main responsibility is task scheduling to workers. Complementarily, the worker role is implemented in the \emph{TaskTracker} which will actually execute the individual tasks reporting their progress back to the JobTracker.
 
