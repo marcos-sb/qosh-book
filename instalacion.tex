@@ -1,4 +1,4 @@
-\chapter{Installation and Exploitation --- quick-openstacked-hadoop}\label{cap:guiainstalacion}
+\chapter{Installation and Exploitation}\label{cap:guiainstalacion}
 \noindent To make a quick deployment in a single node and be able to run MapReduce workflows effortlessly, a \emph{git} repository has been set up with source files, configuration scripts, and the Hadoop VM. This guide will describe the steps required to achieve a basic installation.
 
 \section{Quick Installation}\label{sec:instalacionqosh}
@@ -16,7 +16,7 @@
 The amount of RAM and HDD will limit the number of concurrent instances that are allowed to run --- recall that each instance will be provisioned 1 GB of RAM and 4 GB of HDD on boot from the host computer.
 
 \subsection{Installation}\label{subsec:instalacion}
-\noindent Figure \ref{fig:comandosshel} contains the command list that will have to be typed in a terminal to run the installation and configuration scripts.
+\noindent Figure \ref{fig:comandosshell} contains the command list that will have to be typed in a terminal to run the installation and configuration scripts.
 
 \begin{figure}[tbp]
  \begin{center}
@@ -51,7 +51,7 @@ The amount of RAM and HDD will limit the number of concurrent instances that are
 \end{center}
 \end{figure}
 
-At this point Django's development web server may be started to directly interact with qosh and check whether its installation succeeded --- figure \ref{fig:comandlsshell2} shows the command sequence to start the server. Again, a web browser shall be used to open \url{http://localhost:8000/albaproject/mapred}; then, qosh log in interface should load. Username and password are \emph{udc} again --- recall that user access is delegated entirely to OpenStack Keystone. Figure \ref{fig:comandosshell2} lists the commands that should be typed in a terminal.
+At this point Django's development web server may be started to directly interact with qosh and check whether its installation succeeded --- figure \ref{fig:comandosshell2} shows the command sequence to start the server. Again, a web browser shall be used to open \url{http://localhost:8000/albaproject/mapred}; then, qosh's log in interface should load. User name and password are \emph{udc} again --- recall that user access is delegated entirely to OpenStack Keystone. Figure \ref{fig:comandosshell2} lists the commands that should be typed in a terminal.
 
 \begin{figure}[tbp]
     \begin{center}
@@ -67,9 +67,9 @@ At this point Django's development web server may be started to directly interac
 \end{figure}
 
 \subsection{Testing a Workflow for Hadoop}\label{subsec:flujohadoop}
-\noindent Finally, to ensure every component is completely installed and configured, a real MapReduce workflow should be run in qosh. Input files for this test case might be downloaded from \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list} (\texttt{just\_imagine.tar.gz} and \texttt{bigtxt.tar.gz} --- zipped files containing plain-text files whose words will be counted --- and \texttt{wordcount.jar} --- package containing the classical word count MapReduce implementation.
+\noindent Finally, to ensure every component is completely installed and configured, a real MapReduce workflow should be run in qosh. Input files for this test case might be downloaded from Google Code repository at \url{https://code.google.com/p/quick-openstacked-hadoop/downloads/list}. There should be the files \texttt{just\_imagine.tar.gz} and \texttt{bigtxt.tar.gz}, zipped files containing plain-text files whose words will be counted, and \texttt{wordcount.jar}, a package containing the classical word count MapReduce implementation.
 
-Just after logging in, qosh's main page should load on screen. From there, \emph{Define Job} shall be clicked and the form that sets up the MapReduce job should appear. The fields should be filled in in a similar way as in figure \ref{fig:defmapredjob} before clicking \emph{launch} to begin the process. Once the job be completed the results may be downloaded from the \emph{Job History} page.
+Just after logging in, qosh's main page should load on screen. From there, Define Job shall be clicked and the form to set up the MapReduce job should appear. The fields should be filled in in a similar way as in figure \ref{fig:defmapredjob} before clicking \emph{launch} to begin the process. Once the job be completed, the results may be downloaded from the Job History page.
 
 \begin{figure}[bp]
 \begin{center}
@@ -79,7 +79,7 @@ Just after logging in, qosh's main page should load on screen. From there, \emph
 \end{center}
 \end{figure}
 
-The image \ref{fig:mapredjobhistory} captures the \emph{Job History} page, and the image \ref{fig:mapredjobdetails} shows a capture detailing job \#56 from the \ref{Job Details} page.
+The image \ref{fig:mapredjobhistory} captures the Job History page, and the image \ref{fig:mapredjobdetails} shows a capture detailing job \#56 from the Job Details page.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -100,6 +100,6 @@ The image \ref{fig:mapredjobhistory} captures the \emph{Job History} page, and t
 \section{Long-term Operation}\label{sec:explotacionqosh}
 \noindent To send MapReduce workflows into qosh, the operating procedure described in section \ref{subsec:flujohadoop} should be followed. Changing job options, cluster size, and main class may be accomplished by filling the form fields according to the user's needs.
 
-By default qosh is configured to run in debug mode. This behavior may be easily modified by altering the flag \textbf{DEBUG} within \texttt{settings.py}. Furthermore, it should be noted that qosh will operate much faster when deployed to a production-level web server.
+By default, qosh is configured to run in debug mode. This behavior may be easily modified by altering the flag \texttt{DEBUG} within \texttt{settings.py}. Furthermore, it should be noted that qosh will operate much faster when deployed to a production-level web server.
 
-OpenStack Compute will keep a log in \texttt{/var/log/nova} that could be read should any issue appeared. By default, workflow computed results will be stored to \texttt{\$HOME/Public} which may be changed in \texttt{settings.py}, variable \textbf{MEDIA\_ROOT}.
+OpenStack Compute will keep a log in \texttt{/var/log/nova} that could be read should any issue appear. By default, workflow results will be stored to \texttt{\$HOME/Public} which may be changed in \texttt{settings.py}, variable \texttt{MEDIA\_ROOT}.
