@@ -1,9 +1,10 @@
-\documentclass[12pt,twoside,onecolumn,a4paper]{tesis}
+\documentclass[12pt,twoside,onecolumn,a4paper]{report}
 \usepackage[T1]{fontenc}
-\usepackage[latin1]{inputenc}
+\usepackage{fancyhdr}
+\usepackage[margin=0.79in,includeheadfoot]{geometry}
+%\usepackage[latin1]{inputenc}
 \usepackage[pdftex]{graphicx}
 %\usepackage[small]{subfigure}
-\usepackage{fancyheadings}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{multirow}
@@ -12,83 +13,92 @@
 
 \pagestyle{fancy}
 \bibliographystyle{unsrt}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter. #1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection. #1}}
-\renewcommand{\baselinestretch}{1.1}
-\lhead[\fancyplain{}{\thepage}]{\fancyplain{}{\rightmark}}
-\rhead[\fancyplain{}{\leftmark}]{\fancyplain{}{\thepage}}
-\cfoot{}
+%\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter. #1}{}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection. #1}}
+%\renewcommand{\baselinestretch}{1.1}
+\lhead[\fancyplain{}{\leftmark}]{}
+\rhead[]{\fancyplain{}{\rightmark}}
+%\cfoot{}
 
 
-\renewcommand{\theenumi}{\arabic{enumi}.}
-\renewcommand{\theenumii}{\theenumi\arabic{enumii}.}
-\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
-\renewcommand{\labelenumi}{\theenumi}
-\renewcommand{\labelenumii}{\theenumii}
-\renewcommand{\labelenumiii}{\theenumiii}
+%\renewcommand{\theenumi}{\arabic{enumi}.}
+%\renewcommand{\theenumii}{\theenumi\arabic{enumii}.}
+%\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
+%\renewcommand{\labelenumi}{\theenumi}
+%\renewcommand{\labelenumii}{\theenumii}
+%\renewcommand{\labelenumiii}{\theenumiii}
 
-\oddsidemargin=2 cm
-\marginparwidth=4 cm
-\linespread{1.3}
+\linespread{1.25}
 
 %funcion para compilar solo una parte. Un solo fichero.
 %\includeonly{intro,grid}
 
 %%ampliar margenes cabecera
-\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
-\let\endchangemargin=\endlist
+%\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+%\let\endchangemargin=\endlist
 
 
 \begin{document}
 \pagestyle{empty}
+\newpage\null\newpage
+\newpage\null\newpage
+\newpage\null\newpage
 \include{portada}
-\cleardoublepage
-\pagestyle{empty}
+\newpage\null\newpage
 \include{citas}
-\cleardoublepage
-%\pagestyle{empty}
-%\include{projspec}
-%\cleardoublepage
-\pagestyle{empty}
+\newpage\null\newpage
+\pagenumbering{gobble}
 \include{prefacio}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \pagenumbering{roman} \pagestyle{fancy}
 \tableofcontents
 %\listoftables
 \listoffigures
-\cleardoublepage
-\pagenumbering{arabic} \pagestyle{fancy}
 
 
 %%%%% Aqui van los capitulos. Cada uno es un fichero tex diferente
+\newpage\null\thispagestyle{empty}\newpage
+\newpage\null\thispagestyle{empty}\newpage
+\newpage\null\thispagestyle{empty}\newpage
+\pagenumbering{arabic} \pagestyle{fancy}
 \include{intro}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \include{stateoftheart}
-\cleardoublepage
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
 \include{evaliaas}
-\cleardoublepage
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
 \include{openstack}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \include{hadoop}
-\cleardoublepage
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
 \include{solucion}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \include{pruebas}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \include{conclusiones}
-\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
 \include{aportaciones}
-\renewcommand\chaptername{Apendice}
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
+
+
 \appendix
 \include{instalacion}
-\cleardoublepage
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
+\lhead[\fancyplain{}{\leftmark}]{}
+\rhead[]{\fancyplain{}{\leftmark}}
 \include{glosario}
 
-\cleardoublepage
+\newpage\null\newpage
+\newpage\null\thispagestyle{empty}\newpage
 \nocite{*}
 \bibliography{biblio}
-\markboth{Bibliography}{Bibliography}
 \addcontentsline{toc}{chapter}{Bibliography}
-
+\newpage\null\thispagestyle{empty}\newpage
+\newpage\null\thispagestyle{empty}\newpage
 \end{document}
 
