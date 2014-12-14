@@ -18,7 +18,7 @@
 \end{center}
 \end{figure}
 
-The different components have been devised to run in a shared-nothing fashion. This provides the cloud admin the flexibility required to distribute the modules over the cluster as pleased. An example of a particular OpenStack deployment is shown in figure \ref{fig:despliegueos}. What is missing from the diagram, for clarity, is the asynchronous queue that mediates inter-module communication. Qpid and RabbitMQ are the two queue implementations that are officially documented, being the former the one that we used in our test deployment.
+The different components have been devised to run in a shared-nothing fashion. This provides the cloud admin the flexibility required to distribute the modules over the cluster as pleased. An example of a particular OpenStack deployment is shown in figure \ref{fig:despliegueos}. Missing from the diagram, for clarity, are the connections between the different modules and the asynchronous queue that mediates their communication. Qpid and RabbitMQ are the two queue implementations that are officially documented, being the former the one used in our test deployment.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -29,7 +29,7 @@ The different components have been devised to run in a shared-nothing fashion. T
 \end{figure}
 
 \section{Horizon}\label{sec:horizon}
-\noindent Horizon represents a window to configure and monitor the cloud. As discussed in the previous section, Horizon does not currently --- as of Folsom version --- present a global view of the physical infrastructure, leaving the user in the dark in this respect. Horizon is written in Python on top of \texttt{Django}, a web framework. Django itself relays on a web server like \texttt{httpd} to expose static files, uses a caching mechanism (\texttt{memcached}) to speedup load times and a terminal embedding (\texttt{noVNC}) system to view the output of the virtual graphics card directly on Horizon.
+\noindent Horizon represents a window to configure and monitor the cloud. As discussed in the previous section, Horizon does not currently --- as of Folsom version --- present a global view of the physical infrastructure, leaving the user in the dark in this respect. Horizon is written in Python on top of \texttt{Django}, a web framework. Django itself relays on a web server like \texttt{httpd} to expose static files, uses a caching mechanism (\texttt{memcached}) to speedup load times and a terminal embedding system (\texttt{noVNC}) to view the output of the virtual graphics card directly on Horizon.
 
 To manage and create instances in the cloud, OpenStack gives the cloud admin the ability to register authorization roles that will let the users consume those services whose roles gave access to. While the cloud administrator is allowed to register custom roles, two roles that ship with the distribution are the \emph{Cloud Admin} and the \emph{Cloud Member}.
 
@@ -48,7 +48,7 @@ A user granted the Member role will be able to:
 
 \begin{description}
  \item[Status:] Quota, resources, etc.
- \item[Instances:] create, shutdown, reset, suspend, print log, create image from a running instance (snapshot), etc.
+ \item[Instances:] Create, shutdown, reset, suspend, print log, create image from a running instance (snapshot), etc.
  \item[Volumes:] List, create, modify, attach to an instance, create a volume snapshot, etc.
  \item[Images:] Create, list, delete, modify, etc.
  \item[Networking:] Manage public IPs (floating IPs).
@@ -57,11 +57,11 @@ A user granted the Member role will be able to:
 \end{description}
 
 \section{Keystone}\label{sec:keystone}
-\noindent Keystone is the central security check-point and information repository, storing information needed to access the cloud's installed services. It verifies, before each request, user credentials and authorizations in OpenStack services. Keystone divides this functionality in two parts: on the one hand, user control, on the other, service catalog.
+\noindent Keystone is the central security check-point and user-related data repository, storing the information needed to access the cloud's installed services. It verifies, before each request, user credentials and authorizations to OpenStack services. Keystone divides this functionality in two parts: user control and service catalog.
 
-To organize users, Keystone assigns them tenants or projects. Users, as discussed above, are granted the membership to a tenant and a service quota they will have to adhere to; they are also restricted to the tenant's quota.
+To organize users, Keystone assigns them to tenants or projects. Users, as discussed above, are granted the membership to a tenant and a service quota they will have to adhere to; they are also restricted to the tenant's quota.
 
-To organize the catalog at hand, Keystone defines two other concepts within the service catalog: \emph{Services} and \emph{endpoints}. A service in the catalog is a mere abstract description of an exploitable cloud feature by the user. The particular implementation of the service is managed by the set of endpoints associated to it. Said collection contains every piece of information that is required for users to consume the services. Figure \ref{fig:secuenciais} shows a Sequence Diagram portraying the interchanged messages between the different entities taking part in the consumption of the service \emph{Create new instance}.
+To organize the catalog at hand, Keystone defines two other concepts within the service catalog: \emph{Services} and \emph{endpoints}. A service in the catalog is a mere abstract description of an exploitable cloud feature by the user. The particular implementation of the service is managed by the set of endpoints associated with it. Said collection contains every piece of information that is required for users to consume the services. Figure \ref{fig:secuenciais} shows a Sequence Diagram portraying the interchanged messages between the different entities taking part in the consumption of the service \emph{Create new instance}.
 
 \begin{figure}[tbp]
 \begin{center}
@@ -71,10 +71,10 @@ To organize the catalog at hand, Keystone defines two other concepts within the 
 \end{center}
 \end{figure}
 
-Stemming from the fact that Horizon exposes only a part of OpenStack functionality, to help dealing with security, Keystone installs a CLI tool to interact with the REST service dealing with administrative operations. Issuing certain commands to Keystone through a terminal application requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the Admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
+Stemming from the fact that Horizon exposes only a part of OpenStack functionality, to help dealing with security Keystone installs a CLI tool to interact with the REST service dealing with administrative operations. Issuing certain commands to Keystone through a terminal application requires the knowledge of the admin token, which has to be conveniently secured, or the login credentials of a user with the Admin role. Lastly, it should be noted that Keystone uses a data base to store user access credentials and the service catalog meta-data.
 
 \section{Quantum}\label{sec:quantum}
-\noindent Starting with Folsom, Quantum is the module to manage virtual networking. It was introduced to separate the networking part from the computing part, hitherto held together in the \texttt{Compute} module. Certainly, the fact that it had been refactored out demonstrates OpenStack's evolving model toward a more coherent, less coupled functional allocation between modules.
+\noindent Starting with Folsom, Quantum is the module to manage virtual networking. It was introduced to separate the networking part from the computing part, hitherto held together in the \texttt{Compute} module. Certainly, the fact that it had been refactored out demonstrates OpenStack's evolving model toward a more coherent and less coupled functional allocation between modules.
 
 To bring virtual networking into existence, Quantum banks on external plug-ins. Two of those plug-ins whose usage and configuration is covered in the official Quantum administrator manual \cite{quantumadminfolsom} are \texttt{OpenVSwitch} and \texttt{LinuxBridge}. Additionally, Quantum relies on iptables to configure routing rules and firewall, \texttt{dnsmasq} for \emph{DNS}, \emph{DHCP} and \emph{NAT}.
 
@@ -89,9 +89,9 @@ Figure \ref{fig:desplieguequantum} pictures the example of a virtual network con
 \end{figure}
 
 \section{Compute}\label{sec:compute}
-\noindent Compute is the central module. Its duty entails orchestrating the global inner workings of the cloud, delegating each particular function to the module on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required to function, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor found, typically, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute which interact with the service through its REST interface).
+\noindent Compute is the central module. Its duty entails orchestrating the global inner workings of the cloud, delegating each particular function to the module on charge. In the end, Compute will let a logged user start virtual instances, which will draw their VCPU, VRAM and VHDD from the physical cluster. Yet required to function, Compute does not contain a virtualization package. The approach is to delegate infrastructure provision to a hypervisor typically found, but not restricted to, in the same node. To expose this on-demand computational service, Compute implements a REST API so that users can control their instances' life cycle directly from a REST client (like the CLI tools that accompany Compute which interact with the service through its REST interface).
 
-To effectively create an instance, Compute will collaborate with other modules within the cloud to orchestrate the execution in the most suitable cluster node hypervisor --- most suitable according to a cloud-defined rule set. Some of the supporting services are described below.
+To effectively create an instance, Compute will collaborate with other modules within the cloud to orchestrate the execution in the \emph{most suitable} cluster node hypervisor --- most suitable according to a cloud-defined rule set. Some of the supporting services are described below.
 
 \begin{description}
  \item[Keystone:] Collates credentials y authorizes requests.
@@ -113,22 +113,22 @@ Glance supports a good number of image and container types --- this fact being m
 
 \begin{description}
  \item[Ephemeral:] The size of the drive hosting the root file system is set following the particular \emph{flavor} parameters when the VM starts. The files contained in this file system are those present in the image file stored in Glance. Any alteration to this file system will only persist with the execution of the VM. Any change to the image file system is written temporarily to be discarded as soon as the VM shuts down.
- \item[Block:] By making use of storage volumes managed by Cinder with \emph{LVM} (\emph{Logical Volume Manager}) OpenStack provides the ability to attach indeterminately-sized logical volumes to instances on-demand. This kind of storage guaranties that information is preserved between VM executions. However, this method carries an important handicap, that of being unable to attach a single volume to two different instances at same the time. High availability or data safety on failure are not supported, as data is stored in a single place. A backup or RAID policies may be established to get over these limitations but they are discouraged as OpenStack has it own module to deal with them: Swift.
- \item[Safe:] Swift manages a safe distributed storage banking on controlled replication allowing for high availability deployments that overcome hard drive's inherent fragility.
+ \item[Block:] By making use of storage volumes managed by Cinder with \emph{LVM} (\emph{Logical Volume Manager}) OpenStack provides the ability to attach indeterminately-sized logical volumes to instances on-demand. This kind of storage guarantees that information is preserved between VM executions. However, this method carries an important handicap, that of being unable to attach a single volume to two different instances at same the time. High availability or data safety on failure are not supported, as data is stored in a single place. A backup or RAID policies may be established to get over these limitations but they are discouraged as OpenStack has it own module to deal with them: Swift.
+ \item[Safe:] Swift manages a safe distributed storage banking on controlled replication allowing for high availability deployments that overcome the hard drive's inherent fragility.
 \end{description}
 
 \subsection{Cinder}\label{subsec:cinder}
 \noindent Cinder is the OpenStack module that takes care of virtual block storage devices --- functionally similar to Amazon's \emph{EBS} (\emph{Elastic Block Storage}). Cinder uses an \emph{iSCSI} implementation (\texttt{open-iscsi}) and LVM to manage operations on the volumes. Creation, attachment and detachment, and logical volume removal is directly controlled through Horizon.
 
-Those persistent virtual blocks are administered as logical volumes pertaining to a volume group controlled by Cinder. Cinder, though, shall not be used to create a shared medium for instances, as \emph{NFS} (\emph{Network File System}) or a \emph{SAN} (\emph{Storage Area Network}) solutions do; for a single volume cannot be attached to different instances at the same time.
+Those persistent virtual blocks are administered as logical volumes pertaining to a volume group controlled by Cinder. Cinder, though, shall not be used to create a shared medium for instances, as \emph{NFS} (\emph{Network File System}) or \emph{SAN} (\emph{Storage Area Network}) solutions do; for a single volume cannot be attached to different instances at the same time.
 
 \subsection{Swift}\label{subsec:swift}
-\noindent Just as happened with Cinder, Swift cannot be framed into traditional shared networking nor  be compared to Cinder: Swift covers a different functional demand. Swift is defined as ``\emph{a scalable object storage system where logged users control their store buckets uploading, downloading or deleting files to their will}'' \cite{osswift}. Swift may be conceived as a functional clone to Amazon's S3 or Eucaliptus' \texttt{Walrus}, implementing a REST API partially compatible with Amazon's. Central to Swift's implementation is replication.
+\noindent Just as happened with Cinder, Swift cannot be framed into traditional shared networking applications nor be compared to Cinder: Swift covers a different functional demand. Swift is defined as ``\emph{a scalable object storage system where logged users control their store buckets uploading, downloading or deleting files to their will}'' \cite{osswift}. Swift may be conceived as a functional clone to Amazon's S3 or Eucaliptus' \texttt{Walrus}, implementing a REST API partially compatible with Amazon's. Central to Swift's implementation is replication.
 
 \subsubsection{Replication}\label{subsubsec:replicacion}
 \noindent Scalability, fault tolerance, high availability, safe storage and load balancing are some distinguishing features of Swift's. As discussed, high availability and fault tolerance are implemented with replication. Replication is a mechanism by which a distributed system keeps copies of file system blocks at different locations to guarantee better performance and limit failure impact.
 
-Within Swift, replication processes on every \emph{Object Server} --- any node in the cluster configured to support Swift storage --- periodically compare their local blocks with remote replicas to collate their update state. Comparing replicas states is as costly a process as it is often, thus \emph{Hash lists} and \emph{watermark}s are used to improve comparison time. Replication is transparent to the user and Rsync or HTTP transport replica payload across the cluster. When a new Swift node is added to the cluster, replica distribution becomes unbalanced and Swift will trigger an automatic rebalancing procedure. When it be synchronized with the cluster, the new node will be able to respond to data requests.
+Within Swift, replication processes on every \emph{Object Server} --- any node in the cluster configured to support Swift storage --- periodically compare their local blocks with remote replicas to collate their update state. Comparing replicas' states is as costly a process as it is often, thus \emph{hash lists} and \emph{watermark}s are used to improve comparison time. Replication is transparent to the user and Rsync or HTTP transport replica payload across the cluster. When a new Swift node is added to the cluster, replica distribution becomes unbalanced and Swift will trigger an automatic rebalancing procedure. When it be synchronized with the cluster, the new node will be able to respond to data requests.
 
 \subsubsection{Updaters y Auditors}\label{subsubsec:otroscompswift}
 \noindent Other supporting services that complete the functional circle defined for Swift are \emph{Updater}s and \emph{Auditor}s. The former act when a replica synchronization error is raised or when Object Servers load is so high as to make a data request not be responded. It happens then that the execution of this data request is delayed and queued, being serviced by the Updater process at a later time. Auditors continually scan the file system looking for integrity failures in objects or buckets. If an inconsistency were to be found, the incoherent entity would be quarantined and replicas would be made anew.
